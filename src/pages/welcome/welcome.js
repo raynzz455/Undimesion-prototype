@@ -5,7 +5,7 @@ import './welcome.css';
 function Welcome({ onWelcome }) {
   const navigate = useNavigate();
   const [isSun, setIsSun] = useState(true);
-  const [jupiterPosition, setJupiterPosition] = useState({ x: 300, y: 50 });
+  const [jupiterPosition, setJupiterPosition] = useState({ x: 330, y: 50 });
 
   const handleWelcomeClick = () => {
     onWelcome();
