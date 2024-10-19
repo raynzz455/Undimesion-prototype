@@ -1,0 +1,257 @@
+:root {
+    --primary-color: black;
+    --border-animation-color: black;
+}
+
+body {
+    margin: 0;
+    height: 100dvh;
+    background-color: white;
+    font-family: 'Lexend Deca', sans-serif;
+}
+
+.container-nav {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    align-items: center; 
+    justify-content: flex-end;
+    position: relative; 
+    overflow: hidden; 
+}
+
+.container-nav::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 1px; 
+    background-color: var(--border-animation-color);
+    animation: borderAnimation 8s infinite; 
+}
+
+@keyframes borderAnimation {
+    0%, 100% {
+        width: 0;
+        left: 50%;
+    }
+    25%, 50% {
+        width: 100%;
+        left: 0;
+    }
+}
+
+.nav-icon {
+    width: 25px;
+    height: 25px;
+    margin-right: 10px;
+}
+  
+.container {
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    position: relative;
+    width: 100vw; 
+    height: 400px; 
+    overflow: hidden; 
+}
+
+.icon {
+    z-index: 30; 
+    position: absolute; 
+    transition: transform 0.3s ease; 
+    animation: float 2s ease-in-out infinite; 
+    opacity: 90%;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-15px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+.icon.mercury {
+    width: 40px;
+    height: 40px;
+    top: 190px; 
+    left: 30px; 
+    animation-duration: 4s; 
+}
+
+.icon.globe {
+    width: 45px;
+    height: 45px;
+    top: 30px; 
+    left: 70px; 
+    animation-duration: 4.6s; 
+}
+
+.icon.jupiter {
+    width: 60px; 
+    height: 60px; 
+    animation-duration: 5.2s; 
+}
+
+.icon.saturn {
+    width: 55px;
+    height: 55px;
+    top: 290px; 
+    left: 320px; 
+    animation-duration: 6.5s; 
+}
+
+.icon.galaxy {
+    width: 80px;
+    height: 80px;   
+    top: 50px; 
+    left: 400px; 
+    animation-duration: 7s; 
+}
+
+@keyframes float-astro {
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-12px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+.astronaut-container {
+    width: 400px;
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    animation: float-astro 4.5s ease-in-out infinite; 
+    
+}
+
+.astronaut {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+    background: transparent;
+}
+
+@media (min-width: 768px) {
+    .container {
+        width: 700px;
+    }
+}
+
+.container2{
+justify-items: center;
+position: relative;
+}
+
+.icon-astro{
+    z-index: 30; 
+    position: absolute; 
+    transition: transform 0.3s ease; 
+    animation: float2 3s ease-in-out infinite; 
+}
+@keyframes float2 {
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+.icon-astro.astro1{
+    width: 25px;
+    height: 25px;
+    animation-duration: 4s; 
+    top: -80px;
+    left: 60px;
+}
+.icon-astro.astro2{
+    width: 25px;
+    height: 25px;
+    animation-duration: 4s; 
+    left: 40px;
+    top: 60px;
+
+}
+.icon-astro.astro3{
+    width: 25px;
+    height: 25px;
+    animation-duration: 4s; 
+    left: 10px;
+    top: -15px;
+
+}
+.icon-astro.astro4{
+    width: 25px;
+    height: 25px;
+    animation-duration: 4s; 
+    left: 350px;
+    top: 150px;
+
+}
+.icon-astro.astro5{
+    width: 25px;
+    height: 25px;
+    animation-duration: 4s; 
+    left: 280px;
+
+}
+
+.text-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 90px;
+    width: 370px;
+}
+
+.kinda {
+    align-self: flex-start;
+    width: 100%;
+    text-align: left;
+    font-weight: 700;   
+    font-size: 32px;
+}
+.dont-see {
+    align-self: flex-end;
+    width: 100%;
+    text-align: right;
+    font-weight: 700;   
+    font-size: 32px; 
+    line-height: 30px;
+
+}
+
+.start-button{
+    background-color: #070707;
+    color: white;
+    height: 40px;
+    margin-top: 10px;
+    width: 300px;
+    font-size: larger;
+}
+
+.byn{
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    font-size: 10px;
+    margin: 3px;
+}
