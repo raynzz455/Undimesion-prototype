@@ -8,6 +8,7 @@ function Welcome({ onWelcome }) {
   const [isSun, setIsSun] = useState(true);
   const [jupiterPosition, setJupiterPosition] = useState({ x: 330, y: 50 });
   const [isMobile, setIsMobile] = useState(window.matchMedia("(max-width: 768px)").matches);
+  const [isFloating, setIsFloating] = useState(false); 
 
   const handleWelcomeClick = () => {
     onWelcome();
@@ -19,9 +20,18 @@ function Welcome({ onWelcome }) {
   };
 
   const handleJupiterClick = (e) => {
-    const newX = e.clientX - 25; 
-    const newY = e.clientY - 25; 
-    setJupiterPosition({ x: newX, y: newY });
+    if (!isFloating) {
+      setIsFloating(true); 
+    }
+  };
+
+  const handleBackgroundClick = (e) => {
+    if (isFloating && e.target.className !== 'jupiter') {
+      const newX = e.clientX - 25; 
+      const newY = e.clientY - 25; 
+      setJupiterPosition({ x: newX, y: newY });
+      setIsFloating(false); 
+    }
   };
 
   const handleDragStart = (e) => {
@@ -57,7 +67,7 @@ function Welcome({ onWelcome }) {
   }, []);
 
   return (
-    <div className="h-full w-full flex flex-col items-center justify-center">
+    <div className="h-full w-full flex flex-col items-center justify-center" onClick={handleBackgroundClick}>
       <div className="container-nav" onClick={handleClick} role="button" aria-label="Toggle day/night mode">
         {isSun ? (
           <svg
@@ -103,7 +113,13 @@ function Welcome({ onWelcome }) {
 
         <div
           className="icon jupiter"
-          style={{ top: `${jupiterPosition.y}px`, left: `${jupiterPosition.x}px`, cursor: isMobile ? 'pointer' : 'grab', position: 'absolute' }}
+          style={{
+            top: `${jupiterPosition.y}px`,
+            left: `${jupiterPosition.x}px`,
+            cursor: isMobile ? 'pointer' : 'grab',
+            position: 'absolute',
+            filter: isFloating ? 'drop-shadow(0 0 10px black)' : 'none' 
+          }}
           draggable={!isMobile} 
           onDragStart={!isMobile ? handleDragStart : undefined}
           onDragEnd={!isMobile ? handleDragEnd : undefined}
@@ -115,11 +131,9 @@ function Welcome({ onWelcome }) {
         <div className="astronaut-container">
           <img src={`${process.env.PUBLIC_URL}/assets/Astronout.png`} alt="astronaut" className="astronaut" />
         </div>
-
       </div>
 
       <div className='container2'>
-
         <div className='icon-astro astro1'>
           <img alt="astro1" src={`${process.env.PUBLIC_URL}/assets/asteroid.png`} />
         </div>
@@ -129,18 +143,18 @@ function Welcome({ onWelcome }) {
         <div className='icon-astro astro3'>
           <img alt="astro1" src={`${process.env.PUBLIC_URL}/assets/asteroid2.png`} />
         </div>
-          <div className='icon-astro astro4'>
-            <img alt="astro1" src={`${process.env.PUBLIC_URL}/assets/asteroid-belt.png`} />
+        <div className='icon-astro astro4'>
+          <img alt="astro1" src={`${process.env.PUBLIC_URL}/assets/asteroid-belt.png`} />
         </div>
         <div className='icon-astro astro5'>
           <img alt="astro1" src={`${process.env.PUBLIC_URL}/assets/space-rock.png`} />
         </div>
-        <LightText/>
-      <div>
-        <button onClick={handleWelcomeClick} className='start-button-light'>Lets Explore!</button>
-      </div>
+        <LightText />
+        <div>
+          <button onClick={handleWelcomeClick} className='start-button-light'>Lets Explore!</button>
         </div>
-        
+      </div>
+
       <p className='byn'>kredit : ByanKeren</p>
     </div>
   );
