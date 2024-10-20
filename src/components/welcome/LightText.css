@@ -1,0 +1,39 @@
+.text-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 90px;
+    width: 370px;
+}
+
+.kinda {
+    align-self: flex-start;
+    width: 100%;
+    text-align: left;
+    font-weight: 900;   
+    font-size: 32px;
+}
+
+.dont-see {
+    align-self: flex-end;
+    width: 100%;
+    text-align: right;
+    font-weight: 900;   
+    font-size: 32px; 
+    line-height: 30px;
+}
+
+.garis {
+    position: relative; 
+    display: inline-block;
+}
+
+.garis::after {
+    content: ''; 
+    position: absolute; 
+    left: 0; 
+    bottom: -6px; 
+    height: 2px;
+    width: 100%;
+    background-color: black; 
+}

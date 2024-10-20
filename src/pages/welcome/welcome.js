@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import LightText from '../../components/welcome/LightText';
 import './welcome.css';
 
 function Welcome({ onWelcome }) {
   const navigate = useNavigate();
   const [isSun, setIsSun] = useState(true);
   const [jupiterPosition, setJupiterPosition] = useState({ x: 330, y: 50 });
+  const [isMobile, setIsMobile] = useState(window.matchMedia("(max-width: 768px)").matches);
 
   const handleWelcomeClick = () => {
     onWelcome();
@@ -14,6 +16,12 @@ function Welcome({ onWelcome }) {
 
   const handleClick = () => {
     setIsSun(prev => !prev);
+  };
+
+  const handleJupiterClick = (e) => {
+    const newX = e.clientX - 25; 
+    const newY = e.clientY - 25; 
+    setJupiterPosition({ x: newX, y: newY });
   };
 
   const handleDragStart = (e) => {
@@ -34,6 +42,19 @@ function Welcome({ onWelcome }) {
     const newY = e.clientY - 25;
     setJupiterPosition({ x: newX, y: newY });
   };
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 768px)");
+    const handleMediaQueryChange = (e) => {
+      setIsMobile(e.matches);
+    };
+
+    mediaQuery.addEventListener('change', handleMediaQueryChange);
+    
+    return () => {
+      mediaQuery.removeEventListener('change', handleMediaQueryChange);
+    };
+  }, []);
 
   return (
     <div className="h-full w-full flex flex-col items-center justify-center">
@@ -82,10 +103,11 @@ function Welcome({ onWelcome }) {
 
         <div
           className="icon jupiter"
-          style={{ top: `${jupiterPosition.y}px`, left: `${jupiterPosition.x}px`, cursor: 'grab', position: 'absolute' }}
-          draggable
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
+          style={{ top: `${jupiterPosition.y}px`, left: `${jupiterPosition.x}px`, cursor: isMobile ? 'pointer' : 'grab', position: 'absolute' }}
+          draggable={!isMobile} 
+          onDragStart={!isMobile ? handleDragStart : undefined}
+          onDragEnd={!isMobile ? handleDragEnd : undefined}
+          onClick={isMobile ? handleJupiterClick : undefined}
         >
           <img alt="jupiter" src={`${process.env.PUBLIC_URL}/assets/jupiter.png`} />
         </div>
@@ -107,20 +129,15 @@ function Welcome({ onWelcome }) {
         <div className='icon-astro astro3'>
           <img alt="astro1" src={`${process.env.PUBLIC_URL}/assets/asteroid2.png`} />
         </div>
-        <div className='icon-astro astro4'>
-          <img alt="astro1" src={`${process.env.PUBLIC_URL}/assets/asteroid-belt.png`} />
+          <div className='icon-astro astro4'>
+            <img alt="astro1" src={`${process.env.PUBLIC_URL}/assets/asteroid-belt.png`} />
         </div>
         <div className='icon-astro astro5'>
           <img alt="astro1" src={`${process.env.PUBLIC_URL}/assets/space-rock.png`} />
         </div>
-
-      <div class="text-container">
-        <p className='kinda'>kinda funny if
-        </p>
-        <p className='dont-see'>you don't see it</p>
-      </div>
+        <LightText/>
       <div>
-        <button onClick={handleWelcomeClick} className='start-button'>Lets Explore!</button>
+        <button onClick={handleWelcomeClick} className='start-button-light'>Lets Explore!</button>
       </div>
         </div>
         
