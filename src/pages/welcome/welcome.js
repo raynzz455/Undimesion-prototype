@@ -9,6 +9,10 @@ function Welcome({ onWelcome }) {
   const [jupiterPosition, setJupiterPosition] = useState({ x: 330, y: 50 });
   const [isMobile, setIsMobile] = useState(window.matchMedia("(max-width: 768px)").matches);
   const [isFloating, setIsFloating] = useState(false); 
+  const [showMessage, setShowMessage] = useState(false); 
+  const [fadeOut, setFadeOut] = useState(false); 
+  const [showEasterEgg, setShowEasterEgg] = useState(false);
+  const [isEasterEggOpen, setIsEasterEggOpen] = useState(false);
 
   const handleWelcomeClick = () => {
     onWelcome();
@@ -17,9 +21,22 @@ function Welcome({ onWelcome }) {
 
   const handleClick = () => {
     setIsSun(prev => !prev);
+    
+    if (isSun) {
+      setShowMessage(true);
+      setFadeOut(false);
+      
+      setTimeout(() => {
+        setFadeOut(true); 
+      }, 2000);
+      
+      setTimeout(() => {
+        setShowMessage(false); 
+      }, 2200);
+    }
   };
 
-  const handleJupiterClick = (e) => {
+  const handleJupiterClick = () => {
     if (!isFloating) {
       setIsFloating(true); 
     }
@@ -65,6 +82,18 @@ function Welcome({ onWelcome }) {
       mediaQuery.removeEventListener('change', handleMediaQueryChange);
     };
   }, []);
+
+  const revealEasterEgg = () => {
+    setShowEasterEgg(true);
+  };
+
+  const openEasterEgg = () => {
+    setIsEasterEggOpen(true);
+  };
+
+  const closeEasterEgg = () => {
+    setIsEasterEggOpen(false);
+  };
 
   return (
     <div className="h-full w-full flex flex-col items-center justify-center" onClick={handleBackgroundClick}>
@@ -128,6 +157,10 @@ function Welcome({ onWelcome }) {
           <img alt="jupiter" src={`${process.env.PUBLIC_URL}/assets/jupiter.png`} />
         </div>
 
+        <div className={`easter-egg-container ${showEasterEgg ? 'keliatan' : ''}`} onClick={openEasterEgg}>
+        <img src={`${process.env.PUBLIC_URL}/assets/DSCF9590.jpg`} alt="easter-egg" className="easter-egg" />
+      </div>
+
         <div className="astronaut-container">
           <img src={`${process.env.PUBLIC_URL}/assets/Astronout.png`} alt="astronaut" className="astronaut" />
         </div>
@@ -149,11 +182,25 @@ function Welcome({ onWelcome }) {
         <div className='icon-astro astro5'>
           <img alt="astro1" src={`${process.env.PUBLIC_URL}/assets/space-rock.png`} />
         </div>
-        <LightText />
+        <LightText revealEasterEgg={revealEasterEgg} />
         <div>
           <button onClick={handleWelcomeClick} className='start-button-light'>Lets Explore!</button>
         </div>
-      </div>
+      </div>  
+
+      {showMessage && (
+        <div className={`message ${fadeOut ? 'fade-out' : ''}`}>
+         <p>Don't expect anything 
+          </p> because this feature is not working yet
+        </div>
+      )}
+      
+       {isEasterEggOpen && (
+        <div className="fullscreen-easter-egg" onClick={closeEasterEgg}>
+          <img src={`${process.env.PUBLIC_URL}/assets/DSCF9590.jpg`} alt="easter-egg-full" className="fullscreen-image" />
+          <button className="close-button" onClick={closeEasterEgg}>✖</button>
+        </div>
+      )}
 
       <p className='byn'>kredit : ByanKeren</p>
     </div>
