@@ -37,3 +37,8 @@
     width: 100%;
     background-color: black; 
 }
+@media (max-width: 360px){
+    .text-container{
+        width: 350px;
+    }
+}

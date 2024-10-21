@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import './App.css';
 import Welcome from './pages/welcome/welcome';
 import Home from './pages/home/home';
+import Navbar from './components/navbar/Navbar';
 
 function App() {
+  const location = useLocation(); 
   const [udahWelcome, setUdahWelcome] = useState(false);
 
   useEffect(() => {
@@ -20,13 +22,20 @@ function App() {
   };
 
   return (
-    <Router>
+    <>
+      {location.pathname !== '/welcome' && <Navbar />}
       <Routes>
         <Route path="/welcome" element={<Welcome onWelcome={handleWelcome} />} />
         <Route path="/" element={udahWelcome ? <Home /> : <Navigate to="/welcome" />} />
       </Routes>
-    </Router>
+    </>
   );
 }
 
-export default App;
+export default function WrappedApp() {
+  return (
+    <Router>
+      <App />
+    </Router>
+  );
+}

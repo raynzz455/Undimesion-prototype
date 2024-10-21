@@ -75,9 +75,9 @@ body {
     align-items: center;
     position: relative;
     width: 100vw; 
-    height: 460px; 
+    height: 450px; 
     overflow: hidden; 
-    padding-top: 60px;
+    padding-top: 70px;
 }
 
 .icon {
@@ -158,7 +158,11 @@ body {
     left: 340px;
     opacity: 0;
 }
-
+@media (max-width: 360px){
+    .easter-egg-container{
+        left: 310px;
+    }
+}
 .keliatan{
     opacity: 1;
 }
