@@ -11,7 +11,7 @@
     width: 100%;
     text-align: left;
     font-weight: 900;   
-    font-size: 32px;
+    font-size: 2rem;
 }
 
 .dont-see {
@@ -19,7 +19,7 @@
     width: 100%;
     text-align: right;
     font-weight: 900;   
-    font-size: 32px; 
+    font-size: 2rem; 
     line-height: 30px;
 }
 

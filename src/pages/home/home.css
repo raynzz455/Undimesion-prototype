@@ -1,17 +1,21 @@
 .home-main{
     background-color: #070707;
 }
+.home-hero-container{
+    position: relative;
+}
 .home-hero {
     background-size: cover; 
     background-position: center;
     width: 100dvw;
     height: 100dvh;
-    padding: 70px 20px;
+    padding: 80px 20px;
+    position: relative;
 }
 
 @media (max-width: 560px) {
      .home-hero{
-        background-image: url('/public/assets/background-hero.jpeg');
+        background-image: url('/public/assets/background-hero.png');
      }
 }
 .hero-text-container{
@@ -19,7 +23,59 @@
     color: white;
     display: flex;
     flex-direction: column;
-    font-size: 1.7rem;
-    letter-spacing: 3px;
+    font-size: 1.5rem;
+    letter-spacing: 2.5px;
     width: 100%;
+}
+
+.home-container1 {
+    height: auto; 
+    width: 100vw; 
+    background-color: #131313; 
+    position: relative;
+    padding: 20px 0; 
+}
+
+.home-scratch{
+    background-size: cover; 
+    background-position: bottom;
+    width: 100dvw;
+    height: 100px;
+    position: absolute;
+    top: 0;    
+}
+@media (max-width: 560px) {
+    .home-scratch{
+       background-image: url('/public/assets/scratch.png');
+    }
+}
+
+.hero-team-text{
+    font-size: 1rem;
+    text-align: center;
+    margin: 60px 0px ;
+    color: white;
+    font-family: 'Lexend Deca', sans-serif;
+}
+.home-team-container {
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+}
+
+.row {
+    display: flex; 
+    justify-content: center; 
+    margin-bottom: 10px;
+}
+
+.home-team-card {
+    width: 65px;
+    height: 75px;
+    background-color: white;    
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    border-radius: 20px;
+    margin: 10px;
 }
