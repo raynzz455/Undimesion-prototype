@@ -1,0 +1,25 @@
+.home-main{
+    background-color: #070707;
+}
+.home-hero {
+    background-size: cover; 
+    background-position: center;
+    width: 100dvw;
+    height: 100dvh;
+    padding: 70px 20px;
+}
+
+@media (max-width: 560px) {
+     .home-hero{
+        background-image: url('/public/assets/background-hero.jpeg');
+     }
+}
+.hero-text-container{
+    font-family: "Hedvig Letters Serif", serif;    
+    color: white;
+    display: flex;
+    flex-direction: column;
+    font-size: 1.7rem;
+    letter-spacing: 3px;
+    width: 100%;
+}

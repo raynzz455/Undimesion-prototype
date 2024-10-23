@@ -2,15 +2,18 @@
     --primary-color: black;
     --border-animation-color: black;
 }
-
-body {
-    margin: 0;
-    height: 100dvh;
-    background-color: white;
-    font-family: 'Lexend Deca', sans-serif;
+.welcome-main {
+    height: 100%;
+    width: 100dvw; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    justify-items: center;
 }
 
-.container-nav {
+.welcome-container-nav {
     width: 100%;
     height: 50px;
     display: flex;
@@ -20,7 +23,7 @@ body {
     overflow: hidden; 
 }
 
-.container-nav::after {
+.welcome-container-nav::after {
     content: '';
     position: absolute;
     bottom: 0;
@@ -42,13 +45,13 @@ body {
     }
 }
 
-.nav-icon {
+.welcome-nav-icon {
     width: 25px;
     height: 25px;
     margin-right: 10px;
 }
- 
-.message {
+
+.welcome-message {
     position: absolute;
     width: 350px;
     top: 300px;
@@ -61,15 +64,14 @@ body {
     transition: opacity 0.5s ease;
     z-index: 60;
     background-color: white;
-  }
-  
-  .fade-out {
+    font-family: 'Lexend Deca', sans-serif;
+}
+
+.welcome-fade-out {
     opacity: 0;
-  }
-  
+}
 
-
-.container {
+.welcome-container {
     display: flex;
     justify-content: center; 
     align-items: center;
@@ -80,7 +82,7 @@ body {
     padding-top: 70px;
 }
 
-.icon {
+.welcome-icon {
     z-index: 30; 
     position: absolute; 
     transition: transform 0.3s ease; 
@@ -99,7 +101,7 @@ body {
     }
 }
 
-.icon.mercury {
+.welcome-icon.mercury {
     width: 40px;
     height: 40px;
     top: 190px; 
@@ -107,7 +109,7 @@ body {
     animation-duration: 4s; 
 }
 
-.icon.globe {
+.welcome-icon.globe {
     width: 45px;
     height: 45px;
     top: 30px; 
@@ -115,13 +117,13 @@ body {
     animation-duration: 4.6s; 
 }
 
-.icon.jupiter {
+.welcome-icon.jupiter {
     width: 60px; 
     height: 60px; 
     animation-duration: 5.2s; 
 }
 
-.icon.saturn {
+.welcome-icon.saturn {
     width: 55px;
     height: 55px;
     top: 290px; 
@@ -129,7 +131,7 @@ body {
     animation-duration: 6.5s; 
 }
 
-.icon.galaxy {
+.welcome-icon.galaxy {
     width: 80px;
     height: 80px;   
     top: 50px; 
@@ -148,7 +150,8 @@ body {
         transform: translateY(0);
     }
 }
-.easter-egg-container{
+
+.welcome-easter-egg-container {
     position: absolute;
     z-index: 20;
     width: 40px;
@@ -158,23 +161,25 @@ body {
     left: 340px;
     opacity: 0;
 }
-@media (max-width: 360px){
-    .easter-egg-container{
-        left: 310px;
+
+@media (max-width: 360px) {
+    .welcome-easter-egg-container {
+        left: 315px;
     }
 }
-.keliatan{
+
+.welcome-keliatan {
     opacity: 1;
 }
 
-.easter-egg{
+.welcome-easter-egg {
     width: 100%;
     height: 100%;
     object-fit: cover; 
     background: transparent;
 }
 
-.fullscreen-easter-egg {
+.welcome-fullscreen-easter-egg {
     position: fixed;
     top: 0;
     left: 0;
@@ -185,14 +190,14 @@ body {
     justify-content: center;
     align-items: center;
     z-index: 999; 
-  }
-  
-  .fullscreen-image {
+}
+
+.welcome-fullscreen-image {
     max-width: 90%;
     max-height: 90%;
-  }
-  
-  .close-button {
+}
+
+.welcome-close-button {
     position: absolute;
     top: 20px;
     right: 20px;
@@ -201,8 +206,7 @@ body {
     color: white;
     font-size: 24px;
     cursor: pointer;
-  }
-  
+}
 
 @keyframes float-astro {
     0% {
@@ -215,7 +219,8 @@ body {
         transform: translateY(0);
     }
 }
-.astronaut-container {
+
+.welcome-astronaut-container {
     width: 400px;
     height: 400px;
     display: flex;
@@ -223,10 +228,9 @@ body {
     justify-content: center;
     margin-right: 10px;
     animation: float-astro 4.5s ease-in-out infinite; 
-    
 }
 
-.astronaut {
+.welcome-astronaut {
     width: 100%;
     height: 100%;
     object-fit: cover; 
@@ -234,27 +238,31 @@ body {
 }
 
 @media (min-width: 768px) {
-    .container {
+    .welcome-container {
         width: 700px;
     }
 }
-@media (max-width: 768px){
-    .icon.galaxy{
+
+@media (max-width: 768px) {
+    .welcome-icon.galaxy {
         display: none;
     }
 }
 
-.container2{
-justify-items: center;
-position: relative;
+.welcome-container2 {
+    justify-items: center;
+    position: relative;
+    justify-content: center;
+    font-family: 'Lexend Deca', sans-serif;
 }
 
-.icon-astro{
+.welcome-icon-astro {
     z-index: 30; 
     position: absolute; 
     transition: transform 0.3s ease; 
     animation: float2 3s ease-in-out infinite; 
 }
+
 @keyframes float2 {
     0% {
         transform: translateY(0);
@@ -267,46 +275,46 @@ position: relative;
     }
 }
 
-.icon-astro.astro1{
+.welcome-icon-astro.welcome-astro1 {
     width: 25px;
     height: 25px;
     animation-duration: 4s; 
     top: -80px;
     left: 60px;
 }
-.icon-astro.astro2{
+
+.welcome-icon-astro.welcome-astro2 {
     width: 25px;
     height: 25px;
     animation-duration: 7s; 
     left: 40px;
     top: 60px;
-
 }
-.icon-astro.astro3{
+
+.welcome-icon-astro.welcome-astro3 {
     width: 25px;
     height: 25px;
     animation-duration: 8s; 
     left: 5px;
     top: -15px;
-
 }
-.icon-astro.astro4{
+
+.welcome-icon-astro.welcome-astro4 {
     width: 25px;
     height: 25px;
     animation-duration: 9s; 
     left: 350px;
     top: 150px;
-
 }
-.icon-astro.astro5{
+
+.welcome-icon-astro.welcome-astro5 {
     width: 25px;
     height: 25px;
     animation-duration: 7.5s; 
     left: 280px;
-
 }
 
-.start-button-light{
+.welcome-start-button-light {
     background-color: #070707;
     color: white;
     height: 40px;
@@ -315,7 +323,7 @@ position: relative;
     font-size: larger;
 }
 
-.byn{
+.welcome-byn {
     position: absolute;
     right: 0;
     bottom: 0;

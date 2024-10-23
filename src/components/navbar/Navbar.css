@@ -2,9 +2,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
-    background-color: #333;
+    padding: 15px 20px;
+    background-color: transparent;
     color: white;
+    z-index: 40;
+    position: absolute;
+    width: 100dvw;
+    font-family: "Lexend Deca", sans-serif;
+    font-weight: 400;
+    font-size: 0.85rem;
   }
   
   .nav-links {

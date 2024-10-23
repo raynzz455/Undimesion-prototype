@@ -96,8 +96,8 @@ function Welcome({ onWelcome }) {
   };
 
   return (
-    <div className="h-full w-full flex flex-col items-center justify-center" onClick={handleBackgroundClick}>
-      <div className="container-nav" onClick={handleClick} role="button" aria-label="Toggle day/night mode">
+    <div className="welcome-main main-content" onClick={handleBackgroundClick}>
+      <div className="welcome-container-nav" onClick={handleClick} role="button" aria-label="Toggle day/night mode">
         {isSun ? (
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -105,7 +105,7 @@ function Welcome({ onWelcome }) {
             viewBox="0 0 24 24"
             strokeWidth="1.5"
             stroke="currentColor"
-            className="nav-icon sun"
+            className="welcome-nav-icon sun"
             aria-hidden="true"
           >
             <path
@@ -121,7 +121,7 @@ function Welcome({ onWelcome }) {
             viewBox="0 0 24 24"
             strokeWidth="1.5"
             stroke="currentColor"
-            className="nav-icon moon"
+            className="welcome-nav-icon moon"
             aria-hidden="true"
           >
             <path
@@ -133,15 +133,15 @@ function Welcome({ onWelcome }) {
         )}
       </div>
 
-      <div className="container relative" onDragOver={handleDragOver} onDrop={handleDrop}>
+      <div className="welcome-container relative" onDragOver={handleDragOver} onDrop={handleDrop}>
         {['mercury', 'globe', 'saturn', 'galaxy'].map((planet) => (
-          <div className={`icon ${planet}`} key={planet}>
+          <div className={`welcome-icon ${planet}`} key={planet}>
             <img alt={planet} src={`${process.env.PUBLIC_URL}/assets/${planet}.png`} />
           </div>
         ))}
 
         <div
-          className="icon jupiter"
+          className="welcome-icon jupiter"
           style={{
             top: `${jupiterPosition.y}px`,
             left: `${jupiterPosition.x}px`,
@@ -157,55 +157,56 @@ function Welcome({ onWelcome }) {
           <img alt="jupiter" src={`${process.env.PUBLIC_URL}/assets/jupiter.png`} />
         </div>
 
-        <div className={`easter-egg-container ${showEasterEgg ? 'keliatan' : ''}`} onClick={openEasterEgg}>
-        <img src={`${process.env.PUBLIC_URL}/assets/DSCF9590.jpg`} alt="easter-egg" className="easter-egg" />
-      </div>
+        <div className={`welcome-easter-egg-container ${showEasterEgg ? 'welcome-keliatan' : ''}`} onClick={openEasterEgg}>
+          <img src={`${process.env.PUBLIC_URL}/assets/DSCF9590.jpg`} alt="easter-egg" className="welcome-easter-egg" />
+        </div>
 
-        <div className="astronaut-container">
-          <img src={`${process.env.PUBLIC_URL}/assets/Astronout.png`} alt="astronaut" className="astronaut" />
+        <div className="welcome-astronaut-container">
+          <img src={`${process.env.PUBLIC_URL}/assets/Astronout.png`} alt="astronaut" className="welcome-astronaut" />
         </div>
       </div>
 
-      <div className='container2'>
-        <div className='icon-astro astro1'>
+      <div className='welcome-container2'>
+        <div className='welcome-icon-astro welcome-astro1'>
           <img alt="astro1" src={`${process.env.PUBLIC_URL}/assets/asteroid.png`} />
         </div>
-        <div className='icon-astro astro2'>
+        <div className='welcome-icon-astro welcome-astro2'>
           <img alt="astro1" src={`${process.env.PUBLIC_URL}/assets/asteroids.png`} />
         </div>
-        <div className='icon-astro astro3'>
+        <div className='welcome-icon-astro welcome-astro3'>
           <img alt="astro1" src={`${process.env.PUBLIC_URL}/assets/asteroid2.png`} />
         </div>
-        <div className='icon-astro astro4'>
+        <div className='welcome-icon-astro welcome-astro4'>
           <img alt="astro1" src={`${process.env.PUBLIC_URL}/assets/asteroid-belt.png`} />
         </div>
-        <div className='icon-astro astro5'>
+        <div className='welcome-icon-astro welcome-astro5'>
           <img alt="astro1" src={`${process.env.PUBLIC_URL}/assets/space-rock.png`} />
         </div>
         <LightText revealEasterEgg={revealEasterEgg} />
         <div>
-          <button onClick={handleWelcomeClick} className='start-button-light'>Lets Explore!</button>
+          <button onClick={handleWelcomeClick} className='welcome-start-button-light mx-auto'>Lets Explore!</button>
         </div>
       </div>  
 
       {showMessage && (
-        <div className={`message ${fadeOut ? 'fade-out' : ''}`}>
-         <p>Don't expect anything 
+        <div className={`welcome-message ${fadeOut ? 'welcome-fade-out' : ''}`}>
+          <p>Don't expect anything 
           </p> because this feature is not working yet
         </div>
       )}
 
-       {isEasterEggOpen && (
-        <div className="fullscreen-easter-egg" onClick={closeEasterEgg}>
-          <img src={`${process.env.PUBLIC_URL}/assets/DSCF9590.jpg`} alt="easter-egg-full" className="fullscreen-image" />
-          <button className="close-button" onClick={closeEasterEgg}><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-          </svg>
+      {isEasterEggOpen && (
+        <div className="welcome-fullscreen-easter-egg" onClick={closeEasterEgg}>
+          <img src={`${process.env.PUBLIC_URL}/assets/DSCF9590.jpg`} alt="easter-egg-full" className="welcome-fullscreen-image" />
+          <button className="welcome-close-button" onClick={closeEasterEgg}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
       )}
 
-      <p className='byn'>kredit : ByanKeren</p>
+      <p className='welcome-byn'>kredit : ByanKeren</p>
     </div>
   );
 }
