@@ -17,14 +17,28 @@ function Home() {
 
       
       <div className='home-container1'>
-    <div className='home-scratch'></div>
-    <div className='hero-team-text'>
+
+    <div className='hero-hopes-text'>
         <p>Our dreams and hopes.</p>
     </div>
-    
 
+    <div className='home-hopes-container'>
+    <div className='home-hopes-section1'>
+        <div className='home-indonesia-images-container'>
+      <img src={`${process.env.PUBLIC_URL}/assets/2450218.jpg`} alt="indonesia" className='indonesia-pictures'/>
+    </div>
 
-</div>
+        <p className='home-indonesia'>
+        For <span className='home-indonesia1'>Indonesia</span>
+    </p>
+    <div className='home-indonesia-text-container'>
+
+    </div>
+    </div>
+
+    </div>
+
+      </div>
 
 
         

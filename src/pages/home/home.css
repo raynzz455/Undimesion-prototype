@@ -31,31 +31,70 @@
 .home-container1 {
     height: auto; 
     width: 100vw; 
-    background-color: #ffffff; 
+    background-color: black; 
     position: relative;
-    padding: 20px 0; 
 }
 
-.home-scratch{
-    background-size: cover; 
-    background-position: 50% 95%; 
-    width: 100%;
-    height: 100px;
-    position: absolute;
-    top: 0;    
-}
-@media (max-width: 560px) {
-    .home-scratch{
-       background-image: url('/public/assets/scratch.png');
-    }
-}
-
-.hero-team-text{
+.hero-hopes-text{
     font-size: 1.8rem;
     text-align: center;
-    margin-top: 60px;
-    margin-bottom: 20px;
     color: black;
-    font-family: "Hedvig Letters Serif", serif;}
+    font-family: "Hedvig Letters Serif", serif;
+    font-weight: 900;
+    background-image: url('/public/assets/scratchpng.png');
+    background-position: center;
+    height: 300px;
+    background-size: cover;
+    display: flex; 
+    align-items: center;
+    justify-content: center; 
+}
 
 
+.home-hopes-container{
+    width: 100%;
+    height: 100vh;
+}
+
+.home-hopes-section1 {
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    align-items: center;
+    padding: 100px 5px;
+}
+
+.home-indonesia-images-container {
+    position: relative;
+    width: 330px;
+    height: 200px;
+    overflow: hidden;
+    justify-content: center;
+    display: flex;
+    align-items: center; /* Center vertically */
+}
+
+.indonesia-pictures {
+    width: 100%;
+    height: auto; 
+}
+
+
+.home-indonesia {
+    padding: 10px 20px;
+    font-size: 0.6rem;
+    text-align: start;
+    color: white;
+    font-family: "Hedvig Letters Serif", serif;
+    z-index: 50; /* Pastikan di atas overlay */
+}
+
+.home-indonesia1 {
+    font-family: "Cinzel", serif;
+    font-size: 1.2rem;
+}
+
+.home-indonesia-text-container{
+    width: 40%;
+}
