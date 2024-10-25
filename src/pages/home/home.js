@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './home.css';
 
-const quotes = [
+const Countries = [
   {
     text: "I yearn for my country to be free from the chains of corruption, for its people to walk in the light of integrity.",
     author: "Reza"
@@ -37,7 +37,7 @@ function Home() {
 
   useEffect(() => {
     const quoteChangeInterval = setInterval(() => {
-      setCurrentQuote((prev) => (prev + 1) % quotes.length);
+      setCurrentQuote((prev) => (prev + 1) % Countries.length);
     }, 3000); 
 
     return () => clearInterval(quoteChangeInterval);
@@ -62,44 +62,44 @@ function Home() {
           <div className='home-hopes-container'>
             
             <div className='home-hopes-section1'>
-              <div className='home-indonesia-images-container'>
-                <img src={`${process.env.PUBLIC_URL}/assets/Prambanan.jpeg`} alt="indonesia" className='indonesia-pictures'/>
+              <div className='home-images-container'>
+                <div className='indonesia-pictures' />
               </div>
               <p className='home-indonesia'>Dreams to Our Countries</p>
               <div className='home-indonesia-text-container'>
                 <div className='home-indonesia-text-quote'>
-                <p>{quotes[currentQuote].text}</p>
+                <p>{Countries[currentQuote].text}</p>
                 </div>
                 <div className='home-indonesia-text-owner'>
-                  <p>-{quotes[currentQuote].author}</p>
+                  <p>-{Countries[currentQuote].author}</p>
                 </div>
               </div>
             </div>
             <div className='home-hopes-section1'>
-              <div className='home-indonesia-images-container'>
-                <img src={`${process.env.PUBLIC_URL}/assets/7266871.jpg`} alt="indonesia" className='indonesia-pictures'/>
+            <div className='home-images-container'>
+            <div className='bogor-pictures'/>
               </div>
               <p className='home-indonesia'>Hopes to Our City</p>
               <div className='home-indonesia-text-container'>
                 <div className='home-indonesia-text-quote'>
-                <p>{quotes[currentQuote].text}</p>
+                <p>{Countries[currentQuote].text}</p>
                 </div>
                 <div className='home-indonesia-text-owner'>
-                  <p>-{quotes[currentQuote].author}</p>
+                  <p>-{Countries[currentQuote].author}</p>
                 </div>
               </div>
             </div>
             <div className='home-hopes-section1'>
-              <div className='home-indonesia-images-container'>
-                <img src={`${process.env.PUBLIC_URL}/assets/Prambanan.jpeg`} alt="indonesia" className='indonesia-pictures'/>
+            <div className='home-images-container'>
+            <div className='future-pictures'/>
               </div>
-              <p className='home-indonesia'>Dreams Countries</p>
+              <p className='home-indonesia'>Hopes & Dreams <br/> to Our Future</p>
               <div className='home-indonesia-text-container'>
                 <div className='home-indonesia-text-quote'>
-                <p>{quotes[currentQuote].text}</p>
+                <p>{Countries[currentQuote].text}</p>
                 </div>
                 <div className='home-indonesia-text-owner'>
-                  <p>-{quotes[currentQuote].author}</p>
+                  <p>-{Countries[currentQuote].author}</p>
                 </div>
               </div>
             </div>

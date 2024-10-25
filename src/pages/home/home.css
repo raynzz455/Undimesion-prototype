@@ -65,7 +65,7 @@
     margin-bottom: 60px;
 }
 
-.home-indonesia-images-container {
+.home-images-container {
     position: relative;
     width: 100vw; 
     overflow: hidden;
@@ -78,10 +78,32 @@
 .indonesia-pictures {
     width: 100%;
     height: 25vh;
-    object-fit: cover;
+    background-image: url('/public/assets/2450218.jpg');
+    background-size: cover;
+    background-position: 40% 100%;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 
+.bogor-pictures{
+    width: 100%;
+    min-height: 25vh;
+    background-image: url('/public/assets/7266871.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
 
+.future-pictures{
+    width: 100%;
+    min-height: 25vh;
+    background-image: url('/public/assets/future.jpeg');
+    background-size: cover;
+    background-position: 10% 100%;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
 .home-indonesia {
     padding: 10px 25px;
     font-size: 1.5rem;
