@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './home.css';
 import { TypeAnimation } from 'react-type-animation';
+import { ReactSVG } from 'react-svg';
 
 const Countries = [
   {
@@ -137,10 +138,114 @@ function Home() {
                 </div>
               </div>
 
-                      <div className='home-teams w-screen'>
-                        <p className='text-white'>
+                      <div className='home-teams'>
+                        <p className='text-center text-[1.8rem] '>
                           Our Team
                           </p>
+                        <div className='home-teams-container'>
+                          <div className='home-teams-card-container'>
+
+                            <div className='home-teams-card 1 border-2 border-black'>
+                            <div className='home-teams-card-text1'>
+                                  <p>K</p> 
+                                    <span class="arcticons--emoji-black-spade-suit"></span>
+                              </div>
+                              <div className='home-teams-card-text2'>
+                                    <span class="arcticons--emoji-black-spade-suit-mid"></span>
+                              </div>
+                              <div className='home-teams-card-text3'>
+                                  <p>K</p> 
+                                    <span class="arcticons--emoji-black-spade-suit"></span>
+                              </div>
+                            </div>
+
+                            <div className='home-teams-card 2 border-2 border-black '>
+                            <div className='home-teams-card-text1'>
+                                  <p>K</p> 
+                                    <span class="arcticons--emoji-black-spade-suit"></span>
+                              </div>
+                              <div className='home-teams-card-text2'>
+                                    <span class="arcticons--emoji-black-spade-suit-mid"></span>
+                              </div>
+                              <div className='home-teams-card-text3'>
+                                  <p>K</p> 
+                                    <span class="arcticons--emoji-black-spade-suit"></span>
+                              </div>
+                            </div>
+
+                            <div className='home-teams-card 3 border-2 border-black'>
+                            <div className='home-teams-card-text1'>
+                                  <p>K</p> 
+                                  <span class="arcticons--emoji-black-spade-suit"></span>
+                                  </div>
+                              <div className='home-teams-card-text2'>
+                              <span class="arcticons--emoji-black-spade-suit-mid"></span>
+                              </div>
+                              <div className='home-teams-card-text3'>
+                                  <p>K</p> 
+                                  <span class="arcticons--emoji-black-spade-suit"></span>
+                                  </div>
+                            </div>
+
+                            <div className='home-teams-card 4 border-2 border-black'>
+                            <div className='home-teams-card-text1'>
+                                  <p>K</p> 
+                                  <span class="arcticons--emoji-black-spade-suit"></span>
+                                  </div>
+                              <div className='home-teams-card-text2'>
+                              <span class="arcticons--emoji-black-spade-suit-mid"></span>
+                              </div>
+                              <div className='home-teams-card-text3'>
+                                  <p>K</p> 
+                                  <span class="arcticons--emoji-black-spade-suit"></span>
+                                  </div>
+                            </div>
+
+                            <div className='home-teams-card 5 border-2 border-black'>
+                            <div className='home-teams-card-text1'>
+                                  <p>K</p> 
+                                    <span class="arcticons--emoji-black-spade-suit"></span>
+                              </div>
+                              <div className='home-teams-card-text2'>
+                                    <span class="arcticons--emoji-black-spade-suit-mid"></span>
+                              </div>
+                              <div className='home-teams-card-text3'>
+                                  <p>K</p> 
+                                    <span class="arcticons--emoji-black-spade-suit"></span>
+                              </div>
+                            </div>
+
+                            <div className='home-teams-card 6 border-2 border-black'>
+                            <div className='home-teams-card-text1'>
+                                  <p>J</p> 
+                                  <img class="home-diamonds" src={`${process.env.PUBLIC_URL}/assets/diamonds.png`} alt='diamonds'/>
+                              </div>
+                              <div className='home-teams-card-text2'>
+                              <img class="home-diamonds" src={`${process.env.PUBLIC_URL}/assets/diamonds.png`} alt='diamonds'/>
+                              </div>
+                              <div className='home-teams-card-text3'>
+                                  <p>J</p> 
+                                  <img class="home-diamonds" src={`${process.env.PUBLIC_URL}/assets/diamonds.png`} alt='diamonds'/>
+                              </div>
+                            </div>
+                            
+                            <div className='home-teams-card 7 border-2 border-black'>
+                              <div className='home-teams-card-text1'>
+                                  <p>A</p> 
+                                  <img class="home-clubs" src={`${process.env.PUBLIC_URL}/assets/clubs.png`} alt='clubs'/>
+                              </div>
+                              <div className='home-teams-card-text2'>
+                              <img class="home-clubs mid" src={`${process.env.PUBLIC_URL}/assets/clubs.png`} alt='clubs'/>
+                              </div>
+                              <div className='home-teams-card-text3'>
+                                  <p>A</p> 
+                                  <img class="home-clubs" src={`${process.env.PUBLIC_URL}/assets/clubs.png`} alt='clubs'/>
+                              </div>
+                            </div>
+ 
+                          </div>
+
+                        </div>
                           
 
                       </div>
