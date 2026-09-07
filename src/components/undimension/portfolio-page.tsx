@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { StarField } from "./star-field";
 import { StarGraphic } from "./primitives";
@@ -12,7 +12,10 @@ import { cn } from "@/lib/utils";
 import {
   Github, ExternalLink, Code2, Gamepad2, Smartphone, Wrench, Bot, Package,
   Briefcase, GraduationCap, Award, MapPin, Clock, ChevronLeft, ChevronRight,
+  X, Trophy,
 } from "lucide-react";
+import type { Achievement } from "@/lib/undimension/data";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 
 const CATEGORY_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   WEB: Code2,
@@ -152,8 +155,98 @@ function ProjectMini({ p }: { p: PortfolioProject }) {
   );
 }
 
+function AchievementModal({
+  achievement,
+  memberColor,
+  onClose,
+}: {
+  achievement: Achievement | null;
+  memberColor: string;
+  onClose: () => void;
+}) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, open);
+  const open = achievement !== null;
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  return (
+    <AnimatePresence>
+      {open && achievement && (
+        <motion.div
+          className="fixed inset-0 z-[85] flex items-start md:items-center justify-center p-4 md:p-8 overflow-y-auto overscroll-contain pt-24 md:pt-8"
+          style={{ WebkitOverflowScrolling: "touch" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
+          <motion.div
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ud-achievement-title"
+            tabIndex={-1}
+            className="relative w-full max-w-md my-4 md:my-0 border-8 border-black dark:border-white bg-white dark:bg-[#09090b] shadow-[8px_8px_0_#000] md:shadow-[16px_16px_0_#000] dark:md:shadow-[16px_16px_0_#d4ff00] outline-none overflow-hidden"
+            initial={{ scale: 0.85, y: 30, rotate: -2 }}
+            animate={{ scale: 1, y: 0, rotate: 0 }}
+            exit={{ scale: 0.85, y: 30, rotate: -2 }}
+            transition={{ type: "spring", stiffness: 300, damping: 24 }}
+          >
+            {/* Colored header banner */}
+            <div className="p-6 border-b-8 border-black dark:border-white" style={{ backgroundColor: memberColor }}>
+              <div className="flex items-center justify-center mb-2">
+                <div className="w-16 h-16 flex items-center justify-center bg-black border-4 border-black">
+                  <Trophy className="w-8 h-8 text-white" />
+                </div>
+              </div>
+              <div className="font-mono-ud text-[10px] font-black tracking-[0.3em] uppercase text-black/60 text-center">
+                ▸ ACHIEVEMENT UNLOCKED
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="p-6">
+              <h3
+                id="ud-achievement-title"
+                className="font-bebas text-4xl md:text-5xl text-black dark:text-white leading-none mb-2 text-center"
+              >
+                {achievement.title}
+              </h3>
+              <div className="font-mono-ud text-xs font-black text-black/50 dark:text-white/50 tracking-widest mb-4 text-center">
+                ◆ {achievement.year} ◆
+              </div>
+              <div className="border-4 border-black dark:border-white bg-black dark:bg-white p-4">
+                <p className="font-mono-ud text-sm text-white dark:text-black leading-relaxed text-center">
+                  {achievement.description}
+                </p>
+              </div>
+              <button
+                onClick={onClose}
+                className="w-full mt-4 bg-black dark:bg-white text-white dark:text-black font-bebas text-2xl py-3 border-4 border-black dark:border-white shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff] hover:-translate-y-1 hover:shadow-[8px_8px_0_#d4ff00] transition-all no-color-transition"
+              >
+                CLOSE
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 function MemberPortfolio({ member }: { member: Member }) {
   const cv = MEMBER_CV[member.id];
+  const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
+  const { play } = useSfx();
   if (!cv) return null;
 
   const memberColor = member.color.replace("bg-[", "").replace("]", "");
@@ -173,12 +266,21 @@ function MemberPortfolio({ member }: { member: Member }) {
         <div className="border-8 border-black dark:border-white bg-white dark:bg-[#09090b] shadow-[12px_12px_0_#000] dark:shadow-[12px_12px_0_#fff] overflow-hidden">
           <div className={cn("p-6 md:p-8 border-b-8 border-black dark:border-white", member.color)}>
             <div className="flex flex-col md:flex-row gap-6 items-start">
-              {/* Photo */}
-              <div className="border-4 border-black bg-black p-2 shadow-[8px_8px_0_#000] flex-shrink-0 w-32 md:w-40">
-                <img src={member.img} alt={member.nick} className="w-full aspect-[4/5] object-cover grayscale contrast-[1.4]" />
+              {/* Big Photo */}
+              <div className="border-8 border-black bg-black p-2 shadow-[12px_12px_0_#000] flex-shrink-0 w-full md:w-64 lg:w-72 relative">
+                <img
+                  src={member.img}
+                  alt={member.nick}
+                  className="w-full aspect-[4/5] object-cover grayscale contrast-[1.4]"
+                />
+                <div className="absolute inset-2 ud-scanlines opacity-30 pointer-events-none" />
+                {/* Nick sticker */}
+                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-[#ffea00] border-4 border-black px-6 py-1.5 font-mono-ud font-black text-black text-2xl shadow-[4px_4px_0_#000] -rotate-2 whitespace-nowrap">
+                  &ldquo;{member.nick.toUpperCase()}&rdquo;
+                </div>
               </div>
               {/* Info */}
-              <div className="flex-1 text-black">
+              <div className="flex-1 text-black pt-4 md:pt-0">
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
                   <span className="font-mono-ud text-xs font-black bg-black text-white px-2 py-1 border-2 border-black">
                     ID_{member.id.toUpperCase()}
@@ -289,22 +391,28 @@ function MemberPortfolio({ member }: { member: Member }) {
           <h3 className="font-bebas text-3xl text-black dark:text-white mb-4 flex items-center gap-2 border-b-4 border-black dark:border-white pb-2">
             <Award className="w-6 h-6" style={{ color: memberColor }} />
             ACHIEVEMENTS
+            <span className="ml-auto font-mono-ud text-[10px] text-black/40 dark:text-white/40">▸ CLICK TO EXPAND</span>
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {cv.achievements.map((a, i) => (
-              <motion.div
+              <motion.button
                 key={i}
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="border-2 border-black dark:border-white p-3 bg-black/5 dark:bg-white/5"
+                whileHover={{ y: -4 }}
+                onClick={() => { play("open"); setSelectedAchievement(a); }}
+                className="border-2 border-black dark:border-white p-3 bg-black/5 dark:bg-white/5 text-left cursor-pointer hover:bg-black/10 dark:hover:bg-white/10 transition-colors relative group"
                 style={{ borderLeftWidth: "4px", borderLeftColor: memberColor }}
               >
-                <div className="font-bebas text-2xl text-black dark:text-white leading-none">{a.title}</div>
+                <div className="flex items-start justify-between gap-1 mb-1">
+                  <div className="font-bebas text-2xl text-black dark:text-white leading-none">{a.title}</div>
+                  <Trophy className="w-4 h-4 opacity-30 group-hover:opacity-100 transition-opacity" style={{ color: memberColor }} />
+                </div>
                 <div className="font-mono-ud text-[10px] text-black/50 dark:text-white/50 mb-1">{a.year}</div>
-                <p className="font-mono-ud text-[10px] text-black/70 dark:text-white/70 leading-relaxed">{a.description}</p>
-              </motion.div>
+                <p className="font-mono-ud text-[10px] text-black/70 dark:text-white/70 leading-relaxed line-clamp-2">{a.description}</p>
+              </motion.button>
             ))}
           </div>
         </div>
@@ -321,6 +429,13 @@ function MemberPortfolio({ member }: { member: Member }) {
             ))}
           </div>
         </div>
+
+        {/* Achievement popup modal */}
+        <AchievementModal
+          achievement={selectedAchievement}
+          memberColor={memberColor}
+          onClose={() => { play("close"); setSelectedAchievement(null); }}
+        />
       </motion.div>
     </AnimatePresence>
   );

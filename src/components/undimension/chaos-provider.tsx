@@ -38,14 +38,18 @@ const CHAOS_POOL = [
 
 type ChaosContextValue = {
   chaos: boolean;
+  godMode: boolean;
   toggle: () => void;
   reroll: () => void;
+  unlockGodMode: () => void;
 };
 
 const ChaosContext = createContext<ChaosContextValue>({
   chaos: false,
+  godMode: false,
   toggle: () => {},
   reroll: () => {},
+  unlockGodMode: () => {},
 });
 
 export function useChaos() {
@@ -75,13 +79,15 @@ function randomPalette(): Record<string, string> {
 
 export function ChaosProvider({ children }: { children: ReactNode }) {
   const [chaos, setChaos] = useState(false);
+  const [godMode, setGodMode] = useState(false);
   const [palette, setPalette] = useState<Record<string, string>>(DEFAULT_PALETTE);
 
   // Load persisted state (deferred to satisfy react-hooks/set-state-in-effect rule)
   useEffect(() => {
     const saved = localStorage.getItem("ud-chaos");
-    if (saved === "1") {
-      Promise.resolve().then(() => {
+    const savedGod = localStorage.getItem("ud-godmode");
+    Promise.resolve().then(() => {
+      if (saved === "1") {
         const savedPalette = localStorage.getItem("ud-chaos-palette");
         let p: Record<string, string> | null = null;
         if (savedPalette) {
@@ -95,8 +101,11 @@ export function ChaosProvider({ children }: { children: ReactNode }) {
         }
         setPalette(p);
         setChaos(true);
-      });
-    }
+      }
+      if (savedGod === "1") {
+        setGodMode(true);
+      }
+    });
   }, []);
 
   // Apply palette to :root when chaos is on
@@ -134,8 +143,13 @@ export function ChaosProvider({ children }: { children: ReactNode }) {
     });
   }, [palette]);
 
+  const unlockGodMode = useCallback(() => {
+    setGodMode(true);
+    localStorage.setItem("ud-godmode", "1");
+  }, []);
+
   return (
-    <ChaosContext.Provider value={{ chaos, toggle, reroll }}>
+    <ChaosContext.Provider value={{ chaos, godMode, toggle, reroll, unlockGodMode }}>
       {children}
     </ChaosContext.Provider>
   );

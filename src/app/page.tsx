@@ -7,13 +7,15 @@ import { AboutPage } from "@/components/undimension/about-page";
 import { MemoriesPage } from "@/components/undimension/memories-page";
 import { GamesPage } from "@/components/undimension/games-page";
 import { PortfolioPage } from "@/components/undimension/portfolio-page";
+import { ChaosModePage } from "@/components/undimension/chaos-mode-page";
 import { ScrollProgress } from "@/components/undimension/scroll-progress";
 import { BackToTop } from "@/components/undimension/back-to-top";
 import { KeyboardShortcutsOverlay } from "@/components/undimension/keyboard-shortcuts-overlay";
 import { Soundboard } from "@/components/undimension/soundboard";
 import { StarGraphic } from "@/components/undimension/primitives";
 import { useSfx, useKonamiCode } from "@/hooks/use-sfx";
-import { Volume2, VolumeX, Ghost } from "lucide-react";
+import { useChaos } from "@/components/undimension/chaos-provider";
+import { Volume2, VolumeX, Ghost, Lock, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const FOOTER_STATS = [
@@ -30,15 +32,22 @@ const FOOTER_LINKS = [
   { label: "PORTFOLIO", page: "portfolio" as const },
 ];
 
-function KonamiOverlay({ show }: { show: boolean }) {
+function KonamiOverlay({ show, godUnlocked }: { show: boolean; godUnlocked?: boolean }) {
   if (!show) return null;
   return (
     <div className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center">
-      <div className="bg-[#ff00ff] text-white font-bebas text-6xl md:text-9xl px-12 py-8 border-8 border-black dark:border-white shadow-[16px_16px_0_#000] dark:shadow-[16px_16px_0_#d4ff00] rotate-3 animate-pulse">
+      <div className="bg-[#ff00ff] text-white font-bebas text-6xl md:text-9xl px-12 py-8 border-8 border-black dark:border-white shadow-[16px_16px_0_#000] dark:shadow-[16px_16px_0_#d4ff00] rotate-3 animate-pulse text-center">
         ↑↑↓↓←→←→BA
-        <p className="font-mono-ud text-base text-center mt-2">
-          {"// CHAOS MODE UNLOCKED //"}
+        <p className="font-mono-ud text-base mt-2">
+          {godUnlocked
+            ? "// GOD MODE UNLOCKED — CHAOS MODE BUTTON APPEARED //"
+            : "// CHAOS MODE UNLOCKED //"}
         </p>
+        {godUnlocked && (
+          <p className="font-mono-ud text-xs mt-1 text-[#d4ff00]">
+            ▸ Look for the CHAOS MODE button top-right
+          </p>
+        )}
       </div>
     </div>
   );
@@ -165,10 +174,15 @@ export default function Home() {
   const [soundboardOpen, setSoundboardOpen] = useState(false);
 
   const { play, ensureCtx } = useSfx(soundOn);
+  const { chaos, godMode, unlockGodMode } = useChaos();
 
   useKonamiCode(() => {
     setKonami(true);
     play("submit");
+    // If chaos mode is ON when konami is entered, unlock god mode
+    if (chaos && !godMode) {
+      unlockGodMode();
+    }
     setTimeout(() => setKonami(false), 3500);
   });
 
@@ -236,6 +250,7 @@ export default function Home() {
         {page === "memories" && <MemoriesPage />}
         {page === "games" && <GamesPage />}
         {page === "portfolio" && <PortfolioPage />}
+        {page === "chaosmode" && godMode && <ChaosModePage onExit={() => setPage("about")} />}
       </main>
       <Footer setPage={setPage} />
       <SoundToggle
@@ -260,7 +275,18 @@ export default function Home() {
         onClose={() => setSoundboardOpen(false)}
       />
       <KeyboardShortcutsOverlay open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
-      <KonamiOverlay show={konami} />
+      {/* God mode floating button — only visible when godMode is unlocked */}
+      {godMode && page !== "chaosmode" && (
+        <button
+          onClick={() => { play("submit"); setPage("chaosmode"); }}
+          className="fixed top-20 right-4 z-[55] flex items-center gap-2 bg-[#ff00ff] text-white border-4 border-black dark:border-white font-bebas text-lg px-4 py-2 shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff] hover:-translate-y-1 transition-transform no-color-transition animate-pulse"
+          aria-label="Enter Chaos Mode (member area)"
+          title="⚡ CHAOS MODE — Member Area"
+        >
+          <Upload className="w-4 h-4" /> CHAOS MODE
+        </button>
+      )}
+      <KonamiOverlay show={konami} godUnlocked={godMode && chaos} />
     </div>
   );
 }

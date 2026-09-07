@@ -112,13 +112,13 @@ function GameSectionView({ game }: { game: GameSection }) {
 
       <div
         className={cn(
-          "max-w-7xl mx-auto w-full flex flex-col lg:flex-row items-center gap-12 lg:gap-8 relative z-10",
+          "max-w-7xl mx-auto w-full flex flex-col lg:flex-row items-center gap-8 lg:gap-12 relative z-10",
           game.reverse && "lg:flex-row-reverse",
         )}
       >
         <div
           className={cn(
-            "w-full lg:w-[35%] flex flex-col",
+            "w-full lg:w-[35%] flex flex-col relative z-20",
             game.reverse && "lg:items-end lg:text-right",
           )}
         >
@@ -135,15 +135,15 @@ function GameSectionView({ game }: { game: GameSection }) {
           </div>
           <h2
             className={cn(
-              "font-outfit font-black text-6xl md:text-[100px] mb-6 uppercase leading-[0.8]",
+              "font-outfit font-black text-4xl sm:text-5xl md:text-[80px] lg:text-[100px] mb-6 uppercase leading-[0.85] break-words relative z-20",
               isCinzel && "font-cinzel",
             )}
             style={{
               color: game.accent,
               textShadow:
                 game.reverse
-                  ? "-4px 4px 0px #fff, -6px 6px 0px #fff"
-                  : "4px 4px 0px #fff, 6px 6px 0px #fff",
+                  ? "-3px 3px 0px #fff, -5px 5px 0px #fff"
+                  : "3px 3px 0px #fff, 5px 5px 0px #fff",
             }}
           >
             {game.title}

@@ -34,8 +34,7 @@ export function MemberDetailModal({
     <AnimatePresence>
       {open && member && (
         <motion.div
-          className="fixed inset-0 z-[80] flex items-start md:items-center justify-center p-3 md:p-6 overflow-y-auto overscroll-contain"
-          style={{ WebkitOverflowScrolling: "touch" }}
+          className="fixed inset-0 z-[80] flex items-center justify-center p-3 md:p-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -43,11 +42,11 @@ export function MemberDetailModal({
         >
           {/* Backdrop */}
           <motion.div
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/85 backdrop-blur-sm"
             onClick={onClose}
           />
 
-          {/* Modal */}
+          {/* Modal — centered, max height with scroll */}
           <motion.div
             ref={panelRef}
             role="dialog"
@@ -55,7 +54,7 @@ export function MemberDetailModal({
             aria-labelledby="ud-member-modal-title"
             tabIndex={-1}
             className={cn(
-              "relative w-full max-w-3xl my-4 md:my-8 border-8 border-black dark:border-white shadow-[8px_8px_0_#000] md:shadow-[16px_16px_0_#000] dark:md:shadow-[16px_16px_0_#d4ff00] outline-none",
+              "relative w-full max-w-3xl max-h-[92vh] overflow-y-auto border-8 border-black dark:border-white shadow-[8px_8px_0_#000] md:shadow-[16px_16px_0_#000] dark:md:shadow-[16px_16px_0_#d4ff00] outline-none",
               member.color,
             )}
             initial={{ scale: 0.92, y: 20, rotate: -1 }}
@@ -63,14 +62,19 @@ export function MemberDetailModal({
             exit={{ scale: 0.92, y: 20, rotate: -1 }}
             transition={{ type: "spring", stiffness: 300, damping: 26 }}
           >
-            {/* Close button */}
-            <button
-              onClick={onClose}
-              className="absolute -top-5 -right-5 z-30 w-12 h-12 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-black dark:border-white shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] hover:rotate-90 transition-transform no-color-transition"
-              aria-label="Close"
-            >
-              <X className="w-6 h-6" />
-            </button>
+            {/* Close hint bar (no X button — ESC or click backdrop to close) */}
+            <div className="bg-black dark:bg-white text-white dark:text-black px-4 py-1.5 border-b-4 border-black dark:border-white flex items-center justify-between">
+              <span className="font-mono-ud text-[10px] font-black tracking-[0.2em] uppercase opacity-70">
+                ▸ ENTITY DOSSIER
+              </span>
+              <button
+                onClick={onClose}
+                className="font-mono-ud text-[10px] font-black tracking-wider uppercase hover:text-[#ff4d4d] dark:hover:text-[#ff4d4d] transition-colors no-color-transition"
+                aria-label="Close"
+              >
+                [ ESC ] TUTUP
+              </button>
+            </div>
 
             {/* Header with image + identity */}
             <div className="relative bg-black dark:bg-[#111] text-white p-6 md:p-8 border-b-8 border-black dark:border-white overflow-hidden">

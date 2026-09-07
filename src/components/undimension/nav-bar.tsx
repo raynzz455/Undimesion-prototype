@@ -7,7 +7,7 @@ import { useChaos } from "./chaos-provider";
 import { Menu, X, Sun, Moon, Shuffle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type Page = "about" | "memories" | "games" | "portfolio";
+export type Page = "about" | "memories" | "games" | "portfolio" | "chaosmode";
 
 const TABS: { key: Page; label: string }[] = [
   { key: "about", label: "ABOUT" },

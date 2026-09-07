@@ -249,8 +249,8 @@ html {
   animation: ud-page-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 @keyframes ud-page-in {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* ── Intro animations ── */

@@ -264,7 +264,7 @@ function UploadWidget({ onUploaded }: { onUploaded: () => void }) {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-[70] flex items-start justify-center p-4 bg-black/70 backdrop-blur-sm overflow-y-auto py-12">
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto overscroll-contain">
           <div className="bg-[#f4f4f0] dark:bg-[#09090b] border-4 border-black dark:border-white shadow-[12px_12px_0_#ff4d4d] p-6 w-full max-w-md relative">
             <button
               onClick={() => setOpen(false)}
