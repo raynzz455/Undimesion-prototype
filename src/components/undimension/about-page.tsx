@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { StarField } from "./star-field";
 import { StarGraphic, Marquee } from "./primitives";
 import { MemberDetailModal } from "./member-detail-modal";
@@ -225,9 +225,13 @@ function MemberCard({ m, i, onOpen }: { m: Member; i: number; onOpen: () => void
   );
 }
 
-function TheCollective({ onOpenMember }: { onOpenMember: (m: Member) => void }) {
+function TheCollective({ onOpenMember, lastOpenedIdRef }: { onOpenMember: (m: Member) => void; lastOpenedIdRef: React.RefObject<string | null> }) {
   const randomMember = () => {
-    const m = MEMBERS[Math.floor(Math.random() * MEMBERS.length)];
+    // Exclude the last opened member so we never pick the same one twice in a row
+    const lastId = lastOpenedIdRef.current;
+    const pool = MEMBERS.filter((m) => m.id !== lastId);
+    const pick = pool.length > 0 ? pool : MEMBERS;
+    const m = pick[Math.floor(Math.random() * pick.length)];
     onOpenMember(m);
   };
   return (
@@ -373,12 +377,24 @@ function HarapanSection() {
 
 export function AboutPage() {
   const [selected, setSelected] = useState<Member | null>(null);
+  // Track the last opened member id so RANDOM ENTITY never picks the same one
+  // twice in a row, even after the modal is closed.
+  const lastOpenedIdRef = useRef<string | null>(null);
   useScrollReveal();
   const { play } = useSfx();
 
   const openMember = (m: Member) => {
     play("open");
-    setSelected(m);
+    lastOpenedIdRef.current = m.id;
+    // If a modal is already open, close it first then reopen after a brief
+    // delay so AnimatePresence replays the enter animation. This ensures the
+    // user sees a visible transition even when switching directly between members.
+    if (selected !== null && selected.id !== m.id) {
+      setSelected(null);
+      setTimeout(() => setSelected(m), 150);
+    } else {
+      setSelected(m);
+    }
   };
   const closeModal = () => {
     play("close");
@@ -389,8 +405,7 @@ export function AboutPage() {
   useHashMember((id) => {
     const m = MEMBERS.find((x) => x.id === id);
     if (m) {
-      play("open");
-      setSelected(m);
+      openMember(m);
     }
   });
 
@@ -399,7 +414,7 @@ export function AboutPage() {
       <StarField variant="adaptive" className="fixed z-[1]" />
       <HeroSection />
       <MarqueeBar />
-      <TheCollective onOpenMember={openMember} />
+      <TheCollective onOpenMember={openMember} lastOpenedIdRef={lastOpenedIdRef} />
       <StatsRadarSection />
       <TimelineSection />
       <CompatibilityMatrix />

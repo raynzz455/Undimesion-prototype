@@ -50,14 +50,18 @@ export function ChaosDice() {
       count++;
       if (count >= 12) {
         clearInterval(interval);
-        const finalMember = MEMBERS[Math.floor(Math.random() * MEMBERS.length)];
+        // Avoid picking the same member as the previous result
+        const memberPool = result
+          ? MEMBERS.filter((m) => m.id !== result.member.id)
+          : MEMBERS;
+        const finalMember = memberPool[Math.floor(Math.random() * memberPool.length)];
         const finalActivity = ACTIVITIES[Math.floor(Math.random() * ACTIVITIES.length)];
         setResult({ member: finalMember, activity: finalActivity });
         setRolling(false);
         play("submit");
       }
     }, 80);
-  }, [play]);
+  }, [play, result]);
 
   return (
     <div className="relative border-4 border-black dark:border-white bg-[#09090b] dark:bg-white p-6 shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff] ud-corners text-[#d4ff00] dark:text-black">
