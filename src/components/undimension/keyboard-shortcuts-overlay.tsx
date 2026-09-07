@@ -11,6 +11,7 @@ const SHORTCUTS = [
   { keys: ["G"], desc: "Pergi ke Gallery" },
   { keys: ["S"], desc: "Pergi ke Games" },
   { keys: ["A"], desc: "Pergi ke About" },
+  { keys: ["P"], desc: "Pergi ke Portfolio" },
   { keys: ["B"], desc: "Buka Soundboard" },
   { keys: ["Tab"], desc: "Navigasi fokus berikutnya" },
   { keys: ["Shift", "Tab"], desc: "Navigasi fokus sebelumnya" },

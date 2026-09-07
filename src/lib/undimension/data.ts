@@ -598,3 +598,124 @@ export const CONSTELLATION_LINES: [string, string][] = [
   ["rifqi", "dudit"],
   ["razka", "reza"],
 ];
+
+// Portfolio projects — showcase of programming work by the collective
+export type PortfolioProject = {
+  id: string;
+  title: string;
+  description: string;
+  tech: string[];
+  category: "WEB" | "GAME" | "MOBILE" | "TOOL" | "BOT" | "OTHER";
+  status: "LIVE" | "WIP" | "ARCHIVED";
+  year: string;
+  author: string;
+  link?: string;
+  repo?: string;
+  color: string;
+};
+
+export const PORTFOLIO_PROJECTS: PortfolioProject[] = [
+  {
+    id: "p1",
+    title: "UNDIMENSION WEB",
+    description: "Web profile collective ini. Neo-brutalism design, 11 section interaktif, chaos mode, synthesized SFX, dan paginated gallery carousel. Full-stack Next.js 16 + Prisma.",
+    tech: ["Next.js 16", "TypeScript", "Tailwind 4", "Prisma", "sharp", "framer-motion"],
+    category: "WEB",
+    status: "LIVE",
+    year: "2026",
+    author: "RAZKA",
+    link: "#",
+    repo: "https://github.com/raynzz455/Undimesion-prototype",
+    color: "#ff4d4d",
+  },
+  {
+    id: "p2",
+    title: "MINECRAFT MOD PACK",
+    description: "Custom modpack untuk server private collective. Berisi 47 mod yang dipilih manual, config di-tune untuk survival chaos bareng.",
+    tech: ["Java", "Forge", "JSON", "Minecraft"],
+    category: "GAME",
+    status: "ARCHIVED",
+    year: "2022",
+    author: "ALDI",
+    color: "#00e5ff",
+  },
+  {
+    id: "p3",
+    title: "ML DRAFT ANALYZER",
+    description: "Tool web untuk analisis draft Mobile Legends. Input composition musuh → output rekomendasi pick. Pakai data hero API.",
+    tech: ["React", "Node.js", "REST API"],
+    category: "TOOL",
+    status: "ARCHIVED",
+    year: "2023",
+    author: "REZA",
+    color: "#d4ff00",
+  },
+  {
+    id: "p4",
+    title: "DISCORD CHAOS BOT",
+    description: "Bot Discord untuk server collective. Fitur: random game picker, schedule reminder, sound effect player, dan meme generator dari screenshot.",
+    tech: ["Node.js", "discord.js", "SQLite"],
+    category: "BOT",
+    status: "LIVE",
+    year: "2024",
+    author: "DUDIT",
+    color: "#ff00ff",
+  },
+  {
+    id: "p5",
+    title: "D&D DICE ROLLER PWA",
+    description: "Progressive Web App untuk roll dadu D&D. Support d4/d6/d8/d10/d12/d20/d100, advantage/disadvantage, dan history log. Installable di HP.",
+    tech: ["React", "PWA", "Service Worker"],
+    category: "WEB",
+    status: "LIVE",
+    year: "2024",
+    author: "ABYAN",
+    color: "#ff8c00",
+  },
+  {
+    id: "p6",
+    title: "OBBY SPEEDRUN TRACKER",
+    description: "Web app untuk track speedrun time obby Roblox. Leaderboard, video proof link, dan auto-timer. Kompetisi internal collective.",
+    tech: ["Next.js", "Prisma", "YouTube API"],
+    category: "WEB",
+    status: "WIP",
+    year: "2025",
+    author: "RASYA",
+    color: "#00ff00",
+  },
+  {
+    id: "p7",
+    title: "SCREENSHOT ARCHIVER",
+    description: "CLI tool untuk auto-organize screenshot berdasarkan tanggal + game. Convert ke WebP, compress, upload ke cloud. Dipakai untuk arip 4000+ screenshot.",
+    tech: ["Python", "Pillow", "CLI"],
+    category: "TOOL",
+    status: "LIVE",
+    year: "2023",
+    author: "RAZKA",
+    color: "#8a2be2",
+  },
+  {
+    id: "p8",
+    title: "GHOST PRESENCE BOT",
+    description: "Bot yang bikin akun Discord 'online' walau user ga main. Random status message, reaction time simulator, dan auto-reply chaos.",
+    tech: ["Python", "discord.py", "cron"],
+    category: "BOT",
+    status: "ARCHIVED",
+    year: "2024",
+    author: "RIFQI",
+    color: "#ff4d4d",
+  },
+  {
+    id: "p9",
+    title: "SMK REUNION INVITE SITE",
+    description: "Landing page undangan reuni SMK. Countdown timer, RSVP form, gallery foto lama, dan peta lokasi. Dikirim ke 50+ alumni.",
+    tech: ["HTML/CSS", "JavaScript", "Google Maps API"],
+    category: "WEB",
+    status: "ARCHIVED",
+    year: "2025",
+    author: "ALDI",
+    color: "#00e5ff",
+  },
+];
+
+export const PORTFOLIO_CATEGORIES = ["ALL", "WEB", "GAME", "MOBILE", "TOOL", "BOT", "OTHER"] as const;

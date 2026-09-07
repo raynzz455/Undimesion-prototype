@@ -7,12 +7,13 @@ import { useChaos } from "./chaos-provider";
 import { Menu, X, Sun, Moon, Shuffle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type Page = "about" | "memories" | "games";
+export type Page = "about" | "memories" | "games" | "portfolio";
 
 const TABS: { key: Page; label: string }[] = [
   { key: "about", label: "ABOUT" },
   { key: "memories", label: "GALLERY" },
   { key: "games", label: "GAMES" },
+  { key: "portfolio", label: "PORTFOLIO" },
 ];
 
 export function NavBar({

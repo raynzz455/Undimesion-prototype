@@ -6,6 +6,7 @@ import { NavBar, type Page } from "@/components/undimension/nav-bar";
 import { AboutPage } from "@/components/undimension/about-page";
 import { MemoriesPage } from "@/components/undimension/memories-page";
 import { GamesPage } from "@/components/undimension/games-page";
+import { PortfolioPage } from "@/components/undimension/portfolio-page";
 import { ScrollProgress } from "@/components/undimension/scroll-progress";
 import { BackToTop } from "@/components/undimension/back-to-top";
 import { KeyboardShortcutsOverlay } from "@/components/undimension/keyboard-shortcuts-overlay";
@@ -19,13 +20,14 @@ const FOOTER_STATS = [
   { label: "MEMBERS", value: "07" },
   { label: "ESTABLISHED", value: "2020" },
   { label: "GAMES", value: "04" },
-  { label: "DIMENSIONS", value: "∞" },
+  { label: "PROJECTS", value: "09" },
 ];
 
 const FOOTER_LINKS = [
   { label: "ABOUT", page: "about" as const },
   { label: "GALLERY", page: "memories" as const },
   { label: "GAMES", page: "games" as const },
+  { label: "PORTFOLIO", page: "portfolio" as const },
 ];
 
 function KonamiOverlay({ show }: { show: boolean }) {
@@ -185,6 +187,9 @@ export default function Home() {
       } else if (e.key === "s" || e.key === "S") {
         setPage("games");
         play("click");
+      } else if (e.key === "p" || e.key === "P") {
+        setPage("portfolio");
+        play("click");
       } else if (e.key === "b" || e.key === "B") {
         if (!shortcutsOpen) {
           setSoundboardOpen((o) => !o);
@@ -230,6 +235,7 @@ export default function Home() {
         {page === "about" && <AboutPage />}
         {page === "memories" && <MemoriesPage />}
         {page === "games" && <GamesPage />}
+        {page === "portfolio" && <PortfolioPage />}
       </main>
       <Footer setPage={setPage} />
       <SoundToggle
