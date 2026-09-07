@@ -728,3 +728,40 @@ Upload route recreated (Render-ready), News Portal live with 5 articles, Gallery
 - Auto-advance pauses when the user manually navigates (via Prev/Next/page click) — actually no, it keeps auto-advancing. The PAUSE button is the only way to stop it. Consider pausing on user interaction.
 - The upload route saves to local `/public/gallery/uploads/` — on Render, this is ephemeral (lost on redeploy). Must swap to cloud storage before production.
 - News articles have a `pinned` field but no UI to pin/unpin yet — only via DB.
+
+---
+Task ID: 14
+Agent: main (Z.ai Code)
+Task: Add Portfolio page — showcase programming projects by the collective.
+
+## Section 1: Current Project Status Assessment
+
+User requested a portfolio section since the collective members are also programmers. Added a dedicated PORTFOLIO page (4th nav tab) with 9 seed projects spanning web, game, tool, and bot categories.
+
+## Section 2: Completed Modifications & Verification
+
+### New Features Added
+1. **Portfolio Page** (`portfolio-page.tsx`) — A purple-themed neo-brutalist page showcasing 9 programming projects:
+   - **Hero** — "PORT FOLIO" title with glitch-hover, tagline "Kami bukan cuma player. Kami juga builder.", stats row (9 PROJECTS, LIVE count, WIP count, 15 techs)
+   - **Category filter** — ALL/WEB/GAME/MOBILE/TOOL/BOT/OTHER with count badges
+   - **Layout toggle** — Grid view (3-col cards) / List view (full-width rows)
+   - **Project cards** — Category icon, status badge (LIVE/WIP/ARCHIVED), title, description, tech stack tags, author + year, GitHub repo link + live demo link
+   - **9 seed projects**: UNDIMENSION WEB, MINECRAFT MOD PACK, ML DRAFT ANALYZER, DISCORD CHAOS BOT, D&D DICE ROLLER PWA, OBBY SPEEDRUN TRACKER, SCREENSHOT ARCHIVER, GHOST PRESENCE BOT, SMK REUNION INVITE SITE
+
+2. **Navbar update** — Added PORTFOLIO as 4th tab
+3. **Keyboard shortcut** — Press "P" to navigate to Portfolio
+4. **Footer update** — Added PORTFOLIO link + changed DIMENSIONS stat to PROJECTS (09)
+5. **Keyboard shortcuts overlay** — Added "P = Pergi ke Portfolio"
+
+### Data Added
+- `PortfolioProject` type + `PORTFOLIO_PROJECTS` array (9 projects with id, title, description, tech[], category, status, year, author, link, repo, color)
+- `PORTFOLIO_CATEGORIES` constant
+
+### Verification Results
+- ✅ ESLint: 0 errors, 0 warnings
+- ✅ Agent Browser E2E: Portfolio renders (PORT/FOLIO + tagline), 9 project cards, filter BOT → 2 cards (DISCORD CHAOS BOT + GHOST PRESENCE), layout toggle GRID ↔ LIST works, keyboard "P" navigates, mobile (390px) no error, **zero console errors**
+- ✅ VLM: confirms purple-themed hero with "PORT FOLIO" title
+- ✅ Pushed to GitHub (commit e596270 → rebased → 7aff186)
+
+## Section 3: Current Status: ✅ Phase 14 Complete & Verified
+Site now has 4 pages: ABOUT, GALLERY, GAMES, PORTFOLIO. Zero errors, lint clean, pushed to GitHub.
