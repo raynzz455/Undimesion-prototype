@@ -1,0 +1,1139 @@
+     1→import { useState, useEffect, useMemo } from "react"
+     2→import openingImg from "@/imports/Screenshot__6_-1.png"
+     3→import img1 from "@/imports/Screenshot_2026-08-27_234001.png"
+     4→import img2 from "@/imports/Screenshot_2026-08-27_234015.png"
+     5→import img3 from "@/imports/Screenshot_2026-08-27_234027.png"
+     6→import img4 from "@/imports/Screenshot_2026-08-27_234040.png"
+     7→import harapanImg1 from "@/imports/image-1.png"
+     8→import harapanImg2 from "@/imports/image-2.png"
+     9→import harapanImg3 from "@/imports/image-3.png"
+    10→import harapanImg4 from "@/imports/image-4.png"
+    11→import dndBg from "@/imports/dungeons_and_dragons_pixel_art_large.png"
+    12→import mcBg from "@/imports/Minecraft_Buddies___Overworld__night_version___Robert_Wilson.jpg"
+    13→import mlBg from "@/imports/Mobile_Legends__Bang_Bang_vs_Honor_of_Kings__Which_Mobile_MOBA_is_Better_.jpg"
+    14→import robloxBg from "@/imports/roblox_The_Mimic.jpg"
+    15→
+    16→type Page = "about" | "memories" | "games"
+    17→
+    18→function StarGraphic({ className }: { className?: string }) {
+    19→  return (
+    20→    <svg viewBox="0 0 100 100" className={className} fill="currentColor">
+    21→      <path d="M50 0 L58 42 L100 50 L58 58 L50 100 L42 58 L0 50 L42 42 Z" />
+    22→    </svg>
+    23→  )
+    24→}
+    25→
+    26→function ScrollProgress() {
+    27→  const [width, setWidth] = useState(0)
+    28→  useEffect(() => {
+    29→    const handleScroll = () => {
+    30→      const scrollHeight =
+    31→        document.documentElement.scrollHeight -
+    32→        document.documentElement.clientHeight
+    33→      const currentScroll = document.documentElement.scrollTop
+    34→      setWidth((currentScroll / scrollHeight) * 100)
+    35→    }
+    36→    window.addEventListener("scroll", handleScroll)
+    37→    return () => window.removeEventListener("scroll", handleScroll)
+    38→  }, [])
+    39→  return (
+    40→    <div
+    41→      className="fixed top-0 left-0 h-2 bg-[#ff4d4d] z-[60] transition-all duration-75 no-color-transition"
+    42→      style={{ width: `${width}%` }}
+    43→    />
+    44→  )
+    45→}
+    46→
+    47→function RandomStars({
+    48→  forceDark = false,
+    49→  count = 250,
+    50→  className = "absolute inset-0 pointer-events-none z-0 overflow-hidden",
+    51→}: {
+    52→  forceDark?: boolean
+    53→  count?: number
+    54→  className?: string
+    55→}) {
+    56→  const stars = useMemo(
+    57→    () =>
+    58→      Array.from({ length: count }).map((_, i) => ({
+    59→        id: i,
+    60→        x: Math.random() * 100,
+    61→        y: Math.random() * 100,
+    62→        size: Math.random() * 5 + 1,
+    63→        isCross: Math.random() > 0.85,
+    64→        delay: Math.random() * 5,
+    65→        duration: Math.random() * 3 + 1,
+    66→      })),
+    67→    [count],
+    68→  )
+    69→
+    70→  return (
+    71→    <div className={className}>
+    72→      {stars.map((s) => (
+    73→        <div
+    74→          key={s.id}
+    75→          className={`absolute ${
+    76→            forceDark ? "bg-white" : "bg-black dark:bg-white"
+    77→          } animate-pulse`}
+    78→          style={{
+    79→            left: `${s.x}%`,
+    80→            top: `${s.y}%`,
+    81→            width: s.isCross ? 2 : s.size,
+    82→            height: s.isCross ? s.size * 3 : s.size,
+    83→            borderRadius: s.isCross ? 0 : "50%",
+    84→            animationDelay: `${s.delay}s`,
+    85→            animationDuration: `${s.duration}s`,
+    86→          }}
+    87→        >
+    88→          {s.isCross && (
+    89→            <div
+    90→              className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${
+    91→                forceDark ? "bg-white" : "bg-black dark:bg-white"
+    92→              }`}
+    93→              style={{ width: s.size * 3, height: 2 }}
+    94→            />
+    95→          )}
+    96→        </div>
+    97→      ))}
+    98→    </div>
+    99→  )
+   100→}
+   101→
+   102→function RealisticBlackhole() {
+   103→  return (
+   104→    <div className="absolute -right-32 md:right-0 top-1/2 -translate-y-1/2 w-[450px] h-[450px] md:w-[700px] md:h-[700px] z-0 pointer-events-none transform -rotate-12">
+   105→      <svg
+   106→        viewBox="0 0 500 500"
+   107→        className="w-full h-full animate-[spin_40s_linear_infinite_reverse]"
+   108→      >
+   109→        <defs>
+   110→          <filter id="glow">
+   111→            <feGaussianBlur stdDeviation="8" result="coloredBlur" />
+   112→            <feMerge>
+   113→              <feMergeNode in="coloredBlur" />
+   114→              <feMergeNode in="SourceGraphic" />
+   115→            </feMerge>
+   116→          </filter>
+   117→        </defs>
+   118→        <ellipse
+   119→          cx="250"
+   120→          cy="250"
+   121→          rx="220"
+   122→          ry="70"
+   123→          fill="none"
+   124→          stroke="#d4ff00"
+   125→          strokeWidth="20"
+   126→          filter="url(#glow)"
+   127→          className="opacity-80"
+   128→        />
+   129→        <circle
+   130→          cx="250"
+   131→          cy="250"
+   132→          r="145"
+   133→          fill="none"
+   134→          stroke="#ff4d4d"
+   135→          strokeWidth="25"
+   136→          filter="url(#glow)"
+   137→          className="opacity-90"
+   138→        />
+   139→        <circle
+   140→          cx="250"
+   141→          cy="250"
+   142→          r="130"
+   143→          fill="#000"
+   144→          stroke="#fff"
+   145→          strokeWidth="6"
+   146→        />
+   147→        <path
+   148→          d="M 30 250 A 220 70 0 0 0 470 250"
+   149→          fill="none"
+   150→          stroke="#00e5ff"
+   151→          strokeWidth="25"
+   152→          strokeLinecap="round"
+   153→          filter="url(#glow)"
+   154→        />
+   155→        <path
+   156→          d="M 70 250 A 180 50 0 0 0 430 250"
+   157→          fill="none"
+   158→          stroke="#fff"
+   159→          strokeWidth="8"
+   160→          strokeLinecap="round"
+   161→        />
+   162→      </svg>
+   163→    </div>
+   164→  )
+   165→}
+   166→
+   167→function RealisticPlanets() {
+   168→  return (
+   169→    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden">
+   170→      <div className="absolute w-[400px] h-[400px] md:w-[600px] md:h-[600px] rounded-full border-4 border-white border-dashed animate-[spin_20s_linear_infinite]">
+   171→        <div
+   172→          className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full border-4 border-white shadow-[8px_8px_0_#fff] flex items-center justify-center overflow-hidden animate-[spin_20s_linear_infinite_reverse]"
+   173→          style={{
+   174→            background: "radial-gradient(circle at 35% 35%, #4facfe, #00f2fe)",
+   175→          }}
+   176→        >
+   177→          <div className="w-10 h-10 bg-[#38b000] rounded-sm absolute -top-2 -left-2 transform rotate-12 border-2 border-black" />
+   178→          <div className="w-12 h-6 bg-[#38b000] rounded-sm absolute bottom-1 right-[-4px] transform -rotate-12 border-2 border-black" />
+   179→        </div>
+   180→      </div>
+   181→      <div className="absolute w-[550px] h-[550px] md:w-[800px] md:h-[800px] rounded-full border-4 border-white animate-[spin_30s_linear_infinite_reverse]">
+   182→        <div
+   183→          className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-16 h-16 rounded-full border-4 border-white shadow-[8px_8px_0_#fff] overflow-hidden animate-[spin_30s_linear_infinite]"
+   184→          style={{ background: "#e07a5f" }}
+   185→        >
+   186→          <div className="w-6 h-6 bg-[#9b2226] border-2 border-black rounded-full absolute top-1 right-1 shadow-[inset_4px_4px_0_#000]" />
+   187→          <div className="w-4 h-4 bg-[#9b2226] border-2 border-black rounded-full absolute bottom-2 left-2 shadow-[inset_2px_2px_0_#000]" />
+   188→        </div>
+   189→      </div>
+   190→      <div className="absolute w-[700px] h-[700px] md:w-[1050px] md:h-[1050px] rounded-full border-4 border-white border-dotted animate-[spin_40s_linear_infinite]">
+   191→        <div
+   192→          className="absolute top-1/2 -left-10 -translate-y-1/2 w-28 h-28 rounded-full border-4 border-white shadow-[8px_8px_0_#fff] flex items-center justify-center animate-[spin_40s_linear_infinite_reverse]"
+   193→          style={{ background: "#f4a261" }}
+   194→        >
+   195→          <div className="absolute w-full h-2 bg-[#e76f51] top-1/4 border-y-2 border-black" />
+   196→          <div className="absolute w-full h-4 bg-[#e76f51] bottom-1/3 border-y-2 border-black" />
+   197→          <div className="absolute w-[200%] h-[200%] border-y-[16px] border-x-8 border-white rounded-[50%] transform rotate-[25deg] scale-y-[0.3]" />
+   198→          <div className="absolute w-[180%] h-[180%] border-y-[8px] border-[#2a9d8f] rounded-[50%] transform rotate-[25deg] scale-y-[0.3] opacity-90" />
+   199→        </div>
+   200→      </div>
+   201→    </div>
+   202→  )
+   203→}
+   204→
+   205→function TesseractWithAstronaut({
+   206→  image,
+   207→  onEnter,
+   208→}: {
+   209→  image: string
+   210→  onEnter: () => void
+   211→}) {
+   212→  return (
+   213→    <div
+   214→      className="relative w-[250px] h-[250px] md:w-[400px] md:h-[400px] flex items-center justify-center group cursor-pointer z-20 mt-12 mb-16 no-color-transition animate-intro-zoom"
+   215→      onClick={onEnter}
+   216→    >
+   217→      <svg
+   218→        className="absolute inset-0 w-full h-full animate-[spin_25s_linear_infinite]"
+   219→        viewBox="0 0 200 200"
+   220→      >
+   221→        <rect
+   222→          x="10"
+   223→          y="10"
+   224→          width="180"
+   225→          height="180"
+   226→          fill="none"
+   227→          stroke="currentColor"
+   228→          strokeWidth="6"
+   229→          className="text-white group-hover:stroke-[#ff4d4d] transition-colors duration-500"
+   230→        />
+   231→        <rect
+   232→          x="55"
+   233→          y="55"
+   234→          width="90"
+   235→          height="90"
+   236→          fill="none"
+   237→          stroke="currentColor"
+   238→          strokeWidth="6"
+   239→          className="text-white group-hover:stroke-[#00e5ff] transition-colors duration-500"
+   240→        />
+   241→        <line
+   242→          x1="10"
+   243→          y1="10"
+   244→          x2="55"
+   245→          y2="55"
+   246→          stroke="currentColor"
+   247→          strokeWidth="6"
+   248→          className="text-white"
+   249→        />
+   250→        <line
+   251→          x1="190"
+   252→          y1="10"
+   253→          x2="145"
+   254→          y2="55"
+   255→          stroke="currentColor"
+   256→          strokeWidth="6"
+   257→          className="text-white"
+   258→        />
+   259→        <line
+   260→          x1="10"
+   261→          y1="190"
+   262→          x2="55"
+   263→          y2="145"
+   264→          stroke="currentColor"
+   265→          strokeWidth="6"
+   266→          className="text-white"
+   267→        />
+   268→        <line
+   269→          x1="190"
+   270→          y1="190"
+   271→          x2="145"
+   272→          y2="145"
+   273→          stroke="currentColor"
+   274→          strokeWidth="6"
+   275→          className="text-white"
+   276→        />
+   277→      </svg>
+   278→      <div className="absolute w-[112.5px] h-[112.5px] md:w-[180px] md:h-[180px] flex items-center justify-center bg-black border-4 border-white shadow-[8px_8px_0_#fff] transform transition-transform group-hover:scale-125 overflow-hidden animate-[spin_25s_linear_infinite_reverse]">
+   279→        <img
+   280→          src={image}
+   281→          alt="Extracted Astronaut"
+   282→          className="absolute w-[220%] h-[220%] max-w-none object-cover filter contrast-[1.2]"
+   283→          style={{ clipPath: "circle(35% at 50% 50%)" }}
+   284→        />
+   285→      </div>
+   286→      <button className="absolute -bottom-16 -right-4 md:-right-12 bg-[#d4ff00] text-black font-bebas text-4xl md:text-6xl px-10 py-4 border-4 border-white shadow-[8px_8px_0_#fff] transform rotate-3 flex items-center gap-3 group-hover:bg-white group-hover:-translate-y-2 group-hover:-translate-x-2 group-hover:shadow-[16px_16px_0_#ff4d4d] transition-all no-color-transition">
+   287→        <span>ENTER</span>
+   288→        <span className="text-2xl md:text-4xl">➔</span>
+   289→      </button>
+   290→    </div>
+   291→  )
+   292→}
+   293→
+   294→function OpeningScreen({ onEnter }: { onEnter: () => void }) {
+   295→  return (
+   296→    <div className="relative min-h-screen flex flex-col items-center justify-center bg-[#09090b] overflow-hidden selection:bg-[#ff4d4d] selection:text-white">
+   297→      <RandomStars forceDark={true} count={250} />
+   298→      <RealisticBlackhole />
+   299→      <RealisticPlanets />
+   300→      <div className="relative z-10 flex flex-col items-center justify-center text-center w-full px-4">
+   301→        <h1
+   302→          className="font-bebas text-[110px] md:text-[180px] lg:text-[240px] leading-[0.8] uppercase text-white drop-shadow-md relative z-10 animate-intro-text"
+   303→          style={{ textShadow: "10px 10px 0px #00e5ff" }}
+   304→        >
+   305→          UNDIMENSION
+   306→        </h1>
+   307→        <TesseractWithAstronaut image={openingImg} onEnter={onEnter} />
+   308→        <p className="font-outfit text-lg md:text-2xl font-black border-4 border-white bg-[#ff4d4d] text-white px-8 py-4 shadow-[8px_8px_0_#fff] max-w-xl transform -rotate-2 uppercase relative z-10 hover:rotate-0 hover:scale-105 transition-all no-color-transition animate-intro-fade">
+   309→          Initiate launch sequence to the collective.
+   310→        </p>
+   311→      </div>
+   312→    </div>
+   313→  )
+   314→}
+   315→
+   316→function NavBar({
+   317→  current,
+   318→  setPage,
+   319→  isDark,
+   320→  toggleDark,
+   321→}: {
+   322→  current: Page
+   323→  setPage: (p: Page) => void
+   324→  isDark: boolean
+   325→  toggleDark: () => void
+   326→}) {
+   327→  const tabs = [
+   328→    { key: "about" as const, label: "ABOUT" },
+   329→    { key: "memories" as const, label: "GALLERY" },
+   330→    { key: "games" as const, label: "GAMES" },
+   331→  ]
+   332→  return (
+   333→    <nav className="fixed top-2 left-2 right-2 md:top-4 md:left-4 md:right-4 z-50 bg-[#f4f4f0] dark:bg-black border-4 border-black dark:border-white shadow-[8px_8px_0_#000] dark:shadow-[8px_8px_0_#d4ff00] flex flex-col md:flex-row items-stretch">
+   334→      <div className="p-3 md:p-5 flex-1 flex items-center justify-between md:justify-start bg-[#d4ff00] dark:bg-[#d4ff00] border-b-4 md:border-b-0 md:border-r-4 border-black dark:border-white">
+   335→        <div className="flex items-center">
+   336→          <StarGraphic className="w-8 h-8 mr-4 animate-spin-slow text-black" />
+   337→          <button
+   338→            onClick={() => setPage("about")}
+   339→            className="font-bebas text-4xl md:text-5xl tracking-widest uppercase hover:underline underline-offset-8 text-black"
+   340→          >
+   341→            UNDIMENSION
+   342→          </button>
+   343→        </div>
+   344→        <button
+   345→          onClick={toggleDark}
+   346→          className="md:hidden border-4 border-black bg-white text-black px-3 py-1 font-mono font-bold shadow-[4px_4px_0_#000] active:translate-x-1 active:translate-y-1 active:shadow-[0_0_0_#000] no-color-transition"
+   347→        >
+   348→          {isDark ? "LIGHT" : "DARK"}
+   349→        </button>
+   350→      </div>
+   351→      <div className="flex bg-white dark:bg-black">
+   352→        {tabs.map(({ key, label }, i) => (
+   353→          <button
+   354→            key={key}
+   355→            onClick={() => setPage(key)}
+   356→            className={`flex-1 md:flex-none px-4 md:px-8 py-4 font-bebas text-xl md:text-3xl uppercase tracking-widest transition-colors border-black dark:border-white ${
+   357→              i !== tabs.length - 1 ? "border-r-4" : ""
+   358→            } ${
+   359→              current === key
+   360→                ? "bg-black text-white dark:bg-white dark:text-black"
+   361→                : "bg-transparent text-black dark:text-white hover:bg-[#ff4d4d] hover:text-white dark:hover:bg-[#ff4d4d] dark:hover:text-white"
+   362→            }`}
+   363→          >
+   364→            {label}
+   365→          </button>
+   366→        ))}
+   367→        <button
+   368→          onClick={toggleDark}
+   369→          className="hidden md:flex items-center justify-center px-6 border-l-4 border-black dark:border-white bg-[#00e5ff] dark:bg-[#00e5ff] text-black hover:bg-black hover:text-[#00e5ff] transition-colors"
+   370→        >
+   371→          <span className="font-mono font-black uppercase tracking-widest text-lg">
+   372→            [{isDark ? "LIGHT" : "DARK"}]
+   373→          </span>
+   374→        </button>
+   375→      </div>
+   376→    </nav>
+   377→  )
+   378→}
+   379→
+   380→/* ─── Data 7 Anggota Penuh ─── */
+   381→const MEMBERS = [
+   382→  {
+   383→    name: "Raynaldi",
+   384→    nick: "Aldi",
+   385→    role: "THE FOUNDER",
+   386→    img: openingImg,
+   387→    color: "bg-[#ff4d4d]",
+   388→    highlight: "text-[#ff4d4d]",
+   389→  },
+   390→  {
+   391→    name: "Muhammad Razka Faudzan",
+   392→    nick: "Rembo",
+   393→    role: "THE ARCHITECT",
+   394→    img: img1,
+   395→    color: "bg-[#00e5ff]",
+   396→    highlight: "text-[#00e5ff]",
+   397→  },
+   398→  {
+   399→    name: "Reza",
+   400→    nick: "Eja",
+   401→    role: "THE STRATEGIST",
+   402→    img: img2,
+   403→    color: "bg-[#d4ff00]",
+   404→    highlight: "text-[#d4ff00]",
+   405→  },
+   406→  {
+   407→    name: "Muhammad Abyan Riyadh Amal",
+   408→    nick: "Byan",
+   409→    role: "THE VANGUARD",
+   410→    img: img3,
+   411→    color: "bg-[#ff00ff]",
+   412→    highlight: "text-[#ff00ff]",
+   413→  },
+   414→  {
+   415→    name: "Rasya Musyafa Ridwan",
+   416→    nick: "Acong",
+   417→    role: "THE MAVERICK",
+   418→    img: img4,
+   419→    color: "bg-[#ff8c00]",
+   420→    highlight: "text-[#ff8c00]",
+   421→  },
+   422→  {
+   423→    name: "Muhammad Rifqi",
+   424→    nick: "Tipki",
+   425→    role: "THE ENIGMA",
+   426→    img: img1,
+   427→    color: "bg-[#00ff00]",
+   428→    highlight: "text-[#00ff00]",
+   429→  },
+   430→  {
+   431→    name: "Raditya Jundika Putra",
+   432→    nick: "Dudit",
+   433→    role: "THE CATALYST",
+   434→    img: img2,
+   435→    color: "bg-[#8a2be2]",
+   436→    highlight: "text-[#8a2be2]",
+   437→  },
+   438→]
+   439→
+   440→function AboutPage() {
+   441→  return (
+   442→    <div className="page-enter bg-[#f4f4f0] dark:bg-[#09090b] pt-40 min-h-screen relative overflow-hidden">
+   443→      <RandomStars
+   444→        className="fixed inset-0 pointer-events-none z-[1]"
+   445→        count={400}
+   446→      />
+   447→
+   448→      <div className="max-w-7xl mx-auto px-6 md:px-12 py-12 relative z-10">
+   449→        <div className="flex flex-col lg:flex-row gap-12 items-center">
+   450→          <div className="flex-1 flex flex-col justify-center">
+   451→            <div className="inline-block border-4 border-black dark:border-white bg-[#ff4d4d] text-white font-mono text-sm px-4 py-2 uppercase mb-8 w-max shadow-[8px_8px_0_#000] dark:shadow-[8px_8px_0_#fff] transform -rotate-2 no-color-transition">
+   452→              [ ESTABLISHED 2020 ]
+   453→            </div>
+   454→            <h1
+   455→              className="font-bebas text-6xl md:text-[140px] leading-[0.8] mb-8 uppercase text-black dark:text-white"
+   456→              style={{ textShadow: "8px 8px 0px #00e5ff" }}
+   457→            >
+   458→              WE ARE
+   459→              <br />
+   460→              <span
+   461→                className="text-black dark:text-white"
+   462→                style={{
+   463→                  textShadow:
+   464→                    "-4px -4px 0 #ff4d4d, 4px -4px 0 #ff4d4d, -4px 4px 0 #ff4d4d, 4px 4px 0 #ff4d4d, 12px 12px 0px #d4ff00",
+   465→                }}
+   466→              >
+   467→                UNDIMENSION
+   468→              </span>
+   469→            </h1>
+   470→            <p className="font-outfit text-lg md:text-2xl font-bold border-l-8 border-black dark:border-white pl-6 max-w-2xl bg-white dark:bg-[#1a1a1a] text-black dark:text-white p-6 shadow-[8px_8px_0_#000] dark:shadow-[8px_8px_0_#d4ff00] border-r-4 border-y-4 no-color-transition">
+   471→              Sebuah circle teman lama yang tak terikat ruang maupun waktu.
+   472→              Datang dari mimpi yang berbeda, namun melangkah di orbit yang
+   473→              sama.
+   474→            </p>
+   475→          </div>
+   476→          <div className="flex-1 w-full relative">
+   477→            <div className="border-4 border-black dark:border-white bg-black dark:bg-[#111] p-8 shadow-[12px_12px_0_#000] dark:shadow-[12px_12px_0_#ff4d4d] transform rotate-2 text-white no-color-transition hover:rotate-0 hover:scale-105">
+   478→              <StarGraphic className="w-12 h-12 text-[#d4ff00] mb-6 animate-spin-slow" />
+   479→              <h2 className="font-bebas text-6xl mb-4">THE MISSION</h2>
+   480→              <p className="font-mono text-lg mb-6 leading-relaxed">
+   481→                Menjadi konstanta di tengah variabel kehidupan. Gravitasi yang
+   482→                terus menarik kita kembali, sejauh apapun kita pergi.
+   483→              </p>
+   484→              <div className="border-t-4 border-white pt-6 flex flex-wrap gap-4">
+   485→                <span className="bg-[#00e5ff] text-black font-bold px-4 py-2 border-4 border-white shadow-[4px_4px_0_#fff]">
+   486→                  SPACE
+   487→                </span>
+   488→                <span className="bg-[#d4ff00] text-black font-bold px-4 py-2 border-4 border-white shadow-[4px_4px_0_#fff]">
+   489→                  TIME
+   490→                </span>
+   491→                <span className="bg-[#ff4d4d] text-white font-bold px-4 py-2 border-4 border-white shadow-[4px_4px_0_#fff]">
+   492→                  BOND
+   493→                </span>
+   494→              </div>
+   495→            </div>
+   496→          </div>
+   497→        </div>
+   498→      </div>
+   499→
+   500→      <div className="border-y-8 border-black dark:border-white bg-[#d4ff00] py-6 mt-16 overflow-hidden flex transform -rotate-1 shadow-[0_10px_0_#000]">
+   501→        <div className="animate-marquee text-black font-bebas text-7xl tracking-widest uppercase relative z-10">
+   502→          {Array(8)
+   503→            .fill("NO LIMITS • NEO-BRUTALISM • UNDIMENSION • ")
+   504→            .map((text, i) => (
+   505→              <span key={i} className="px-4">
+   506→                {text}
+   507→              </span>
+   508→            ))}
+   509→        </div>
+   510→      </div>
+   511→
+   512→      {/* ─── THE COLLECTIVE (7 ANGGOTA) ─── */}
+   513→      <div className="bg-white dark:bg-[#1a1a1a] py-32 px-6 md:px-12 border-b-8 border-black dark:border-white relative z-10">
+   514→        <div className="max-w-7xl mx-auto">
+   515→          <div className="text-center mb-40 relative">
+   516→            {/* Background absolute text */}
+   517→            <h2 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-bebas text-[150px] md:text-[300px] text-black/5 dark:text-white/5 pointer-events-none w-[150%] select-none">
+   518→              WHO WE ARE
+   519→            </h2>
+   520→            <h2
+   521→              className="font-bebas text-8xl md:text-[150px] uppercase text-black dark:text-white relative z-10"
+   522→              style={{ textShadow: "10px 10px 0px #00e5ff" }}
+   523→            >
+   524→              THE COLLECTIVE
+   525→            </h2>
+   526→            <p className="font-mono font-black text-2xl mt-4 bg-black text-[#d4ff00] dark:bg-[#d4ff00] dark:text-black inline-block px-8 py-3 border-4 border-black dark:border-white shadow-[8px_8px_0_#ff4d4d] transform rotate-2 relative z-10">
+   527→              Mengenal Entitas di Balik Anomali Ini
+   528→            </p>
+   529→          </div>
+   530→
+   531→          <div className="flex flex-col gap-32 md:gap-48 mt-20">
+   532→            {MEMBERS.map((m, i) => {
+   533→              const isEven = i % 2 === 0
+   534→              return (
+   535→                <div
+   536→                  key={i}
+   537→                  className={`relative w-full border-8 border-black dark:border-white p-6 md:p-12 ${m.color} z-10 group`}
+   538→                >
+   539→                  {/* Giant Background Nickname */}
+   540→                  <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 flex items-center justify-center opacity-30 mix-blend-color-burn pointer-events-none">
+   541→                    <h2
+   542→                      className={`font-bebas text-[180px] md:text-[350px] leading-none text-black select-none transform ${
+   543→                        isEven ? "-rotate-6" : "rotate-6"
+   544→                      }`}
+   545→                    >
+   546→                      {m.nick}
+   547→                    </h2>
+   548→                  </div>
+   549→
+   550→                  <div
+   551→                    className={`relative z-10 flex flex-col ${
+   552→                      isEven ? "md:flex-row" : "md:flex-row-reverse"
+   553→                    } gap-12 md:gap-0 items-center`}
+   554→                  >
+   555→                    {/* Image Container - Pushed heavily outside the box bounds */}
+   556→                    <div
+   557→                      className={`w-full md:w-[45%] relative transform ${
+   558→                        isEven
+   559→                          ? "rotate-6 md:-translate-x-16 md:-translate-y-20"
+   560→                          : "-rotate-6 md:translate-x-16 md:-translate-y-20"
+   561→                      } group-hover:rotate-0 transition-transform duration-300 z-30`}
+   562→                    >
+   563→                      <div className="border-8 border-black dark:border-white bg-black p-3 shadow-[16px_16px_0_#000] dark:shadow-[16px_16px_0_#fff]">
+   564→                        <div className="relative overflow-hidden group-hover:scale-[1.02] transition-transform">
+   565→                          <img
+   566→                            src={m.img}
+   567→                            alt={m.nick}
+   568→                            className="w-full aspect-[4/5] object-cover grayscale contrast-[1.4] group-hover:grayscale-0 transition-all duration-300"
+   569→                          />
+   570→                          {/* CRT Scanline overlay effect */}
+   571→                          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0),rgba(255,255,255,0)_50%,rgba(0,0,0,0.1)_50%,rgba(0,0,0,0.1))] bg-[length:100%_4px] pointer-events-none" />
+   572→                        </div>
+   573→                        {/* Tape Sticker / Badge */}
+   574→                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#ffea00] border-4 border-black px-10 py-3 font-mono font-black text-black text-3xl md:text-4xl shadow-[6px_6px_0_#000] transform -rotate-3 z-40 whitespace-nowrap">
+   575→                          "{m.nick.toUpperCase()}"
+   576→                        </div>
+   577→                        <div className="absolute -bottom-6 right-0 bg-white border-4 border-black px-4 py-2 font-bebas text-3xl shadow-[4px_4px_0_#000] transform rotate-6 z-40">
+   578→                          ID_00{i + 1}
+   579→                        </div>
+   580→                      </div>
+   581→                    </div>
+   582→
+   583→                    {/* Info Container */}
+   584→                    <div
+   585→                      className={`w-full md:w-[55%] flex flex-col ${
+   586→                        isEven ? "md:pl-16" : "md:pr-16"
+   587→                      } z-20`}
+   588→                    >
+   589→                      {/* Full Name Barcode Tag */}
+   590→                      <div className="bg-black text-white dark:bg-white dark:text-black border-4 border-black dark:border-white p-6 shadow-[12px_12px_0_#000] dark:shadow-[12px_12px_0_#fff] mb-8 transform -rotate-1 no-color-transition">
+   591→                        <h3 className="font-bebas text-6xl md:text-8xl leading-[0.8] mb-2">
+   592→                          {m.name}
+   593→                        </h3>
+   594→                        <div className="w-full h-4 bg-[repeating-linear-gradient(90deg,#fff,#fff_2px,transparent_2px,transparent_6px)] dark:bg-[repeating-linear-gradient(90deg,#000,#000_2px,transparent_2px,transparent_6px)] mt-4" />
+   595→                      </div>
+   596→
+   597→                      {/* Role & Bio Sheet */}
+   598→                      <div className="bg-white dark:bg-black border-4 border-black dark:border-white p-8 shadow-[12px_12px_0_#000] dark:shadow-[12px_12px_0_#fff] transform rotate-2 relative no-color-transition">
+   599→                        {/* Decorative Pin */}
+   600→                        <div className="absolute -top-5 -right-5 w-10 h-10 rounded-full bg-red-600 border-4 border-black shadow-[4px_4px_0_#000]" />
+   601→                        <div className="absolute top-4 left-4 w-4 h-4 rounded-full bg-black dark:bg-white" />
+   602→
+   603→                        <h4 className="font-mono font-black text-3xl mb-6 bg-black text-white dark:bg-white dark:text-black inline-block px-4 py-2">
+   604→                          {m.role}
+   605→                        </h4>
+   606→                        <p className="font-outfit font-bold text-xl text-black dark:text-white leading-relaxed">
+   607→                          Setiap langkahnya dihitung, tapi dieksekusi dengan
+   608→                          kekacauan yang tak tertebak.{" "}
+   609→                          <span className={m.highlight}>
+   610→                            Ini bukan sekadar julukan, ini adalah cara ia
+   611→                            bertahan hidup di kerasnya realita virtual dan
+   612→                            nyata.
+   613→                          </span>
+   614→                        </p>
+   615→
+   616→                        {/* RPG Stats Blocks */}
+   617→                        <div className="mt-8 flex flex-wrap gap-4 border-t-8 border-black dark:border-white pt-6">
+   618→                          {["PWR: 99", "AGI: MAX", "INT: ???"].map(
+   619→                            (stat, idx) => (
+   620→                              <span
+   621→                                key={idx}
+   622→                                className={`border-4 border-black dark:border-white px-4 py-2 font-bebas text-3xl ${
+   623→                                  idx === 1
+   624→                                    ? "bg-black text-white dark:bg-white dark:text-black"
+   625→                                    : "bg-white text-black dark:bg-black dark:text-white"
+   626→                                }`}
+   627→                              >
+   628→                                {stat}
+   629→                              </span>
+   630→                            ),
+   631→                          )}
+   632→                        </div>
+   633→                      </div>
+   634→
+   635→                      {/* Social Buttons */}
+   636→                      <div className="mt-10 flex gap-4 md:gap-6 transform -rotate-1">
+   637→                        {["INSTAGRAM", "X_TWITTER", "DISCORD"].map((social) => (
+   638→                          <a
+   639→                            href="#"
+   640→                            key={social}
+   641→                            className="flex-1 bg-black text-white dark:bg-white dark:text-black border-4 border-black dark:border-white py-4 text-center font-bebas text-2xl md:text-3xl shadow-[8px_8px_0_#000] dark:shadow-[8px_8px_0_#fff] hover:translate-y-2 hover:translate-x-2 hover:shadow-[0_0_0_#000] transition-all no-color-transition"
+   642→                          >
+   643→                            {social}
+   644→                          </a>
+   645→                        ))}
+   646→                      </div>
+   647→                    </div>
+   648→                  </div>
+   649→                </div>
+   650→              )
+   651→            })}
+   652→          </div>
+   653→        </div>
+   654→      </div>
+   655→
+   656→      {/* ─── HARAPAN KAMI ─── */}
+   657→      <div className="relative bg-[#09090b] dark:bg-[#09090b] py-32 px-6 md:px-12 border-t-8 border-black dark:border-white overflow-hidden">
+   658→        {/* Giant background text */}
+   659→        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
+   660→          <span className="font-bebas text-[200px] md:text-[400px] text-white/[0.03] whitespace-nowrap leading-none">
+   661→            HARAPAN
+   662→          </span>
+   663→        </div>
+   664→
+   665→        <div className="max-w-7xl mx-auto relative z-10">
+   666→          {/* Section Header */}
+   667→          <div className="mb-20 relative">
+   668→            <div className="inline-block relative">
+   669→              <span className="absolute -top-4 -left-4 font-mono text-[#d4ff00] text-sm font-black tracking-[0.3em] uppercase">§ 03 —</span>
+   670→              <h2
+   671→                className="font-bebas text-7xl md:text-[180px] leading-none uppercase text-white"
+   672→                style={{ textShadow: "8px 8px 0px #ff4d4d, 16px 16px 0px #00e5ff" }}
+   673→              >
+   674→                HARAPAN<br />KAMI
+   675→              </h2>
+   676→            </div>
+   677→            <div className="absolute top-8 right-0 hidden md:flex flex-col items-end gap-2">
+   678→              <div className="w-32 h-2 bg-[#d4ff00]" />
+   679→              <div className="w-20 h-2 bg-[#ff4d4d]" />
+   680→              <div className="w-12 h-2 bg-[#00e5ff]" />
+   681→            </div>
+   682→          </div>
+   683→
+   684→          {/* Cards Grid */}
+   685→          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0 relative">
+   686→
+   687→            {/* Card 1 — MIMPI KAMI */}
+   688→            <div className="relative transform md:-rotate-3 md:-translate-y-4 hover:rotate-0 hover:scale-105 hover:z-50 transition-all duration-300 group">
+   689→              <div className="border-8 border-black bg-[#d4ff00] shadow-[12px_12px_0_#fff]">
+   690→                <div className="border-b-8 border-black overflow-hidden relative">
+   691→                  <img src={harapanImg1} alt="Mimpi Kami" className="w-full aspect-[4/3] object-cover grayscale group-hover:grayscale-0 contrast-125 transition-all duration-500" />
+   692→                  <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0)_50%,rgba(0,0,0,0.15)_50%,rgba(0,0,0,0.15))] bg-[length:100%_4px]" />
+   693→                  {/* Glitch stamp */}
+   694→                  <div className="absolute top-3 left-3 bg-[#ff4d4d] border-4 border-black px-3 py-1 font-mono font-black text-white text-xs shadow-[4px_4px_0_#000] transform -rotate-6">
+   695→                    DREAM_01
+   696→                  </div>
+   697→                </div>
+   698→                <div className="p-6">
+   699→                  <h3 className="font-bebas text-5xl text-black leading-none mb-3" style={{ textShadow: "3px 3px 0 #fff" }}>
+   700→                    MIMPI KAMI
+   701→                  </h3>
+   702→                  <div className="border-4 border-black bg-black p-4 shadow-[6px_6px_0_#ff4d4d] mb-4">
+   703→                    <p className="font-mono font-black text-white text-sm leading-relaxed">
+   704→                      Seperti bintang yang menerangi malam — mimpi kami abadi.
+   705→                    </p>
+   706→                  </div>
+   707→                  <div className="flex justify-between items-center">
+   708→                    <div className="w-24 h-1 bg-black" />
+   709→                    <span className="font-mono font-black text-black text-xs tracking-[0.3em]">BY REZA</span>
+   710→                  </div>
+   711→                </div>
+   712→              </div>
+   713→            </div>
+   714→
+   715→            {/* Card 2 — HARAPAN NEGERI */}
+   716→            <div className="relative transform md:rotate-2 md:translate-y-8 hover:rotate-0 hover:scale-105 hover:z-50 transition-all duration-300 group">
+   717→              <div className="border-8 border-black bg-[#00e5ff] shadow-[12px_12px_0_#fff]">
+   718→                <div className="border-b-8 border-black overflow-hidden relative">
+   719→                  <img src={harapanImg2} alt="Harapan Negeri" className="w-full aspect-[4/3] object-cover grayscale group-hover:grayscale-0 contrast-125 transition-all duration-500" />
+   720→                  <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0)_50%,rgba(0,0,0,0.15)_50%,rgba(0,0,0,0.15))] bg-[length:100%_4px]" />
+   721→                  <div className="absolute top-3 left-3 bg-[#d4ff00] border-4 border-black px-3 py-1 font-mono font-black text-black text-xs shadow-[4px_4px_0_#000] transform rotate-6">
+   722→                    VOICE_02
+   723→                  </div>
+   724→                </div>
+   725→                <div className="p-6">
+   726→                  <h3 className="font-bebas text-5xl text-black leading-none mb-3" style={{ textShadow: "3px 3px 0 #fff" }}>
+   727→                    HARAPAN<br />NEGERI
+   728→                  </h3>
+   729→                  <div className="border-4 border-black bg-black p-4 shadow-[6px_6px_0_#d4ff00] mb-4">
+   730→                    <p className="font-mono font-black text-white text-sm leading-relaxed">
+   731→                      Our voices matter. Suara kami adalah kontribusi nyata.
+   732→                    </p>
+   733→                  </div>
+   734→                  <div className="flex justify-between items-center">
+   735→                    <div className="w-24 h-1 bg-black" />
+   736→                    <span className="font-mono font-black text-black text-xs tracking-[0.3em]">BY RAZKA</span>
+   737→                  </div>
+   738→                </div>
+   739→              </div>
+   740→            </div>
+   741→
+   742→            {/* Card 3 — HARAPAN KOTA */}
+   743→            <div className="relative transform md:-rotate-1 md:-translate-y-2 hover:rotate-0 hover:scale-105 hover:z-50 transition-all duration-300 group">
+   744→              <div className="border-8 border-black bg-[#ff4d4d] shadow-[12px_12px_0_#fff]">
+   745→                <div className="border-b-8 border-black overflow-hidden relative">
+   746→                  <img src={harapanImg3} alt="Harapan Kota" className="w-full aspect-[4/3] object-cover grayscale group-hover:grayscale-0 contrast-125 transition-all duration-500" />
+   747→                  <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0)_50%,rgba(0,0,0,0.15)_50%,rgba(0,0,0,0.15))] bg-[length:100%_4px]" />
+   748→                  {/* Overlay text on image like in design */}
+   749→                  <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-3 border-t-4 border-black">
+   750→                    <p className="font-bebas text-xl text-white leading-none">Hopes to Our City</p>
+   751→                    <p className="font-mono text-xs text-white/80">In unity, we find strength and resilience.</p>
+   752→                  </div>
+   753→                  <div className="absolute top-3 left-3 bg-[#00e5ff] border-4 border-black px-3 py-1 font-mono font-black text-black text-xs shadow-[4px_4px_0_#000] transform -rotate-3">
+   754→                    UNITY_03
+   755→                  </div>
+   756→                </div>
+   757→                <div className="p-6">
+   758→                  <h3 className="font-bebas text-5xl text-black leading-none mb-3" style={{ textShadow: "3px 3px 0 #fff" }}>
+   759→                    HARAPAN<br />KOTA
+   760→                  </h3>
+   761→                  <div className="border-4 border-black bg-black p-4 shadow-[6px_6px_0_#00e5ff] mb-4">
+   762→                    <p className="font-mono font-black text-white text-sm leading-relaxed">
+   763→                      In unity, we find strength. Dalam kebersamaan ada kekuatan.
+   764→                    </p>
+   765→                  </div>
+   766→                  <div className="flex justify-between items-center">
+   767→                    <div className="w-24 h-1 bg-black" />
+   768→                    <span className="font-mono font-black text-black text-xs tracking-[0.3em]">BY RASYA</span>
+   769→                  </div>
+   770→                </div>
+   771→              </div>
+   772→            </div>
+   773→
+   774→            {/* Card 4 — MASA DEPAN (bonus, more eccentric) */}
+   775→            <div className="relative transform md:rotate-4 md:translate-y-12 hover:rotate-0 hover:scale-105 hover:z-50 transition-all duration-300 group">
+   776→              <div className="border-8 border-black bg-[#ff00ff] shadow-[12px_12px_0_#d4ff00]">
+   777→                <div className="border-b-8 border-black overflow-hidden relative">
+   778→                  <img src={harapanImg4} alt="Masa Depan" className="w-full aspect-[4/3] object-cover grayscale group-hover:grayscale-0 contrast-125 transition-all duration-500" />
+   779→                  <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0)_50%,rgba(0,0,0,0.15)_50%,rgba(0,0,0,0.15))] bg-[length:100%_4px]" />
+   780→                  <div className="absolute top-3 left-3 bg-[#ff4d4d] border-4 border-black px-3 py-1 font-mono font-black text-white text-xs shadow-[4px_4px_0_#000] transform rotate-3">
+   781→                    FUTURE_04
+   782→                  </div>
+   783→                </div>
+   784→                <div className="p-6">
+   785→                  <h3 className="font-bebas text-5xl text-black leading-none mb-3" style={{ textShadow: "3px 3px 0 #fff" }}>
+   786→                    MASA<br />DEPAN
+   787→                  </h3>
+   788→                  <div className="border-4 border-black bg-black p-4 shadow-[6px_6px_0_#ff00ff] mb-4">
+   789→                    <p className="font-mono font-black text-white text-sm leading-relaxed">
+   790→                      Tak ada yang tahu apa yang ada di depan — tapi kami hadapi bersama.
+   791→                    </p>
+   792→                  </div>
+   793→                  <div className="flex justify-between items-center">
+   794→                    <div className="w-24 h-1 bg-black" />
+   795→                    <span className="font-mono font-black text-black text-xs tracking-[0.3em]">BY ALDI</span>
+   796→                  </div>
+   797→                </div>
+   798→              </div>
+   799→            </div>
+   800→
+   801→          </div>
+   802→
+   803→          {/* Bottom brutalist bar */}
+   804→          <div className="mt-24 border-t-8 border-white pt-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+   805→            <p className="font-bebas text-5xl md:text-7xl text-white uppercase" style={{ textShadow: "4px 4px 0 #ff4d4d" }}>
+   806→              Satu orbit.<br className="md:hidden" /> Satu gravitasi.
+   807→            </p>
+   808→            <div className="flex gap-4">
+   809→              <div className="w-8 h-8 bg-[#d4ff00] border-4 border-white" />
+   810→              <div className="w-8 h-8 bg-[#ff4d4d] border-4 border-white" />
+   811→              <div className="w-8 h-8 bg-[#00e5ff] border-4 border-white" />
+   812→              <div className="w-8 h-8 bg-[#ff00ff] border-4 border-white" />
+   813→            </div>
+   814→          </div>
+   815→        </div>
+   816→      </div>
+   817→    </div>
+   818→  )
+   819→}
+   820→
+   821→function MemoriesPage() {
+   822→  const photos = [
+   823→    { img: openingImg, title: "VISI AWAL", date: "2020", rotate: "-rotate-2" },
+   824→    { img: img1, title: "MIMPI BINTANG", date: "2021", rotate: "rotate-2" },
+   825→    { img: img2, title: "IMPIAN NEGERI", date: "2022", rotate: "-rotate-1" },
+   826→    { img: img3, title: "MALAM DI KOTA", date: "2022", rotate: "rotate-3" },
+   827→    { img: img4, title: "MALAM PERMAINAN", date: "2023", rotate: "-rotate-3" },
+   828→  ]
+   829→
+   830→  return (
+   831→    <div className="page-enter bg-[#00e5ff] dark:bg-[#004d56] pt-40 pb-24 min-h-screen relative overflow-hidden">
+   832→      <RandomStars
+   833→        className="fixed inset-0 pointer-events-none z-[1] overflow-hidden"
+   834→        count={400}
+   835→      />
+   836→
+   837→      <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
+   838→        <div className="bg-white dark:bg-[#09090b] border-4 border-black dark:border-white shadow-[12px_12px_0_#000] dark:shadow-[12px_12px_0_#d4ff00] p-8 md:p-12 mb-20 relative no-color-transition">
+   839→          <StarGraphic className="absolute top-4 right-4 w-16 h-16 text-[#ff4d4d] animate-spin-slow" />
+   840→          <h1
+   841→            className="font-bebas text-6xl md:text-[150px] leading-none uppercase text-black dark:text-white"
+   842→            style={{ textShadow: "8px 8px 0px #000" }}
+   843→          >
+   844→            <span
+   845→              className="text-white dark:text-[#ff4d4d]"
+   846→              style={{
+   847→                textShadow:
+   848→                  "-4px -4px 0 #000, 4px -4px 0 #000, -4px 4px 0 #000, 4px 4px 0 #000, 10px 10px 0px #d4ff00",
+   849→              }}
+   850→            >
+   851→              GALLERY
+   852→            </span>
+   853→            <br />
+   854→            OF CHAOS
+   855→          </h1>
+   856→          <p className="font-mono text-lg md:text-xl font-bold mt-8 max-w-2xl bg-[#d4ff00] text-black border-4 border-black p-4 inline-block shadow-[4px_4px_0_#000]">
+   857→            Momen mentah. Tanpa filter. Tanpa batas.
+   858→          </p>
+   859→        </div>
+   860→
+   861→        <div className="columns-1 md:columns-2 lg:columns-3 gap-10 space-y-10">
+   862→          {photos.map((p, i) => (
+   863→            <div
+   864→              key={i}
+   865→              className={`border-4 border-black dark:border-white shadow-[8px_8px_0_#000] dark:shadow-[8px_8px_0_#fff] bg-white dark:bg-[#1a1a1a] p-4 inline-block w-full transform ${p.rotate} hover:rotate-0 hover:z-50 hover:scale-105 transition-all z-10 relative no-color-transition`}
+   866→            >
+   867→              <div className="border-4 border-black dark:border-white bg-black overflow-hidden mb-4 relative">
+   868→                <img
+   869→                  src={p.img}
+   870→                  alt={p.title}
+   871→                  className="w-full h-auto filter grayscale hover:grayscale-0 contrast-125 transition-all duration-300 opacity-90 hover:opacity-100"
+   872→                />
+   873→              </div>
+   874→              <div className="flex justify-between items-end border-t-4 border-black dark:border-white pt-4">
+   875→                <span className="font-bebas text-4xl text-black dark:text-white">
+   876→                  {p.title}
+   877→                </span>
+   878→                <span className="font-mono font-bold bg-black dark:bg-[#d4ff00] text-white dark:text-black border-2 border-transparent dark:border-black px-3 py-1 text-sm">
+   879→                  {p.date}
+   880→                </span>
+   881→              </div>
+   882→            </div>
+   883→          ))}
+   884→        </div>
+   885→      </div>
+   886→    </div>
+   887→  )
+   888→}
+   889→
+   890→function GameCarousel({ images, title }: { images: string[], title: string }) {
+   891→  const [idx, setIdx] = useState(0)
+   892→
+   893→  useEffect(() => {
+   894→    const timer = setInterval(() => {
+   895→      setIdx((prev) => (prev + 1) % images.length)
+   896→    }, 4000)
+   897→    return () => clearInterval(timer)
+   898→  }, [images.length])
+   899→
+   900→  return (
+   901→    <div className="relative border-4 md:border-8 border-black shadow-[8px_8px_0_#000] md:shadow-[16px_16px_0_#000] w-full bg-[#8b8b8b] p-2 md:p-4 transform rotate-1 md:rotate-2 hover:rotate-0 transition-transform">
+   902→      <div className="absolute -top-4 -left-4 md:-top-6 md:-left-6 bg-[#ff4d4d] text-white font-mono font-black border-2 md:border-4 border-black px-3 py-1 md:px-4 md:py-2 text-lg md:text-2xl shadow-[2px_2px_0_#000] md:shadow-[4px_4px_0_#000] transform -rotate-3 md:-rotate-6 z-20">
+   903→        {title}
+   904→      </div>
+   905→      <div className="border-2 md:border-4 border-black overflow-hidden relative aspect-video bg-black">
+   906→        <img
+   907→          src={images[idx]}
+   908→          alt={`${title} moment ${idx + 1}`}
+   909→          className="w-full h-full object-cover transition-opacity duration-300"
+   910→        />
+   911→      </div>
+   912→      <div className="flex justify-between items-center mt-3 md:mt-4">
+   913→        <div className="flex gap-1 md:gap-2">
+   914→          {images.map((_, i) => (
+   915→            <button
+   916→              key={i}
+   917→              onClick={() => setIdx(i)}
+   918→              className={`w-3 h-3 md:w-4 md:h-4 border-2 border-black ${
+   919→                i === idx ? "bg-[#d4ff00]" : "bg-white"
+   920→              }`}
+   921→            />
+   922→          ))}
+   923→        </div>
+   924→        <div className="font-mono font-black text-black text-xs md:text-base">
+   925→          IMG_0{idx + 1}
+   926→        </div>
+   927→      </div>
+   928→    </div>
+   929→  )
+   930→}
+   931→
+   932→function GameSeparator() {
+   933→  return (
+   934→    <div className="relative h-40 md:h-64 w-full bg-black overflow-hidden border-y-4 md:border-y-8 border-black">
+   935→      {/* Top and Bottom Fades */}
+   936→      <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-[#09090b] to-transparent z-10" />
+   937→      
+   938→      <RandomStars count={200} className="absolute inset-0 z-0 pointer-events-none" forceDark={true} />
+   939→      
+   940→      <div className="relative z-20 flex items-center justify-center h-full">
+   941→        <StarGraphic className="w-12 h-12 md:w-16 md:h-16 text-[#d4ff00] animate-spin-slow" />
+   942→      </div>
+   943→
+   944→      <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-[#09090b] to-transparent z-10" />
+   945→    </div>
+   946→  )
+   947→}
+   948→
+   949→function GamesPage() {
+   950→  return (
+   951→    <div className="page-enter flex flex-col bg-[#09090b] text-black dark:text-white relative">
+   952→      <RandomStars
+   953→        className="fixed inset-0 pointer-events-none z-[1] overflow-hidden"
+   954→        count={400}
+   955→      />
+   956→
+   957→      {/* MINECRAFT SECTION */}
+   958→      <section className="relative min-h-screen w-full flex items-center justify-center p-6 pt-32 overflow-hidden bg-black">
+   959→        {/* Background Image */}
+   960→        <img src={mcBg} alt="Minecraft Background" className="absolute inset-0 w-full h-full object-cover opacity-90" />
+   961→        <div className="absolute inset-0 bg-black/60" /> {/* Dark overlay for readability */}
+   962→        
+   963→        {/* Local Stars specifically overlaying the dark section for consistent starry vibe */}
+   964→        <RandomStars count={200} forceDark={true} className="absolute inset-0 pointer-events-none z-[2]" />
+   965→        
+   966→        <div className="max-w-7xl mx-auto w-full flex flex-col lg:flex-row items-center gap-12 lg:gap-8 relative z-10">
+   967→          <div className="w-full lg:w-[35%] flex flex-col">
+   968→            <div className="inline-block bg-white dark:bg-black border-4 border-black dark:border-white font-mono font-black px-4 py-2 md:px-6 md:py-2 mb-6 shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff] transform -rotate-2 w-max text-sm md:text-base">
+   969→              SEKTOR 01
+   970→            </div>
+   971→            <h2
+   972→              className="font-outfit font-black text-6xl md:text-[100px] text-[#5d9e35] mb-6 uppercase leading-[0.8]"
+   973→              style={{ textShadow: "4px 4px 0px #fff, 6px 6px 0px #fff" }}
+   974→            >
+   975→              MINECRAFT
+   976→            </h2>
+   977→            <div className="border-4 border-black bg-[#d4ff00] text-black p-6 md:p-8 shadow-[12px_12px_0_#000] transform rotate-1 mb-8">
+   978→              <p className="font-bebas text-3xl md:text-4xl mb-4 leading-none">SURVIVAL OF THE FITTEST</p>
+   979→              <p className="font-mono font-bold text-base md:text-lg leading-relaxed">
+   980→                Dunia tanpa batas, tempat kami membangun dari nol. Satu blok tanah, 
+   981→                satu pedang kayu, dan ratusan jam yang dihabiskan menambang diamond. 
+   982→                (Dan ya, ada yang selalu mati kena creeper.)
+   983→              </p>
+   984→            </div>
+   985→          </div>
+   986→          <div className="w-full lg:w-[65%] flex justify-center mt-12 lg:mt-0 relative z-20">
+   987→            <GameCarousel images={[img1, img2, img3, img4]} title="OUR WORLD" />
+   988→          </div>
+   989→        </div>
+   990→      </section>
+   991→
+   992→      <GameSeparator />
+   993→
+   994→      {/* ROBLOX SECTION */}
+   995→      <section className="relative min-h-screen w-full flex items-center justify-center p-6 pt-32 overflow-hidden bg-black">
+   996→        <img src={robloxBg} alt="Roblox Background" className="absolute inset-0 w-full h-full object-cover opacity-90" />
+   997→        <div className="absolute inset-0 bg-black/60" />
+   998→        
+   999→        <RandomStars count={200} forceDark={true} className="absolute inset-0 pointer-events-none z-[2]" />
+  1000→
+  1001→        <div className="max-w-7xl mx-auto w-full flex flex-col lg:flex-row-reverse items-center gap-12 lg:gap-8 relative z-10">
+  1002→          <div className="w-full lg:w-[35%] flex flex-col lg:items-end lg:text-right">
+  1003→            <div className="inline-block bg-[#ffea00] border-4 border-black text-black font-mono font-black px-4 py-2 md:px-6 md:py-2 mb-6 shadow-[6px_6px_0_#000] transform rotate-3 w-max text-sm md:text-base">
+  1004→              SEKTOR 02
+  1005→            </div>
+  1006→            <h2
+  1007→              className="font-outfit font-black text-6xl md:text-[120px] text-[#cc0000] mb-6 uppercase leading-[0.8]"
+  1008→              style={{ textShadow: "-4px 4px 0px #fff, -6px 6px 0px #fff" }}
+  1009→            >
+  1010→              ROBLOX
+  1011→            </h2>
+  1012→            <div className="border-4 border-white bg-black text-[#ffea00] p-6 md:p-8 shadow-[-8px_8px_0_#fff] lg:shadow-[-12px_12px_0_#fff] transform -rotate-2 mb-8 text-left lg:text-right">
+  1013→              <p className="font-bebas text-3xl md:text-4xl mb-4 leading-none">PURE UNADULTERATED CHAOS</p>
+  1014→              <p className="font-mono font-bold text-base md:text-lg leading-relaxed">
+  1015→                Dari roleplay absurd sampai obby yang bikin emosi. 
+  1016→                Ini adalah kanvas imajinasi kolektif paling liar kami. 
+  1017→                Oof!
+  1018→              </p>
+  1019→            </div>
+  1020→          </div>
+  1021→          <div className="w-full lg:w-[65%] flex justify-center mt-12 lg:mt-0 relative z-20">
+  1022→            <GameCarousel images={[img4, img3, img2, img1]} title="CHAOS INC" />
+  1023→          </div>
+  1024→        </div>
+  1025→      </section>
+  1026→
+  1027→      <GameSeparator />
+  1028→
+  1029→      {/* MOBILE LEGENDS SECTION */}
+  1030→      <section className="relative min-h-screen w-full flex items-center justify-center p-6 pt-32 overflow-hidden bg-black">
+  1031→        <img src={mlBg} alt="Mobile Legends Background" className="absolute inset-0 w-full h-full object-cover opacity-90" />
+  1032→        <div className="absolute inset-0 bg-black/70" />
+  1033→        
+  1034→        <RandomStars count={200} forceDark={true} className="absolute inset-0 pointer-events-none z-[2]" />
+  1035→
+  1036→        <div className="max-w-7xl mx-auto w-full flex flex-col lg:flex-row items-center gap-12 lg:gap-8 relative z-10">
+  1037→          <div className="w-full lg:w-[35%] flex flex-col">
+  1038→            <div className="inline-block bg-[#00e5ff] border-4 border-white text-black font-mono font-black px-4 py-2 md:px-6 md:py-2 mb-6 shadow-[6px_6px_0_#fff] transform -rotate-1 w-max text-sm md:text-base">
+  1039→              SEKTOR 03
+  1040→            </div>
+  1041→            <h2
+  1042→              className="font-outfit font-black text-5xl md:text-[80px] text-[#00e5ff] mb-6 uppercase leading-[0.9]"
+  1043→              style={{ textShadow: "4px 4px 0px #fff, 6px 6px 0px #fff" }}
+  1044→            >
+  1045→              MOBILE<br/>LEGENDS
+  1046→            </h2>
+  1047→            <div className="border-4 border-[#00e5ff] bg-black text-white p-6 md:p-8 shadow-[8px_8px_0_#00e5ff] lg:shadow-[12px_12px_0_#00e5ff] transform rotate-1 mb-8">
+  1048→              <p className="font-bebas text-3xl md:text-4xl mb-4 text-[#ff4d4d] animate-pulse leading-none">PUSH MID OR AFK</p>
+  1049→              <p className="font-mono font-bold text-base md:text-lg leading-relaxed">
+  1050→                Arena tempur harian. Kami menang bersama, atau kalah dengan gaya (dan saling menyalahkan). 
+  1051→                Koneksi merah, draft aneh, epic comeback.
+  1052→              </p>
+  1053→            </div>
+  1054→          </div>
+  1055→          <div className="w-full lg:w-[65%] flex justify-center mt-12 lg:mt-0 relative z-20">
+  1056→             <GameCarousel images={[img2, img4, img1, img3]} title="ARENA LOG" />
+  1057→          </div>
+  1058→        </div>
+  1059→      </section>
+  1060→
+  1061→      <GameSeparator />
+  1062→
+  1063→      {/* DUNGEONS & DRAGONS SECTION */}
+  1064→      <section className="relative min-h-screen w-full flex items-center justify-center p-6 pt-32 overflow-hidden bg-black">
+  1065→        <img src={dndBg} alt="D&D Background" className="absolute inset-0 w-full h-full object-cover opacity-90" />
+  1066→        <div className="absolute inset-0 bg-black/70" />
+  1067→        
+  1068→        <RandomStars count={200} forceDark={true} className="absolute inset-0 pointer-events-none z-[2]" />
+  1069→        
+  1070→        <div className="max-w-7xl mx-auto w-full flex flex-col lg:flex-row-reverse items-center gap-12 lg:gap-8 relative z-10">
+  1071→          <div className="w-full lg:w-[35%] flex flex-col lg:items-end lg:text-right">
+  1072→            <div className="inline-block bg-black border-4 border-white text-white font-mono font-black px-4 py-2 md:px-6 md:py-2 mb-6 shadow-[6px_6px_0_#000] transform rotate-2 w-max text-sm md:text-base">
+  1073→              SEKTOR 04
+  1074→            </div>
+  1075→            <h2
+  1076→              className="font-cinzel font-black text-5xl md:text-[90px] text-[#ffebd2] mb-6 uppercase leading-[0.8]"
+  1077→              style={{ textShadow: "4px 4px 0px #000, 6px 6px 0px #000" }}
+  1078→            >
+  1079→              DUNGEONS <br/>& DRAGONS
+  1080→            </h2>
+  1081→            <div className="border-4 md:border-8 border-black bg-[#ffebd2] text-black p-6 md:p-8 shadow-[-8px_8px_0_#000] lg:shadow-[-12px_12px_0_#000] transform -rotate-1 mb-8 text-left lg:text-right">
+  1082→              <p className="font-bebas text-3xl md:text-4xl mb-4 text-red-800 leading-none">NATURAL 20 OR CRITICAL FAIL</p>
+  1083→              <p className="font-mono font-bold text-base md:text-lg lg:border-r-4 border-black lg:pr-4 lg:pl-0 border-l-4 lg:border-l-0 pl-4 leading-relaxed">
+  1084→                Meja imajinasi tempat kami menjadi pahlawan (atau badut). 
+  1085→                Dunia yang terbentuk dari kata-kata, kertas, dan dadu 20 sisi. 
+  1086→                Roll for initiative!
+  1087→              </p>
+  1088→            </div>
+  1089→          </div>
+  1090→          <div className="w-full lg:w-[65%] flex justify-center mt-12 lg:mt-0 relative z-20">
+  1091→             <GameCarousel images={[img3, img1, img4, img2]} title="TAVERN TALES" />
+  1092→          </div>
+  1093→        </div>
+  1094→      </section>
+  1095→    </div>
+  1096→  )
+  1097→}
+  1098→
+  1099→export default function App() {
+  1100→  const [hasEntered, setHasEntered] = useState(false)
+  1101→  const [page, setPage] = useState<Page>("about")
+  1102→  const [isDark, setIsDark] = useState(false)
+  1103→
+  1104→  const toggleDark = () => setIsDark(!isDark)
+  1105→
+  1106→  useEffect(() => {
+  1107→    if (isDark) {
+  1108→      document.documentElement.classList.add("dark")
+  1109→    } else {
+  1110→      document.documentElement.classList.remove("dark")
+  1111→    }
+  1112→  }, [isDark])
+  1113→
+  1114→  useEffect(() => {
+  1115→    window.scrollTo({ top: 0 })
+  1116→  }, [page, hasEntered])
+  1117→
+  1118→  if (!hasEntered) {
+  1119→    return <OpeningScreen onEnter={() => setHasEntered(true)} />
+  1120→  }
+  1121→
+  1122→  return (
+  1123→    <div className="min-h-screen flex flex-col selection:bg-[#ff4d4d] selection:text-white">
+  1124→      <ScrollProgress />
+  1125→      <NavBar
+  1126→        current={page}
+  1127→        setPage={setPage}
+  1128→        isDark={isDark}
+  1129→        toggleDark={toggleDark}
+  1130→      />
+  1131→      <main className="flex-1">
+  1132→        {page === "about" && <AboutPage />}
+  1133→        {page === "memories" && <MemoriesPage />}
+  1134→        {page === "games" && <GamesPage />}
+  1135→      </main>
+  1136→    </div>
+  1137→  )
+  1138→}
+  1139→

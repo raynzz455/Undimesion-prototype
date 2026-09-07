@@ -1,0 +1,362 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-outfit);
+  --font-mono: var(--font-mono-ud);
+  --font-bebas: var(--font-bebas);
+  --font-outfit: var(--font-outfit);
+  --font-cinzel: var(--font-cinzel);
+  --font-chakra: var(--font-chakra);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(0.96 0.005 95);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+
+  /* Undimension brand palette */
+  --ud-red: #ff4d4d;
+  --ud-cyan: #00e5ff;
+  --ud-lime: #d4ff00;
+  --ud-magenta: #ff00ff;
+  --ud-orange: #ff8c00;
+  --ud-green: #00ff00;
+  --ud-purple: #8a2be2;
+  --ud-paper: #f4f4f0;
+  --ud-ink: #09090b;
+}
+
+.dark {
+  --background: oklch(0.09 0.005 260);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-mono-ud), monospace;
+    overflow-x: hidden;
+  }
+}
+
+/* ───────────────────────────────────────────
+   UNDIMENSION — Optimized Neo-Brutalism System
+   Key optimization: NO global * transition.
+   Only animate transform/opacity on demand.
+   ─────────────────────────────────────────── */
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Scope color transitions only to theme-sensitive elements */
+.ud-theme-transition,
+.ud-theme-transition * {
+  transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+  transition-duration: 250ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Elements that should snap instantly (brutal feel) */
+.no-color-transition,
+.no-color-transition * {
+  transition-property: transform, box-shadow !important;
+}
+
+/* ── Optimized Star Field (CSS-only, GPU friendly) ── */
+/* Instead of 250-400 DOM nodes, we use layered radial-gradient backgrounds.
+   This is ~100x lighter on layout/paint while keeping the cosmic vibe. */
+.ud-starfield {
+  background-image:
+    radial-gradient(1px 1px at 20px 30px, #fff, transparent),
+    radial-gradient(1px 1px at 40px 70px, rgba(255,255,255,.8), transparent),
+    radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 130px 80px, rgba(255,255,255,.9), transparent),
+    radial-gradient(1px 1px at 160px 120px, #fff, transparent),
+    radial-gradient(1px 1px at 200px 50px, rgba(255,255,255,.7), transparent),
+    radial-gradient(1.5px 1.5px at 240px 100px, #fff, transparent),
+    radial-gradient(1px 1px at 280px 20px, rgba(255,255,255,.8), transparent),
+    radial-gradient(1px 1px at 320px 60px, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 360px 110px, rgba(255,255,255,.9), transparent);
+  background-repeat: repeat;
+  background-size: 400px 200px;
+  animation: ud-twinkle 4s ease-in-out infinite alternate;
+}
+.ud-starfield--light {
+  background-image:
+    radial-gradient(1px 1px at 20px 30px, #000, transparent),
+    radial-gradient(1px 1px at 40px 70px, rgba(0,0,0,.8), transparent),
+    radial-gradient(1px 1px at 90px 40px, #000, transparent),
+    radial-gradient(1.5px 1.5px at 130px 80px, rgba(0,0,0,.9), transparent),
+    radial-gradient(1px 1px at 160px 120px, #000, transparent),
+    radial-gradient(1px 1px at 200px 50px, rgba(0,0,0,.7), transparent),
+    radial-gradient(1.5px 1.5px at 240px 100px, #000, transparent),
+    radial-gradient(1px 1px at 280px 20px, rgba(0,0,0,.8), transparent),
+    radial-gradient(1px 1px at 320px 60px, #000, transparent),
+    radial-gradient(1.5px 1.5px at 360px 110px, rgba(0,0,0,.9), transparent);
+}
+@keyframes ud-twinkle {
+  0% { opacity: .55; }
+  100% { opacity: 1; }
+}
+
+/* Cross sparkles layer (very sparse, cheap) */
+.ud-sparkles::before,
+.ud-sparkles::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(2px 6px at 15% 25%, currentColor, transparent),
+    radial-gradient(2px 6px at 75% 65%, currentColor, transparent),
+    radial-gradient(2px 6px at 45% 85%, currentColor, transparent),
+    radial-gradient(2px 6px at 88% 15%, currentColor, transparent);
+  background-repeat: no-repeat;
+  opacity: .4;
+  animation: ud-twinkle 6s ease-in-out infinite alternate;
+}
+.ud-sparkles::after {
+  animation-delay: -3s;
+  transform: rotate(90deg);
+}
+
+/* ── Marquee ── */
+@keyframes ud-marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  display: flex;
+  animation: ud-marquee 18s linear infinite;
+  min-width: 200%;
+  will-change: transform;
+}
+
+/* ── Spin (GPU only) ── */
+@keyframes ud-spin {
+  100% { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: ud-spin 22s linear infinite;
+  will-change: transform;
+}
+.animate-spin-rev {
+  animation: ud-spin 30s linear infinite reverse;
+  will-change: transform;
+}
+
+/* ── Page enter ── */
+.page-enter {
+  animation: ud-page-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes ud-page-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Intro animations ── */
+@keyframes ud-intro-zoom {
+  0% { transform: scale(0.5) translateY(50px); opacity: 0; filter: blur(10px); }
+  100% { transform: scale(1) translateY(0); opacity: 1; filter: blur(0); }
+}
+.animate-intro-zoom {
+  animation: ud-intro-zoom 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes ud-intro-text {
+  0% { transform: translateY(50px); opacity: 0; filter: blur(5px); }
+  100% { transform: translateY(0); opacity: 1; filter: blur(0); }
+}
+.animate-intro-text {
+  animation: ud-intro-text 1.1s ease-out 0.4s forwards;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+@keyframes ud-intro-fade {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+.animate-intro-fade {
+  animation: ud-intro-fade 1.8s ease-out 0.9s forwards;
+  opacity: 0;
+}
+
+/* ── Blackhole glow pulse ── */
+@keyframes ud-glow-pulse {
+  0%, 100% { opacity: .8; }
+  50% { opacity: 1; }
+}
+
+/* ── CRT scanline overlay ── */
+.ud-scanlines {
+  background-image: linear-gradient(
+    rgba(255,255,255,0),
+    rgba(255,255,255,0) 50%,
+    rgba(0,0,0,0.1) 50%,
+    rgba(0,0,0,0.1)
+  );
+  background-size: 100% 4px;
+}
+
+/* ── Barcode pattern ── */
+.ud-barcode {
+  background-image: repeating-linear-gradient(
+    90deg,
+    currentColor,
+    currentColor 2px,
+    transparent 2px,
+    transparent 6px
+  );
+}
+
+/* ── Content visibility for offscreen sections (perf) ── */
+.ud-cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 600px;
+}
+
+/* ── Custom scrollbar ── */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: var(--ud-paper);
+}
+.dark ::-webkit-scrollbar-track {
+  background: #111;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--ud-ink);
+  border: 2px solid var(--ud-paper);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: var(--ud-lime);
+  border: 2px solid #111;
+}
+
+/* ── Selection ── */
+::selection {
+  background: var(--ud-red);
+  color: #fff;
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Utility font helpers ── */
+.font-bebas { font-family: var(--font-bebas), sans-serif; }
+.font-outfit { font-family: var(--font-outfit), sans-serif; }
+.font-mono-ud { font-family: var(--font-mono-ud), monospace; }
+.font-cinzel { font-family: var(--font-cinzel), serif; }
+.font-chakra { font-family: var(--font-chakra), sans-serif; }
