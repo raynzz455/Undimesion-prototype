@@ -1,8 +1,58 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { StarField } from "./star-field";
 import { Blackhole, Planets } from "./cosmic";
 import { Tesseract } from "./tesseract";
+
+const BOOT_LINES = [
+  "> INITIALIZING UNDIMENSION KERNEL...",
+  "> LOADING 7 ENTITIES.............. OK",
+  "> CALIBRATING GRAVITATIONAL FIELD. OK",
+  "> ESTABLISHING ORBITAL LOCK....... OK",
+  "> CHAOS ENGINE: ONLINE",
+  "> WELCOME, TRAVELER.",
+];
+
+function BootSequence() {
+  const [lines, setLines] = useState<string[]>([]);
+
+  useEffect(() => {
+    let i = 0;
+    const timer = setInterval(() => {
+      if (i < BOOT_LINES.length) {
+        setLines((prev) => [...prev, BOOT_LINES[i]]);
+        i++;
+      } else {
+        clearInterval(timer);
+      }
+    }, 400);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div
+      className="fixed top-20 left-4 md:left-8 z-20 max-w-xs font-mono-ud text-[10px] md:text-xs text-[#00ff00] bg-black/70 border border-[#00ff00]/40 p-3 pointer-events-none ud-crt"
+      aria-hidden
+    >
+      <div className="flex items-center gap-1 mb-2 pb-1 border-b border-[#00ff00]/30">
+        <span className="w-2 h-2 bg-[#ff4d4d] rounded-full" />
+        <span className="w-2 h-2 bg-[#d4ff00] rounded-full" />
+        <span className="w-2 h-2 bg-[#00ff00] rounded-full" />
+        <span className="ml-2 text-[#00ff00]/60 tracking-widest">SYS:BOOT</span>
+      </div>
+      {lines.map((line, i) => (
+        <div key={i} className="leading-tight">
+          <span className="text-[#00ff00]/60">{line.slice(0, line.indexOf(">") + 2)}</span>
+          <span className="text-[#00ff00]">{line.slice(line.indexOf(">") + 2)}</span>
+        </div>
+      ))}
+      {lines.length < BOOT_LINES.length && (
+        <span className="inline-block w-2 h-3 bg-[#00ff00] ud-blink ml-1" />
+      )}
+    </div>
+  );
+}
 
 export function OpeningScreen({ onEnter }: { onEnter: () => void }) {
   return (
@@ -11,6 +61,7 @@ export function OpeningScreen({ onEnter }: { onEnter: () => void }) {
       <div className="ud-grain" aria-hidden />
       <Blackhole />
       <Planets />
+      <BootSequence />
       <div className="relative z-10 flex flex-col items-center justify-center text-center w-full px-4">
         <h1
           className="font-bebas text-[110px] md:text-[180px] lg:text-[240px] leading-[0.8] uppercase text-white drop-shadow-md relative z-10 animate-intro-text ud-glitch"
