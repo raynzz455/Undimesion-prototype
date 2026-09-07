@@ -376,3 +376,49 @@ Site now has 10 About sections (hero, collective, stats radar, timeline, play ma
 - The live clock in Mission Control updates every 1s via `setInterval` — minimal cost, re-renders only the clock component.
 - Mission Control's API fetches use `.catch(() => {})` — silent failure; stat cells show "…" until loaded, then count up.
 - The quote localStorage key is `ud-quote-idx`; if the quote array changes size, the stored index is validated against the new length.
+
+---
+Task ID: 7
+Agent: main (Z.ai Code)
+Task: QA testing, fix mobile nav cramping bug (hamburger menu), add Soundboard easter egg panel, reposition fixed buttons to avoid overlap, adjust page top padding.
+
+## Section 1: Current Project Status Assessment
+
+Phase 6 was stable (keyboard shortcuts, mission control, quote persistence, gradient border, CRT). This round's QA via agent-browser + VLM found ONE real bug: the mobile navbar was cramped — all 4 items (ABOUT/GALLERY/GAMES/DARK) were squeezed into one row on 390px width, nav was 96px tall, touch targets too small. The VLM confirmed "the navbar is NOT usable on mobile and has significant layout issues." After fixing the mobile nav, work shifted to the Soundboard feature and button repositioning.
+
+## Section 2: Completed Modifications & Verification
+
+### Bugs Fixed
+- **Mobile nav cramping** (`nav-bar.tsx`) — Complete rewrite: navbar is now single-row (brand + hamburger + theme toggle) on mobile (60px tall, down from 96px). Hamburger menu opens a dropdown with ABOUT/GALLERY/GAMES as full-width tappable rows (44px+ touch targets), current page marked with "● NOW" badge, tip hint at bottom. Menu auto-closes on page select. Desktop layout unchanged (inline tabs). Reduced page top padding from `pt-40` (160px) to `pt-28 md:pt-36` since the navbar is shorter now. VLM confirmed: "highly efficient and space-conscious... fits the logo and two action buttons within a minimal height without feeling cluttered."
+- **Fixed button overlap** — The "?" button (bottom-6 right-6) would overlap Gallery's ADD MEMORY button (was bottom-6 right-6). Moved ADD MEMORY to `bottom-36 right-6`. The Soundboard button is at `bottom-[4.5rem] right-6`. Button stack on right: ADD MEMORY (bottom-36) → Soundboard (4.5rem) → "?" (bottom-6). Left: SoundToggle (bottom-6) → BackToTop (bottom-24, only when scrolled).
+
+### New Features Added
+1. **Soundboard** (`soundboard.tsx`) — A fun easter-egg panel with 6 colored buttons that play the synthesized SFX (CLICK/HOVER/OPEN/CLOSE/SUBMIT/ERROR, each in its brand color). Click → plays the Web Audio API sound + shows a visualizer bar animation at the bottom of the button + glows. Triggered by a magenta Music-icon button (bottom-right stack). Modal has role=dialog, aria-modal, aria-labelledby, ESC to close. Uses the existing `useSfx` hook — no new audio files.
+
+### Verification Results
+- ✅ ESLint: 0 errors, 0 warnings
+- ✅ Agent Browser E2E: mobile nav 60px tall (down from 96px), hamburger opens dropdown, Gallery navigation works from dropdown, menu auto-closes on page select, desktop nav unchanged (7 buttons), Soundboard button present + opens dialog (aria-labelledby=ud-soundboard-title confirmed), 6 sound buttons present, clicking plays sound, ESC closes, **zero console errors**
+- ✅ VLM: Soundboard renders as a modal with 6 colored buttons (red CLICK, cyan HOVER, lime OPEN, magenta CLOSE, orange SUBMIT, purple ERROR) + visualizer bars; mobile nav confirmed "compact and usable" with hamburger menu
+
+## Section 3: Unresolved Issues / Risks / Next-phase Recommendations
+
+### Current Status: ✅ Phase 7 Complete & Verified
+Site now has a mobile-friendly hamburger nav, a Soundboard easter egg, properly stacked fixed buttons, and tighter page spacing. Zero errors, lint clean.
+
+### Next-phase recommendations (priority order):
+1. **next/image optimization** — Replace remaining raw `<img>` with `next/image` for responsive sizing + blur placeholders. Biggest perf win remaining.
+2. **Admin auth** — NextAuth (single shared password) so only the 7 members can upload / moderate guestbook.
+3. **Production storage** — Swap `saveImage` in upload route to Cloudinary/Uploadthing for Render deploy.
+4. **Guestbook moderation UI** — Admin can delete/toggle `approved` on entries.
+5. **Timeline images** — Add a photo/illustration to each timeline milestone (currently text-only).
+6. **Lazy-load modals + radar** — `next/dynamic` for MemberDetailModal, PhotoLightbox, StatsRadarSection, CompatibilityMatrix, MissionControl, Soundboard, KeyboardShortcutsOverlay (below-the-fold / on-demand, framer-motion + recharts heavy).
+7. **Play Matrix mobile** — Stacked card layout alternative for very small screens (currently horizontal-scroll fallback).
+8. **Chaos mode theme** — A third theme that randomizes accent colors site-wide.
+9. **Soundboard keyboard shortcut** — Add "B" key to open the Soundboard from the keyboard shortcuts overlay.
+10. **Navbar scroll behavior** — Auto-hide navbar on scroll-down, show on scroll-up (frees vertical space on mobile).
+
+### Known minor notes:
+- The mobile menu dropdown is `absolute top-full mt-2` — sits below the navbar. If the navbar is at `top-2`, the dropdown appears at ~60px+8px margin = 68px from top.
+- The Soundboard's visualizer bars use `repeat: Infinity` — only active for ~600ms (until `lastPlayed` clears), so no infinite animation cost.
+- The hamburger menu closes via the `go()` helper which calls both `setPage` and `setMenuOpen(false)` — no effect needed.
+- Fixed button stack on right side: on mobile, the buttons (12rem = 48px each + gaps) may reach the ADD MEMORY button; tested on 390px and no overlap.

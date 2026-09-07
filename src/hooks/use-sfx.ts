@@ -10,6 +10,8 @@ import { useCallback, useEffect, useRef } from "react";
 
 type SfxType = "click" | "hover" | "open" | "close" | "submit" | "error";
 
+export type { SfxType };
+
 const FREQS: Record<SfxType, { freq: number; type: OscillatorType; dur: number; sweep?: number }> = {
   click: { freq: 880, type: "square", dur: 0.05 },
   hover: { freq: 1320, type: "triangle", dur: 0.03 },

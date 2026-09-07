@@ -383,7 +383,7 @@ export function AboutPage() {
   };
 
   return (
-    <div className="page-enter bg-[#f4f4f0] dark:bg-[#09090b] pt-40 min-h-screen relative overflow-hidden">
+    <div className="page-enter bg-[#f4f4f0] dark:bg-[#09090b] pt-28 md:pt-36 min-h-screen relative overflow-hidden">
       <StarField variant="adaptive" className="fixed z-[1]" />
       <HeroSection />
       <MarqueeBar />

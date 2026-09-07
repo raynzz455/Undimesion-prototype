@@ -9,6 +9,7 @@ import { GamesPage } from "@/components/undimension/games-page";
 import { ScrollProgress } from "@/components/undimension/scroll-progress";
 import { BackToTop } from "@/components/undimension/back-to-top";
 import { KeyboardShortcutsOverlay } from "@/components/undimension/keyboard-shortcuts-overlay";
+import { Soundboard } from "@/components/undimension/soundboard";
 import { StarGraphic } from "@/components/undimension/primitives";
 import { useSfx, useKonamiCode } from "@/hooks/use-sfx";
 import { Volume2, VolumeX, Ghost } from "lucide-react";
@@ -235,12 +236,13 @@ export default function Home() {
       <BackToTop />
       <button
         onClick={() => { play("click"); setShortcutsOpen(true); }}
-        className="fixed bottom-24 right-6 z-[55] w-12 h-12 flex items-center justify-center bg-black dark:bg-white text-white dark:text-black border-4 border-white dark:border-black shadow-[6px_6px_0_#d4ff00] dark:shadow-[6px_6px_0_#ff00ff] hover:-translate-y-1 transition-transform no-color-transition font-bebas text-2xl"
+        className="fixed bottom-6 right-6 z-[55] w-12 h-12 flex items-center justify-center bg-black dark:bg-white text-white dark:text-black border-4 border-white dark:border-black shadow-[6px_6px_0_#d4ff00] dark:shadow-[6px_6px_0_#ff00ff] hover:-translate-y-1 transition-transform no-color-transition font-bebas text-2xl"
         aria-label="Show keyboard shortcuts (?)"
         title="Keyboard shortcuts (?)"
       >
         ?
       </button>
+      <Soundboard />
       <KeyboardShortcutsOverlay open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
       <KonamiOverlay show={konami} />
     </div>

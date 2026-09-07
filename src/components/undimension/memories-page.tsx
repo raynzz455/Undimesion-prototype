@@ -96,7 +96,7 @@ function UploadWidget({ onUploaded }: { onUploaded: () => void }) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-6 z-[55] bg-[#d4ff00] text-black border-4 border-black dark:border-white font-bebas text-2xl px-6 py-4 shadow-[8px_8px_0_#000] dark:shadow-[8px_8px_0_#fff] hover:-translate-y-1 hover:shadow-[12px_12px_0_#ff4d4d] transition-all no-color-transition flex items-center gap-2"
+        className="fixed bottom-36 right-6 z-[55] bg-[#d4ff00] text-black border-4 border-black dark:border-white font-bebas text-2xl px-6 py-4 shadow-[8px_8px_0_#000] dark:shadow-[8px_8px_0_#fff] hover:-translate-y-1 hover:shadow-[12px_12px_0_#ff4d4d] transition-all no-color-transition flex items-center gap-2"
       >
         <Upload className="w-5 h-5" />
         ADD MEMORY
@@ -234,7 +234,7 @@ export function MemoriesPage() {
   };
 
   return (
-    <div className="page-enter bg-[#00e5ff] dark:bg-[#004d56] pt-40 pb-24 min-h-screen relative overflow-hidden">
+    <div className="page-enter bg-[#00e5ff] dark:bg-[#004d56] pt-28 md:pt-36 pb-24 min-h-screen relative overflow-hidden">
       <StarField variant="dark" className="fixed z-[1]" />
 
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
