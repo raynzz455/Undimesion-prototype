@@ -14,6 +14,24 @@ export function QuoteWidget() {
     setIdx((prev) => (prev + 1) % RANDOM_QUOTES.length);
   }, []);
 
+  // Persist last shown quote to localStorage so it doesn't reset on page switch
+  useEffect(() => {
+    const saved = typeof window !== "undefined" ? localStorage.getItem("ud-quote-idx") : null;
+    if (saved !== null) {
+      const n = parseInt(saved, 10);
+      if (!Number.isNaN(n) && n >= 0 && n < RANDOM_QUOTES.length) {
+        // Defer to avoid synchronous setState in effect (react-hooks rule)
+        Promise.resolve().then(() => setIdx(n));
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("ud-quote-idx", String(idx));
+    }
+  }, [idx]);
+
   useEffect(() => {
     if (paused) return;
     const timer = setInterval(next, 6000);

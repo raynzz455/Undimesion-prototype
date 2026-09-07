@@ -324,3 +324,55 @@ Site now has 7 sections on the About page (hero, collective, stats radar, timeli
 - The BackToTop button sits at `bottom-24 left-6` to avoid overlapping the SoundToggle at `bottom-6 left-6`.
 - The Manifesto's accent lines use `WebkitTextStroke` which is well-supported but not in the official CSS spec — acceptable for a stylistic effect.
 - The compatibility data is hand-curated lore, not derived from real play-time tracking — it's flavor content.
+
+---
+Task ID: 6
+Agent: main (Z.ai Code)
+Task: QA testing, add Keyboard Shortcuts overlay (? + G/S/A nav), Mission Control live stats widget, quote localStorage persistence, animated gradient border + CRT/REC styling.
+
+## Section 1: Current Project Status Assessment
+
+Phase 5 was stable (manifesto, play matrix, back-to-top, skip link, all a11y). This round's QA via agent-browser found NO bugs — all 9 About sections render, Games page works (carousel auto-advances), navigation cycle clean, footer complete (the "Built with chaos" check failed earlier only due to CSS uppercase + case-sensitive includes), zero console errors, all images lazy with alt text. The site is stable, so work shifted to new features (keyboard shortcuts, live stats, persistence) and styling polish (gradient border, CRT effects).
+
+## Section 2: Completed Modifications & Verification
+
+### New Features Added
+1. **Keyboard Shortcuts Overlay** (`keyboard-shortcuts-overlay.tsx`) — Press `?` to open a help dialog listing all shortcuts (?, ESC, Tab, Shift+Tab, Enter, ←/→, konami code). Has `role="dialog"`, `aria-modal="true"`, `aria-labelledby`, focus trap, ESC to close. A visible "?" button (bottom-24 right-6, above ADD MEMORY on Gallery) also opens it. Konami code highlighted in magenta.
+2. **Keyboard Navigation** (in `page.tsx`) — G/S/A keys switch to Gallery/Games/About respectively (ignored when typing in inputs). Each plays a "click" SFX. Makes the site fully navigable without a mouse.
+3. **Mission Control Section** (`mission-control.tsx`) — A live telemetry dashboard (§08) with: a live clock counting days/hours/mins/secs since EST 2020-01-01 (updates every second), 4 stat cells with count-up animations (MEMBERS=7, GALLERY FRAMES from /api/gallery count, GUESTBOOK SIGNALS from /api/guestbook count, GAMES TRACKED=4) using framer-motion `useInView` + easeOutExpo count-up, STATUS: ONLINE indicator with pulsing Activity icon. Fetches live counts from APIs on mount (graceful degradation if fetch fails). Placed between Quote and Guestbook.
+4. **Quote Widget Persistence** (`quote-widget.tsx`) — Saves the current quote index to `localStorage` on every change + restores on mount. The quote no longer resets to #0 when switching pages.
+
+### Styling Applied
+- **Animated gradient border** (`.ud-grad-border` in globals.css) — A conic-gradient pseudo-element (red→orange→lime→green→cyan→magenta→purple) that rotates 360° every 6s, masked to a border ring via `mask-composite: exclude`. Applied to the hero THE MISSION card (combined with existing `.ud-glow`). Respects reduced-motion (30s duration).
+- **CRT screen effect** (`.ud-crt` in globals.css) — A `::after` overlay with radial vignette + thick scanlines + multiply blend. Applied to the Games page carousel image container for a retro-monitor look.
+- **REC indicator** — Added a blinking red dot + "REC" text to the Games carousel (top-right), simulating a recording camera. Uses `.ud-blink` animation.
+- **New CSS animations** — `ud-grad-spin` (gradient rotation), `ud-flicker` (subtle CRT flicker), `ud-blink` (1s steps terminal blink), `ud-shake` (intense 0.3s shake). All respect reduced-motion.
+
+### Verification Results
+- ✅ ESLint: 0 errors, 0 warnings
+- ✅ Agent Browser E2E: ? opens shortcuts (role=dialog + aria-modal confirmed), ESC closes, ? button visible, G key → Gallery ("OF CHAOS" + "FRAMES" confirmed), S key → Games ("MINECRAFT" confirmed), A key → About ("THE COLLECTIVE" confirmed), Mission Control renders (MISSION CONTROL / TIME SINCE EST. / STATUS: ONLINE / GALLERY FRAMES / GUESTBOOK SIGNALS all confirmed), quote persistence (localStorage set to 3, navigate away + back, still 3), CRT + REC on Games, **zero console errors**
+- ✅ VLM: keyboard shortcuts dialog renders perfectly with all shortcuts listed; Mission Control renders (screenshot captured quote widget above it, but text checks confirmed all Mission Control elements)
+
+## Section 3: Unresolved Issues / Risks / Next-phase Recommendations
+
+### Current Status: ✅ Phase 6 Complete & Verified
+Site now has 10 About sections (hero, collective, stats radar, timeline, play matrix, harapan, manifesto, quote, mission control, guestbook), full keyboard navigation (?/G/S/A + konami), live telemetry, quote persistence, and rich styling (gradient borders, CRT, REC, glow, glitch, stickers, tilt, scanlines). Zero errors, lint clean.
+
+### Next-phase recommendations (priority order):
+1. **next/image optimization** — Replace remaining raw `<img>` with `next/image` for responsive sizing + blur placeholders. Biggest perf win remaining.
+2. **Admin auth** — NextAuth (single shared password) so only the 7 members can upload / moderate guestbook.
+3. **Production storage** — Swap `saveImage` in upload route to Cloudinary/Uploadthing for Render deploy.
+4. **Guestbook moderation UI** — Admin can delete/toggle `approved` on entries.
+5. **Timeline images** — Add a photo/illustration to each timeline milestone (currently text-only).
+6. **Mobile nav** — Consider hamburger sheet for very small screens (navbar stacks vertically now).
+7. **Lazy-load modals + radar** — `next/dynamic` for MemberDetailModal, PhotoLightbox, StatsRadarSection, CompatibilityMatrix, MissionControl (below-the-fold, framer-motion + recharts heavy).
+8. **Play Matrix mobile** — Stacked card layout alternative for very small screens (currently horizontal-scroll fallback).
+9. **Soundboard feature** — A panel where clicking buttons plays the synthesized SFX (already have the hook) — fun easter egg.
+10. **Theme variants** — Beyond light/dark, add a "chaos" mode that randomizes accent colors.
+
+### Known minor notes:
+- The "?" button sits at `bottom-24 right-6` to avoid overlapping the Gallery's ADD MEMORY button at `bottom-6 right-6`.
+- The gradient border uses `mask-composite: xor/exclude` which is well-supported in modern browsers but may not render in very old ones — acceptable fallback (just shows no gradient ring).
+- The live clock in Mission Control updates every 1s via `setInterval` — minimal cost, re-renders only the clock component.
+- Mission Control's API fetches use `.catch(() => {})` — silent failure; stat cells show "…" until loaded, then count up.
+- The quote localStorage key is `ud-quote-idx`; if the quote array changes size, the stored index is validated against the new length.

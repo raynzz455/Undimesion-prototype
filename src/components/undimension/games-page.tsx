@@ -21,8 +21,7 @@ function GameCarousel({ images, title }: { images: string[]; title: string }) {
       <div className="absolute -top-4 -left-4 md:-top-6 md:-left-6 bg-[#ff4d4d] text-white font-mono-ud font-black border-2 md:border-4 border-black px-3 py-1 md:px-4 md:py-2 text-lg md:text-2xl shadow-[2px_2px_0_#000] md:shadow-[4px_4px_0_#000] -rotate-3 md:-rotate-6 z-20">
         {title}
       </div>
-      <div className="border-2 md:border-4 border-black overflow-hidden relative aspect-video bg-black">
-        { }
+      <div className="border-2 md:border-4 border-black overflow-hidden relative aspect-video bg-black ud-crt">
         <img
           src={images[idx]}
           alt={`${title} moment ${idx + 1}`}
@@ -30,6 +29,11 @@ function GameCarousel({ images, title }: { images: string[]; title: string }) {
           loading="lazy"
           key={idx}
         />
+        {/* REC indicator */}
+        <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/70 px-2 py-0.5 border border-white/30">
+          <span className="w-2 h-2 bg-[#ff4d4d] rounded-full ud-blink" />
+          <span className="font-mono-ud text-[9px] font-black text-white tracking-widest">REC</span>
+        </div>
       </div>
       <div className="flex justify-between items-center mt-3 md:mt-4">
         <div className="flex gap-1 md:gap-2">
