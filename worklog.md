@@ -471,3 +471,56 @@ Site now has a Chaos Mode third theme with randomized accent colors, Soundboard 
 - The chaos palette pool has 15 colors; with 7 slots and a "no immediate repeat" guard, there's good variety on each reroll.
 - The Soundboard's `open` state is now controlled by the parent (`page.tsx`) so the B key + the trigger button + ESC all coordinate cleanly.
 - Chaos mode persists across page navigation (state in localStorage + provider in layout).
+
+---
+Task ID: 9
+Agent: main (Z.ai Code)
+Task: QA testing, add Cosmic Star Map (animated constellation of 7 members), Share button on member modal, decorative corner frames + wobble hover micro-interaction.
+
+## Section 1: Current Project Status Assessment
+
+Phase 8 was stable (Chaos Mode, Soundboard B shortcut). This round's QA via agent-browser found NO bugs — all 10 About sections render, chaos toggles ON, Gallery/Games work, keyboard shortcuts work, zero console errors. The site was stable, so work shifted to new features (Cosmic Star Map, Share button) and styling polish (corner frames, wobble hover).
+
+## Section 2: Completed Modifications & Verification
+
+### New Features Added
+1. **Cosmic Star Map** (`cosmic-star-map.tsx` + `COSMIC_COORDS`/`CONSTELLATION_LINES` data) — An animated star map / constellation chart (§09) showing the 7 members as 4-pointed stars at calculated x/y positions, connected by dashed constellation lines. Each star has: a colored glow (pulsing), a 4-point star SVG core, and a hover label (nick name). Interactive: hover/click a star → the right-side READOUT panel updates with that member's ELEMENT, MAGNITUDE, X-AXIS, Y-AXIS coordinates. Includes a scanning line animation, grid overlay, crosshair center, and corner readouts (SECTOR 7-G / TRACKING / 7 STARS / CONST: UNDIMENSION). When no star is hovered, the panel shows a legend list of all 7 members (clickable). Placed between Quote and Mission Control. CRT effect (`.ud-crt`) applied to the map container.
+2. **Share Button on Member Modal** (`ShareButton` component in member-detail-modal.tsx) — A magenta "SHARE" button added to the social links row in the member detail modal. Uses the Web Share API first (mobile-native share sheet) with a clipboard-copy fallback. Copies: title (`UNDIMENSION — NICK (ROLE)`), tagline + quote, and a URL with `#member-{id}` hash. Shows "COPIED!" confirmation (lime green + Check icon) for 2s. Plays "submit" SFX on click.
+
+### Styling Applied
+- **Decorative corner frames** (`.ud-corners` in globals.css) — L-shaped corner brackets (like a camera viewfinder) via `::before`/`::after` pseudo-elements. Uses `currentColor` so it inherits the element's text color. Available for future use on cards/containers.
+- **Wobble hover** (`.ud-wobble-hover`) — A playful 0.5s rotate-wobble animation on hover (0° → -3° → 2° → -1° → 0°). Applied to member photos in the MemberCard. Respects reduced-motion.
+- **Star map visual details** — 4-pointed star SVGs with drop-shadow glow, dashed constellation lines that brighten when a connected star is hovered, scanning line animation, grid pattern overlay, crosshair, corner readouts.
+
+### Data Added
+- `COSMIC_COORDS` — 7 members with x/y positions (0-100 range), size (star magnitude 3.5-5), color, element.
+- `CONSTELLATION_LINES` — 8 pairs of member ids forming the constellation shape.
+
+### Verification Results
+- ✅ ESLint: 0 errors, 0 warnings
+- ✅ Agent Browser E2E: COSMIC COORDINATES + CELESTIAL CHART render, 7 star buttons present (aria-label*=position), 15 star SVG paths, clicking ALDI star → READOUT shows MAGNITUDE + X-AXIS + FIRE element, Share button exists in member modal (aria-label*=Share + "SHARE" text), **zero console errors**
+- ✅ VLM: confirms "star map/constellation chart background" with "scattered white dots representing stars" + "COSMIC COORDINATES" title
+
+## Section 3: Unresolved Issues / Risks / Next-phase Recommendations
+
+### Current Status: ✅ Phase 9 Complete & Verified
+Site now has 11 About sections (added Cosmic Star Map), a Share button on member modals, and new styling utilities (corner frames, wobble hover). Zero errors, lint clean.
+
+### Next-phase recommendations (priority order):
+1. **next/image optimization** — Replace remaining raw `<img>` with `next/image` for responsive sizing + blur placeholders. Biggest perf win remaining.
+2. **Admin auth** — NextAuth (single shared password) so only the 7 members can upload / moderate guestbook.
+3. **Production storage** — Swap `saveImage` in upload route to Cloudinary/Uploadthing for Render deploy.
+4. **Guestbook moderation UI** — Admin can delete/toggle `approved` on entries.
+5. **Timeline images** — Add a photo/illustration to each timeline milestone (currently text-only).
+6. **Lazy-load modals + radar + star map** — `next/dynamic` for MemberDetailModal, PhotoLightbox, StatsRadarSection, CompatibilityMatrix, MissionControl, Soundboard, KeyboardShortcutsOverlay, CosmicStarMap (below-the-fold, framer-motion + SVG heavy).
+7. **Play Matrix mobile** — Stacked card layout alternative for very small screens.
+8. **Star map deep-link** — The Share button generates `#member-{id}` URLs but there's no router logic to auto-open that modal on load. Add a hash-change listener.
+9. **Star map mobile** — Test the star map on 390px width; the stars + readout panel may need stacking.
+10. **Apply .ud-corners** — The corner-frame utility is defined but not yet applied to any element. Consider adding to hero cards or section containers.
+
+### Known minor notes:
+- The star map uses absolute-positioned buttons at x/y percentages — responsive by design (scales with container).
+- The scanning line uses `repeat: Infinity` — minimal cost (1 element, transform only).
+- The Share button's Web Share API requires HTTPS in production; the clipboard fallback works everywhere.
+- The wobble hover is 0.5s — short enough to not be annoying on repeated hovers.
+- `COSMIC_COORDS` positions are hand-curated for visual balance (not derived from real data).

@@ -11,6 +11,7 @@ import { StatsRadarSection } from "./stats-radar-section";
 import { ManifestoSection } from "./manifesto-section";
 import { CompatibilityMatrix } from "./compatibility-matrix";
 import { MissionControl } from "./mission-control";
+import { CosmicStarMap } from "./cosmic-star-map";
 import { MEMBERS, HARAPAN, type Member } from "@/lib/undimension/data";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useSfx } from "@/hooks/use-sfx";
@@ -126,7 +127,7 @@ function MemberCard({ m, i, onOpen }: { m: Member; i: number; onOpen: () => void
               <img
                 src={m.img}
                 alt={m.nick}
-                className="w-full aspect-[4/5] object-cover grayscale contrast-[1.4] group-hover:grayscale-0 transition-all duration-300"
+                className="w-full aspect-[4/5] object-cover grayscale contrast-[1.4] group-hover:grayscale-0 transition-all duration-300 ud-wobble-hover"
                 loading="lazy"
               />
               <div className="absolute inset-0 ud-scanlines pointer-events-none" />
@@ -394,6 +395,7 @@ export function AboutPage() {
       <HarapanSection />
       <ManifestoSection />
       <QuoteWidget />
+      <CosmicStarMap />
       <MissionControl />
       <GuestbookSection />
       <MemberDetailModal member={selected} onClose={closeModal} />

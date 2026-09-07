@@ -718,3 +718,47 @@ html.chaos::before {
 @media (prefers-reduced-motion: reduce) {
   html.chaos::before { animation: none; }
 }
+
+/* ───────────────────────────────────────────
+   DECORATIVE CORNER FRAMES (Phase 9)
+   ─────────────────────────────────────────── */
+/* Adds L-shaped corner brackets to a container, like a camera viewfinder. */
+.ud-corners {
+  position: relative;
+}
+.ud-corners::before,
+.ud-corners::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 3px solid currentColor;
+  pointer-events: none;
+  z-index: 5;
+}
+.ud-corners::before {
+  top: -3px;
+  left: -3px;
+  border-right: none;
+  border-bottom: none;
+}
+.ud-corners::after {
+  bottom: -3px;
+  right: -3px;
+  border-left: none;
+  border-top: none;
+}
+
+/* Hover wobble for member photos — a playful bounce */
+@keyframes ud-wobble {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-3deg); }
+  50% { transform: rotate(2deg); }
+  75% { transform: rotate(-1deg); }
+}
+.ud-wobble-hover:hover {
+  animation: ud-wobble 0.5s ease-in-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ud-wobble-hover:hover { animation: none; }
+}

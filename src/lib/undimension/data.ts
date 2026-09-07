@@ -564,3 +564,37 @@ export const GAME_LABELS: Record<string, string> = {
   ml: "MOBILE LEGENDS",
   dnd: "D&D",
 };
+
+// Cosmic coordinates for each member — their "position" on the collective star map.
+// x/y in 0-100 range (percentage of the map), size = star magnitude, constellation = which group.
+export type CosmicCoord = {
+  id: string;
+  nick: string;
+  x: number;
+  y: number;
+  size: number;
+  color: string;
+  element: string;
+};
+
+export const COSMIC_COORDS: CosmicCoord[] = [
+  { id: "aldi",  nick: "ALDI",   x: 50, y: 18, size: 5, color: "#ff4d4d", element: "FIRE" },
+  { id: "razka", nick: "REMBO",  x: 22, y: 38, size: 4, color: "#00e5ff", element: "ICE" },
+  { id: "reza",  nick: "EJA",    x: 78, y: 35, size: 4, color: "#d4ff00", element: "MIND" },
+  { id: "abyan", nick: "BYAN",   x: 15, y: 62, size: 4.5, color: "#ff00ff", element: "STORM" },
+  { id: "rasya", nick: "ACONG",  x: 85, y: 65, size: 4.5, color: "#ff8c00", element: "CHAOS" },
+  { id: "rifqi", nick: "TIPKI",  x: 35, y: 82, size: 3.5, color: "#00ff00", element: "VOID" },
+  { id: "dudit", nick: "DUDIT",  x: 65, y: 80, size: 4, color: "#8a2be2", element: "ENERGY" },
+];
+
+// Lines connecting the stars into a "constellation" (pairs of member ids)
+export const CONSTELLATION_LINES: [string, string][] = [
+  ["aldi", "razka"],
+  ["aldi", "reza"],
+  ["razka", "abyan"],
+  ["reza", "rasya"],
+  ["abyan", "rifqi"],
+  ["rasya", "dudit"],
+  ["rifqi", "dudit"],
+  ["razka", "reza"],
+];

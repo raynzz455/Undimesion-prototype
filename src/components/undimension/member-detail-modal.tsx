@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Quote, Sparkles, Calendar, Flame } from "lucide-react";
+import { X, Quote, Sparkles, Calendar, Flame, Share2, Check } from "lucide-react";
 import type { Member } from "@/lib/undimension/data";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
+import { useSfx } from "@/hooks/use-sfx";
 import { cn } from "@/lib/utils";
 
 export function MemberDetailModal({
@@ -196,6 +197,7 @@ export function MemberDetailModal({
                     {social.label}
                   </a>
                 ))}
+                <ShareButton member={member} />
               </div>
 
               {/* Footer */}
@@ -210,5 +212,55 @@ export function MemberDetailModal({
         </motion.div>
       )}
     </AnimatePresence>
+  );
+}
+
+function ShareButton({ member }: { member: Member }) {
+  const [copied, setCopied] = useState(false);
+  const { play } = useSfx();
+
+  const handleShare = async () => {
+    play("submit");
+    const url = typeof window !== "undefined"
+      ? `${window.location.origin}/#member-${member.id}`
+      : "";
+    const shareData = {
+      title: `UNDIMENSION — ${member.nick} (${member.role})`,
+      text: `${member.tagline}\n\n${member.quote}`,
+      url,
+    };
+    // Try Web Share API first (mobile / supported browsers)
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch {
+        // user cancelled or failed — fall through to clipboard
+      }
+    }
+    // Fallback: copy to clipboard
+    try {
+      await navigator.clipboard.writeText(`${shareData.title}\n${shareData.text}\n${url}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard API not available — silent fail
+    }
+  };
+
+  return (
+    <button
+      onClick={handleShare}
+      className={cn(
+        "flex-1 min-w-[120px] border-4 border-black dark:border-white py-3 text-center font-bebas text-xl shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff] hover:translate-y-1 hover:translate-x-1 hover:shadow-[0_0_0_#000] transition-all no-color-transition flex items-center justify-center gap-2",
+        copied
+          ? "bg-[#d4ff00] text-black"
+          : "bg-[#ff00ff] text-white",
+      )}
+      aria-label={`Share ${member.nick}'s profile`}
+    >
+      {copied ? <Check className="w-5 h-5" /> : <Share2 className="w-5 h-5" />}
+      {copied ? "COPIED!" : "SHARE"}
+    </button>
   );
 }
