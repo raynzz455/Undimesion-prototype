@@ -1,3 +1,31 @@
+export type WorkExperience = {
+  company: string;
+  role: string;
+  period: string;
+  description: string;
+  current?: boolean;
+};
+
+export type Education = {
+  school: string;
+  degree: string;
+  period: string;
+  description?: string;
+};
+
+export type Skill = {
+  name: string;
+  level: number; // 0-100
+  category: "LANGUAGE" | "FRAMEWORK" | "TOOL" | "SOFT";
+};
+
+export type Achievement = {
+  title: string;
+  year: string;
+  description: string;
+  icon?: string;
+};
+
 export type Member = {
   id: string;
   name: string;
@@ -14,6 +42,15 @@ export type Member = {
   joinYear: string;
   stats: { label: string; value: string }[];
   socials: { label: string; href: string }[];
+  // Portfolio / CV fields
+  taglineCareer: string; // career-focused one-liner
+  location: string;
+  availability: string; // e.g. "OPEN TO WORK", "EMPLOYED", "FREELANCE"
+  education: Education[];
+  workHistory: WorkExperience[];
+  skills: Skill[];
+  achievements: Achievement[];
+  projects: PortfolioProject[];
 };
 
 export const MEMBERS: Member[] = [

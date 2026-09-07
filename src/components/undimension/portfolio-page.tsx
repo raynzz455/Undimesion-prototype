@@ -1,16 +1,17 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { StarField } from "./star-field";
 import { StarGraphic } from "./primitives";
-import { PORTFOLIO_PROJECTS, PORTFOLIO_CATEGORIES, type PortfolioProject } from "@/lib/undimension/data";
+import { MEMBERS, type Member, type PortfolioProject } from "@/lib/undimension/data";
+import { MEMBER_CV } from "@/lib/undimension/cv-data";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useSfx } from "@/hooks/use-sfx";
 import { cn } from "@/lib/utils";
 import {
   Github, ExternalLink, Code2, Gamepad2, Smartphone, Wrench, Bot, Package,
-  Calendar, User, Filter, Grid3x3, List,
+  Briefcase, GraduationCap, Award, MapPin, Clock, ChevronLeft, ChevronRight,
 } from "lucide-react";
 
 const CATEGORY_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -28,364 +29,370 @@ const STATUS_COLORS: Record<string, string> = {
   ARCHIVED: "#666666",
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  LIVE: "● LIVE",
-  WIP: "◐ WIP",
-  ARCHIVED: "○ ARCHIVED",
+const AVAILABILITY_COLORS: Record<string, string> = {
+  "EMPLOYED": "#00e5ff",
+  "OPEN TO WORK": "#00ff00",
+  "FREELANCE": "#ff00ff",
 };
 
-function ProjectCard({ p, i, layout }: { p: PortfolioProject; i: number; layout: "grid" | "list" }) {
-  const Icon = CATEGORY_ICONS[p.category] || Package;
-  const statusColor = STATUS_COLORS[p.status];
+const SKILL_CATEGORY_COLORS: Record<string, string> = {
+  LANGUAGE: "#ff4d4d",
+  FRAMEWORK: "#00e5ff",
+  TOOL: "#d4ff00",
+  SOFT: "#ff00ff",
+};
 
-  if (layout === "list") {
-    return (
-      <motion.article
-        initial={{ opacity: 0, x: -20 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true, margin: "-40px" }}
-        transition={{ delay: (i % 6) * 0.06, duration: 0.4 }}
-        className="border-4 border-black dark:border-white bg-white dark:bg-[#1a1a1a] shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff] hover:-translate-y-1 transition-transform group"
-        style={{ borderLeftWidth: "8px", borderLeftColor: p.color }}
-      >
-        <div className="p-5 flex flex-col md:flex-row gap-4 items-start">
-          {/* Icon */}
-          <div
-            className="w-14 h-14 flex-shrink-0 flex items-center justify-center border-4 border-black dark:border-white"
-            style={{ backgroundColor: p.color }}
+function MemberSelector({
+  members,
+  selectedId,
+  onSelect,
+}: {
+  members: Member[];
+  selectedId: string;
+  onSelect: (id: string) => void;
+}) {
+  const { play } = useSfx();
+  return (
+    <div className="flex flex-wrap gap-2 mb-8">
+      {members.map((m) => {
+        const active = m.id === selectedId;
+        return (
+          <button
+            key={m.id}
+            onClick={() => { play("click"); onSelect(m.id); }}
+            className={cn(
+              "flex items-center gap-2 px-3 py-2 border-4 border-black dark:border-white font-bebas text-lg tracking-wider transition-all no-color-transition",
+              active ? "text-white shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] scale-105" : "bg-white dark:bg-black text-black dark:text-white hover:-translate-y-0.5",
+            )}
+            style={active ? { backgroundColor: m.color.replace("bg-[", "").replace("]", "") } : undefined}
           >
-            <Icon className="w-7 h-7 text-black" />
-          </div>
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-3 flex-wrap mb-1">
-              <h3 className="font-bebas text-3xl md:text-4xl text-black dark:text-white leading-none">
-                {p.title}
-              </h3>
-              <span
-                className="font-mono-ud text-[10px] font-black tracking-wider px-2 py-1 border-2 border-black dark:border-white"
-                style={{ color: statusColor, borderColor: statusColor }}
-              >
-                {STATUS_LABELS[p.status]}
-              </span>
-            </div>
-            <p className="font-mono-ud text-sm text-black/70 dark:text-white/70 leading-relaxed mb-3">
-              {p.description}
-            </p>
-            {/* Tech stack */}
-            <div className="flex flex-wrap gap-1.5 mb-3">
-              {p.tech.map((t) => (
-                <span
-                  key={t}
-                  className="font-mono-ud text-[10px] font-bold px-2 py-0.5 border border-black dark:border-white bg-black/5 dark:bg-white/5 text-black dark:text-white"
-                >
-                  {t}
-                </span>
-              ))}
-            </div>
-            {/* Meta + links */}
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <div className="flex items-center gap-3 font-mono-ud text-[10px] text-black/50 dark:text-white/50 tracking-wider">
-                <span className="flex items-center gap-1"><User className="w-3 h-3" />{p.author}</span>
-                <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{p.year}</span>
-                <span className="px-1.5 py-0.5 border border-black/30 dark:border-white/30">{p.category}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                {p.repo && (
-                  <a
-                    href={p.repo}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-8 h-8 flex items-center justify-center bg-black dark:bg-white text-white dark:text-black border-2 border-black dark:border-white hover:bg-[#d4ff00] hover:text-black transition-colors"
-                    aria-label={`${p.title} repository`}
-                  >
-                    <Github className="w-4 h-4" />
-                  </a>
-                )}
-                {p.link && (
-                  <a
-                    href={p.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-8 h-8 flex items-center justify-center bg-[#00e5ff] text-black border-2 border-black dark:border-white hover:bg-[#ff4d4d] hover:text-white transition-colors"
-                    aria-label={`${p.title} live demo`}
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.article>
-    );
-  }
-
-  // Grid layout
-  return (
-    <motion.article
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-40px" }}
-      transition={{ delay: (i % 6) * 0.06, duration: 0.4 }}
-      className="border-4 border-black dark:border-white bg-white dark:bg-[#1a1a1a] shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff] hover:-translate-y-1 hover:shadow-[8px_8px_0_#000] dark:hover:shadow-[8px_8px_0_#fff] transition-all group relative overflow-hidden"
-    >
-      {/* Color accent bar */}
-      <div
-        className="absolute top-0 left-0 right-0 h-2"
-        style={{ backgroundColor: p.color }}
-      />
-      {/* Status badge */}
-      <div className="absolute top-3 right-3">
-        <span
-          className="font-mono-ud text-[9px] font-black tracking-wider px-1.5 py-0.5 border-2"
-          style={{ color: statusColor, borderColor: statusColor, backgroundColor: "#000" }}
-        >
-          {STATUS_LABELS[p.status]}
-        </span>
-      </div>
-
-      <div className="p-5 pt-7">
-        {/* Icon */}
-        <div
-          className="w-12 h-12 flex items-center justify-center border-4 border-black dark:border-white mb-3"
-          style={{ backgroundColor: p.color }}
-        >
-          <Icon className="w-6 h-6 text-black" />
-        </div>
-
-        <h3 className="font-bebas text-2xl md:text-3xl text-black dark:text-white leading-none mb-2">
-          {p.title}
-        </h3>
-        <p className="font-mono-ud text-xs text-black/70 dark:text-white/70 leading-relaxed mb-3 line-clamp-3">
-          {p.description}
-        </p>
-
-        {/* Tech stack */}
-        <div className="flex flex-wrap gap-1 mb-3 min-h-[2rem]">
-          {p.tech.slice(0, 4).map((t) => (
             <span
-              key={t}
-              className="font-mono-ud text-[9px] font-bold px-1.5 py-0.5 border border-black dark:border-white bg-black/5 dark:bg-white/5 text-black dark:text-white"
-            >
-              {t}
-            </span>
-          ))}
-          {p.tech.length > 4 && (
-            <span className="font-mono-ud text-[9px] font-bold px-1.5 py-0.5 text-black/50 dark:text-white/50">
-              +{p.tech.length - 4}
-            </span>
-          )}
-        </div>
-
-        {/* Meta */}
-        <div className="flex items-center justify-between border-t-2 border-black dark:border-white pt-2">
-          <div className="font-mono-ud text-[10px] text-black/50 dark:text-white/50 tracking-wider flex items-center gap-2">
-            <span>{p.author}</span>
-            <span>·</span>
-            <span>{p.year}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            {p.repo && (
-              <a
-                href={p.repo}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-7 h-7 flex items-center justify-center bg-black dark:bg-white text-white dark:text-black border border-black dark:border-white hover:bg-[#d4ff00] hover:text-black transition-colors"
-                aria-label={`${p.title} repository`}
-              >
-                <Github className="w-3.5 h-3.5" />
-              </a>
-            )}
-            {p.link && (
-              <a
-                href={p.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-7 h-7 flex items-center justify-center bg-[#00e5ff] text-black border border-black dark:border-white hover:bg-[#ff4d4d] hover:text-white transition-colors"
-                aria-label={`${p.title} live demo`}
-              >
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
-            )}
-          </div>
-        </div>
-      </div>
-    </motion.article>
-  );
-}
-
-function ProjectSkeleton() {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {[0, 1, 2, 3, 4, 5].map((i) => (
-        <div key={i} className="border-4 border-black dark:border-white bg-white dark:bg-[#1a1a1a] p-5">
-          <div className="w-12 h-12 bg-black/10 dark:bg-white/10 animate-pulse mb-3" />
-          <div className="h-6 w-2/3 bg-black/10 dark:bg-white/10 animate-pulse mb-2" />
-          <div className="h-3 w-full bg-black/10 dark:bg-white/10 animate-pulse mb-1" />
-          <div className="h-3 w-4/5 bg-black/10 dark:bg-white/10 animate-pulse mb-3" />
-          <div className="flex gap-1">
-            <div className="h-4 w-12 bg-black/10 dark:bg-white/10 animate-pulse" />
-            <div className="h-4 w-16 bg-black/10 dark:bg-white/10 animate-pulse" />
-          </div>
-        </div>
-      ))}
+              className="w-3 h-3 border-2 border-black dark:border-white flex-shrink-0"
+              style={{ backgroundColor: m.color.replace("bg-[", "").replace("]", "") }}
+            />
+            {m.nick.toUpperCase()}
+          </button>
+        );
+      })}
     </div>
   );
 }
 
+function SkillBar({ name, level, category }: { name: string; level: number; category: string }) {
+  const color = SKILL_CATEGORY_COLORS[category] || "#fff";
+  return (
+    <div className="flex items-center gap-2">
+      <span className="font-mono-ud text-[10px] font-bold text-black/60 dark:text-white/60 w-16 tracking-wider">
+        {category}
+      </span>
+      <span className="font-mono-ud text-xs font-bold text-black dark:text-white w-24 truncate">
+        {name}
+      </span>
+      <div className="flex-1 h-3 border-2 border-black dark:border-white bg-white dark:bg-black overflow-hidden">
+        <motion.div
+          className="h-full"
+          style={{ backgroundColor: color }}
+          initial={{ width: 0 }}
+          whileInView={{ width: `${level}%` }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        />
+      </div>
+      <span className="font-mono-ud text-[10px] font-black w-8 text-right" style={{ color }}>
+        {level}
+      </span>
+    </div>
+  );
+}
+
+function ProjectMini({ p }: { p: PortfolioProject }) {
+  const Icon = CATEGORY_ICONS[p.category] || Package;
+  const statusColor = STATUS_COLORS[p.status];
+  return (
+    <div className="border-4 border-black dark:border-white bg-white dark:bg-[#1a1a1a] p-4 shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] hover:-translate-y-1 transition-transform group">
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div
+          className="w-10 h-10 flex items-center justify-center border-2 border-black dark:border-white flex-shrink-0"
+          style={{ backgroundColor: p.color }}
+        >
+          <Icon className="w-5 h-5 text-black" />
+        </div>
+        <span
+          className="font-mono-ud text-[9px] font-black px-1.5 py-0.5 border"
+          style={{ color: statusColor, borderColor: statusColor }}
+        >
+          {p.status}
+        </span>
+      </div>
+      <h4 className="font-bebas text-xl text-black dark:text-white leading-none mb-1">{p.title}</h4>
+      <p className="font-mono-ud text-[10px] text-black/60 dark:text-white/60 mb-2 line-clamp-2">{p.description}</p>
+      <div className="flex flex-wrap gap-1 mb-2">
+        {p.tech.map((t) => (
+          <span key={t} className="font-mono-ud text-[9px] font-bold px-1 py-0.5 border border-black dark:border-white bg-black/5 dark:bg-white/5 text-black dark:text-white">
+            {t}
+          </span>
+        ))}
+      </div>
+      <div className="flex items-center justify-between border-t-2 border-black dark:border-white pt-2">
+        <span className="font-mono-ud text-[10px] text-black/50 dark:text-white/50">{p.year}</span>
+        <div className="flex gap-1">
+          {p.repo && (
+            <a href={p.repo} target="_blank" rel="noopener noreferrer" className="w-6 h-6 flex items-center justify-center bg-black dark:bg-white text-white dark:text-black border border-black dark:border-white hover:bg-[#d4ff00] hover:text-black transition-colors">
+              <Github className="w-3 h-3" />
+            </a>
+          )}
+          {p.link && (
+            <a href={p.link} target="_blank" rel="noopener noreferrer" className="w-6 h-6 flex items-center justify-center bg-[#00e5ff] text-black border border-black dark:border-white hover:bg-[#ff4d4d] hover:text-white transition-colors">
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MemberPortfolio({ member }: { member: Member }) {
+  const cv = MEMBER_CV[member.id];
+  if (!cv) return null;
+
+  const memberColor = member.color.replace("bg-[", "").replace("]", "");
+  const availColor = AVAILABILITY_COLORS[cv.availability] || "#00e5ff";
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={member.id}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.3 }}
+        className="space-y-6"
+      >
+        {/* Header card */}
+        <div className="border-8 border-black dark:border-white bg-white dark:bg-[#09090b] shadow-[12px_12px_0_#000] dark:shadow-[12px_12px_0_#fff] overflow-hidden">
+          <div className={cn("p-6 md:p-8 border-b-8 border-black dark:border-white", member.color)}>
+            <div className="flex flex-col md:flex-row gap-6 items-start">
+              {/* Photo */}
+              <div className="border-4 border-black bg-black p-2 shadow-[8px_8px_0_#000] flex-shrink-0 w-32 md:w-40">
+                <img src={member.img} alt={member.nick} className="w-full aspect-[4/5] object-cover grayscale contrast-[1.4]" />
+              </div>
+              {/* Info */}
+              <div className="flex-1 text-black">
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                  <span className="font-mono-ud text-xs font-black bg-black text-white px-2 py-1 border-2 border-black">
+                    ID_{member.id.toUpperCase()}
+                  </span>
+                  <span
+                    className="font-mono-ud text-xs font-black px-2 py-1 border-2 border-black"
+                    style={{ backgroundColor: availColor, color: "#000" }}
+                  >
+                    ● {cv.availability}
+                  </span>
+                </div>
+                <h2 className="font-bebas text-5xl md:text-7xl leading-none">{member.name}</h2>
+                <p className="font-mono-ud text-sm font-bold mt-1">{cv.taglineCareer}</p>
+                <div className="flex items-center gap-4 mt-3 font-mono-ud text-xs">
+                  <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{cv.location}</span>
+                  <span className="flex items-center gap-1"><Clock className="w-3 h-3" />EST. {member.joinYear}</span>
+                </div>
+                <p className="font-outfit text-sm mt-3 max-w-xl leading-relaxed">{member.bio}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 2-col: Experience + Education */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Work History */}
+          <div className="border-4 border-black dark:border-white bg-white dark:bg-[#1a1a1a] p-5 shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff]">
+            <h3 className="font-bebas text-3xl text-black dark:text-white mb-4 flex items-center gap-2 border-b-4 border-black dark:border-white pb-2">
+              <Briefcase className="w-6 h-6" style={{ color: memberColor }} />
+              WORK EXPERIENCE
+            </h3>
+            <div className="space-y-4">
+              {cv.workHistory.map((w, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className="relative pl-4 border-l-2 border-black dark:border-white"
+                >
+                  {w.current && (
+                    <span className="absolute -left-1.5 top-1 w-3 h-3 rounded-full border-2 border-black dark:border-white animate-pulse" style={{ backgroundColor: memberColor }} />
+                  )}
+                  <div className="flex items-baseline justify-between gap-2 flex-wrap">
+                    <span className="font-bebas text-xl text-black dark:text-white leading-none">{w.role}</span>
+                    <span className="font-mono-ud text-[10px] text-black/50 dark:text-white/50">{w.period}</span>
+                  </div>
+                  <p className="font-mono-ud text-xs font-bold" style={{ color: memberColor }}>{w.company}</p>
+                  <p className="font-mono-ud text-xs text-black/70 dark:text-white/70 mt-1">{w.description}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Education */}
+          <div className="border-4 border-black dark:border-white bg-white dark:bg-[#1a1a1a] p-5 shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff]">
+            <h3 className="font-bebas text-3xl text-black dark:text-white mb-4 flex items-center gap-2 border-b-4 border-black dark:border-white pb-2">
+              <GraduationCap className="w-6 h-6" style={{ color: memberColor }} />
+              EDUCATION
+            </h3>
+            <div className="space-y-4">
+              {cv.education.map((e, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className="relative pl-4 border-l-2 border-black dark:border-white"
+                >
+                  <div className="flex items-baseline justify-between gap-2 flex-wrap">
+                    <span className="font-bebas text-xl text-black dark:text-white leading-none">{e.degree}</span>
+                    <span className="font-mono-ud text-[10px] text-black/50 dark:text-white/50">{e.period}</span>
+                  </div>
+                  <p className="font-mono-ud text-xs font-bold" style={{ color: memberColor }}>{e.school}</p>
+                  {e.description && <p className="font-mono-ud text-xs text-black/70 dark:text-white/70 mt-1">{e.description}</p>}
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Skills */}
+        <div className="border-4 border-black dark:border-white bg-white dark:bg-[#1a1a1a] p-5 shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff]">
+          <h3 className="font-bebas text-3xl text-black dark:text-white mb-4 flex items-center gap-2 border-b-4 border-black dark:border-white pb-2">
+            <Code2 className="w-6 h-6" style={{ color: memberColor }} />
+            SKILLS MATRIX
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
+            {cv.skills.map((s, i) => (
+              <SkillBar key={i} name={s.name} level={s.level} category={s.category} />
+            ))}
+          </div>
+          {/* Legend */}
+          <div className="flex flex-wrap gap-3 mt-4 pt-3 border-t-2 border-black dark:border-white">
+            {Object.entries(SKILL_CATEGORY_COLORS).map(([cat, color]) => (
+              <div key={cat} className="flex items-center gap-1.5">
+                <span className="w-3 h-3 border border-black dark:border-white" style={{ backgroundColor: color }} />
+                <span className="font-mono-ud text-[10px] font-bold text-black/60 dark:text-white/60 tracking-wider">{cat}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Achievements */}
+        <div className="border-4 border-black dark:border-white bg-white dark:bg-[#1a1a1a] p-5 shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff]">
+          <h3 className="font-bebas text-3xl text-black dark:text-white mb-4 flex items-center gap-2 border-b-4 border-black dark:border-white pb-2">
+            <Award className="w-6 h-6" style={{ color: memberColor }} />
+            ACHIEVEMENTS
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {cv.achievements.map((a, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="border-2 border-black dark:border-white p-3 bg-black/5 dark:bg-white/5"
+                style={{ borderLeftWidth: "4px", borderLeftColor: memberColor }}
+              >
+                <div className="font-bebas text-2xl text-black dark:text-white leading-none">{a.title}</div>
+                <div className="font-mono-ud text-[10px] text-black/50 dark:text-white/50 mb-1">{a.year}</div>
+                <p className="font-mono-ud text-[10px] text-black/70 dark:text-white/70 leading-relaxed">{a.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Projects */}
+        <div className="border-4 border-black dark:border-white bg-white dark:bg-[#1a1a1a] p-5 shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff]">
+          <h3 className="font-bebas text-3xl text-black dark:text-white mb-4 flex items-center gap-2 border-b-4 border-black dark:border-white pb-2">
+            <Package className="w-6 h-6" style={{ color: memberColor }} />
+            PROJECTS ({cv.projects.length})
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {cv.projects.map((p) => (
+              <ProjectMini key={p.id} p={p} />
+            ))}
+          </div>
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 export function PortfolioPage() {
-  const [filter, setFilter] = useState<string>("ALL");
-  const [layout, setLayout] = useState<"grid" | "list">("grid");
+  const [selectedId, setSelectedId] = useState(MEMBERS[0].id);
   useScrollReveal();
-  const { play } = useSfx();
 
-  const filtered = useMemo(() => {
-    if (filter === "ALL") return PORTFOLIO_PROJECTS;
-    return PORTFOLIO_PROJECTS.filter((p) => p.category === filter);
-  }, [filter]);
+  const selected = useMemo(() => MEMBERS.find((m) => m.id === selectedId)!, [selectedId]);
 
-  const stats = useMemo(() => {
-    const byStatus = { LIVE: 0, WIP: 0, ARCHIVED: 0 };
-    const byCategory: Record<string, number> = {};
-    const techs = new Set<string>();
-    PORTFOLIO_PROJECTS.forEach((p) => {
-      byStatus[p.status]++;
-      byCategory[p.category] = (byCategory[p.category] || 0) + 1;
-      p.tech.forEach((t) => techs.add(t));
-    });
-    return { total: PORTFOLIO_PROJECTS.length, byStatus, byCategory, techCount: techs.size };
-  }, []);
+  const goPrev = () => {
+    const idx = MEMBERS.findIndex((m) => m.id === selectedId);
+    setSelectedId(MEMBERS[(idx - 1 + MEMBERS.length) % MEMBERS.length].id);
+  };
+  const goNext = () => {
+    const idx = MEMBERS.findIndex((m) => m.id === selectedId);
+    setSelectedId(MEMBERS[(idx + 1) % MEMBERS.length].id);
+  };
 
   return (
     <div className="page-enter bg-[#8a2be2]/10 dark:bg-[#09090b] pt-28 md:pt-36 pb-24 min-h-screen relative overflow-hidden">
       <StarField variant="adaptive" className="fixed z-[1]" />
 
-      <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
+      <div className="max-w-6xl mx-auto px-6 md:px-12 relative z-10">
         {/* Hero */}
-        <div className="bg-white dark:bg-[#09090b] border-4 border-black dark:border-white shadow-[12px_12px_0_#000] dark:shadow-[12px_12px_0_#8a2be2] p-8 md:p-12 mb-8 relative no-color-transition">
-          <StarGraphic className="absolute top-4 right-4 w-16 h-16 text-[#8a2be2] animate-spin-slow" />
+        <div className="bg-white dark:bg-[#09090b] border-4 border-black dark:border-white shadow-[12px_12px_0_#000] dark:shadow-[12px_12px_0_#8a2be2] p-6 md:p-10 mb-6 relative no-color-transition">
+          <StarGraphic className="absolute top-4 right-4 w-12 h-12 text-[#8a2be2] animate-spin-slow" />
           <h1
-            className="font-bebas text-6xl md:text-[150px] leading-none uppercase text-black dark:text-white"
-            style={{ textShadow: "8px 8px 0px #8a2be2" }}
+            className="font-bebas text-5xl md:text-[100px] leading-none uppercase text-black dark:text-white"
+            style={{ textShadow: "6px 6px 0px #8a2be2" }}
           >
-            <span
-              className="text-[#8a2be2] ud-glitch-hover cursor-pointer"
-              data-text="PORT"
-              style={{
-                textShadow:
-                  "-4px -4px 0 #000, 4px -4px 0 #000, -4px 4px 0 #000, 4px 4px 0 #000, 10px 10px 0px #d4ff00",
-              }}
-            >
-              PORT
+            <span className="text-[#8a2be2] ud-glitch-hover cursor-pointer" data-text="PORTFOLIO">
+              PORTFOLIO
             </span>
-            <br />
-            FOLIO
           </h1>
-          <p className="font-mono-ud text-lg md:text-xl font-bold mt-8 max-w-2xl bg-[#8a2be2] text-white border-4 border-black p-4 inline-block shadow-[4px_4px_0_#000]">
-            Kami bukan cuma player. Kami juga builder.
+          <p className="font-mono-ud text-base md:text-lg font-bold mt-4 max-w-2xl bg-[#8a2be2] text-white border-4 border-black p-3 inline-block shadow-[4px_4px_0_#000]">
+            Bukan cuma player. Kami juga builder. Pilih entitas untuk lihat profil lengkapnya.
           </p>
-          <div className="mt-6 font-mono-ud text-sm text-black/70 dark:text-white/70 border-l-4 border-[#8a2be2] pl-4 max-w-2xl">
-            Kumpulan project programming dari collective — web, tool, bot, dan game.
-            Dari yang masih live sampai archived, semua ada di sini.
-          </div>
-
-          {/* Stats row */}
-          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 max-w-2xl">
-            <div className="border-4 border-black dark:border-white p-3 bg-[#8a2be2] text-white text-center">
-              <div className="font-bebas text-4xl leading-none">{stats.total}</div>
-              <div className="font-mono-ud text-[10px] tracking-widest">PROJECTS</div>
-            </div>
-            <div className="border-4 border-black dark:border-white p-3 bg-[#00ff00] text-black text-center">
-              <div className="font-bebas text-4xl leading-none">{stats.byStatus.LIVE}</div>
-              <div className="font-mono-ud text-[10px] tracking-widest">LIVE</div>
-            </div>
-            <div className="border-4 border-black dark:border-white p-3 bg-[#ff8c00] text-black text-center">
-              <div className="font-bebas text-4xl leading-none">{stats.byStatus.WIP}</div>
-              <div className="font-mono-ud text-[10px] tracking-widest">WIP</div>
-            </div>
-            <div className="border-4 border-black dark:border-white p-3 bg-[#d4ff00] text-black text-center">
-              <div className="font-bebas text-4xl leading-none">{stats.techCount}</div>
-              <div className="font-mono-ud text-[10px] tracking-widest">TECHS</div>
-            </div>
+          <div className="mt-4 font-mono-ud text-xs text-black/60 dark:text-white/60">
+            ▸ {MEMBERS.length} ENTITIES · CV + PROJECTS + ACHIEVEMENTS
           </div>
         </div>
 
-        {/* Controls: filter + layout */}
-        <div className="bg-white dark:bg-[#09090b] border-4 border-black dark:border-white shadow-[8px_8px_0_#000] dark:shadow-[8px_8px_0_#8a2be2] p-4 mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-          {/* Category filter */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono-ud text-[10px] font-black tracking-[0.2em] uppercase text-black/50 dark:text-white/50 flex items-center gap-1">
-              <Filter className="w-3 h-3" /> FILTER:
+        {/* Member selector */}
+        <div className="bg-white dark:bg-[#09090b] border-4 border-black dark:border-white shadow-[8px_8px_0_#000] dark:shadow-[8px_8px_0_#8a2be2] p-4 mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <span className="font-mono-ud text-[10px] font-black tracking-[0.2em] uppercase text-black/50 dark:text-white/50">
+              ▸ SELECT ENTITY
             </span>
-            {PORTFOLIO_CATEGORIES.map((cat) => (
+            <div className="flex items-center gap-1">
               <button
-                key={cat}
-                onClick={() => { play("click"); setFilter(cat); }}
-                className={cn(
-                  "px-3 py-1.5 border-2 border-black dark:border-white font-mono-ud text-[10px] font-black uppercase tracking-wider transition-all no-color-transition",
-                  filter === cat
-                    ? "bg-[#8a2be2] text-white"
-                    : "bg-transparent text-black/60 dark:text-white/60 hover:bg-[#8a2be2]/20",
-                )}
+                onClick={goPrev}
+                className="w-8 h-8 flex items-center justify-center bg-black dark:bg-white text-white dark:text-black border-2 border-black dark:border-white hover:bg-[#8a2be2] hover:text-white transition-colors no-color-transition"
+                aria-label="Previous member"
               >
-                {cat}
-                {cat !== "ALL" && stats.byCategory[cat] ? ` (${stats.byCategory[cat]})` : cat === "ALL" ? ` (${stats.total})` : ""}
+                <ChevronLeft className="w-4 h-4" />
               </button>
-            ))}
+              <button
+                onClick={goNext}
+                className="w-8 h-8 flex items-center justify-center bg-black dark:bg-white text-white dark:text-black border-2 border-black dark:border-white hover:bg-[#8a2be2] hover:text-white transition-colors no-color-transition"
+                aria-label="Next member"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
-
-          {/* Layout toggle */}
-          <div className="flex items-center gap-1">
-            <span className="font-mono-ud text-[10px] font-black tracking-[0.2em] uppercase text-black/50 dark:text-white/50 mr-1">
-              VIEW:
-            </span>
-            <button
-              onClick={() => { play("click"); setLayout("grid"); }}
-              className={cn(
-                "w-8 h-8 flex items-center justify-center border-2 border-black dark:border-white transition-colors no-color-transition",
-                layout === "grid"
-                  ? "bg-[#8a2be2] text-white"
-                  : "bg-transparent text-black dark:text-white hover:bg-[#8a2be2]/20",
-              )}
-              aria-label="Grid view"
-            >
-              <Grid3x3 className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => { play("click"); setLayout("list"); }}
-              className={cn(
-                "w-8 h-8 flex items-center justify-center border-2 border-black dark:border-white transition-colors no-color-transition",
-                layout === "list"
-                  ? "bg-[#8a2be2] text-white"
-                  : "bg-transparent text-black dark:text-white hover:bg-[#8a2be2]/20",
-              )}
-              aria-label="List view"
-            >
-              <List className="w-4 h-4" />
-            </button>
-          </div>
+          <MemberSelector members={MEMBERS} selectedId={selectedId} onSelect={setSelectedId} />
         </div>
 
-        {/* Projects */}
-        {filtered.length === 0 ? (
-          <div className="border-4 border-dashed border-black dark:border-white p-16 text-center">
-            <Package className="w-16 h-16 mx-auto mb-4 text-black/30 dark:text-white/30" />
-            <p className="font-bebas text-5xl text-black dark:text-white">NO PROJECTS IN THIS CATEGORY</p>
-          </div>
-        ) : layout === "grid" ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map((p, i) => (
-              <ProjectCard key={p.id} p={p} i={i} layout="grid" />
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col gap-4">
-            {filtered.map((p, i) => (
-              <ProjectCard key={p.id} p={p} i={i} layout="list" />
-            ))}
-          </div>
-        )}
+        {/* Member portfolio */}
+        <MemberPortfolio member={selected} />
       </div>
     </div>
   );
