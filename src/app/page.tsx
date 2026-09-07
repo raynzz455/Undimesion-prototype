@@ -7,6 +7,7 @@ import { AboutPage } from "@/components/undimension/about-page";
 import { MemoriesPage } from "@/components/undimension/memories-page";
 import { GamesPage } from "@/components/undimension/games-page";
 import { ScrollProgress } from "@/components/undimension/scroll-progress";
+import { BackToTop } from "@/components/undimension/back-to-top";
 import { StarGraphic } from "@/components/undimension/primitives";
 import { useSfx, useKonamiCode } from "@/hooks/use-sfx";
 import { Volume2, VolumeX, Ghost } from "lucide-react";
@@ -183,9 +184,16 @@ export default function Home() {
     <div className="min-h-screen flex flex-col selection:bg-[#ff4d4d] selection:text-white relative">
       {/* Film grain overlay — subtle texture across the whole app */}
       <div className="ud-grain" aria-hidden />
+      {/* Skip-to-content link for keyboard users */}
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-[#d4ff00] focus:text-black focus:font-bebas focus:text-2xl focus:px-4 focus:py-2 focus:border-4 focus:border-black"
+      >
+        SKIP TO CONTENT →
+      </a>
       <ScrollProgress />
       <NavBar current={page} setPage={setPage} />
-      <main className="flex-1 relative z-10">
+      <main id="main" className="flex-1 relative z-10">
         {page === "about" && <AboutPage />}
         {page === "memories" && <MemoriesPage />}
         {page === "games" && <GamesPage />}
@@ -198,6 +206,7 @@ export default function Home() {
           if (!soundOn) play("click");
         }}
       />
+      <BackToTop />
       <KonamiOverlay show={konami} />
     </div>
   );

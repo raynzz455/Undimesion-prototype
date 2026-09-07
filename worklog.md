@@ -265,3 +265,62 @@ Site is now fully accessible (modals have proper ARIA + focus trap), has an inte
 - The radar chart uses `recharts` which adds to the bundle; consider lazy-loading the StatsRadarSection if bundle size becomes an issue.
 - Focus trap restores focus to `document.activeElement` at modal-open time; if the trigger is removed from DOM (e.g. page switch while open), it gracefully no-ops.
 - The author filter is client-side (filters the already-fetched photos) — no extra API calls, instant.
+
+---
+Task ID: 5
+Agent: main (Z.ai Code)
+Task: QA testing, fix a11y gap (skip-to-content + main id), add Manifesto section, Back-to-top button, Play Matrix (member×game compatibility grid), styling polish (grain on opening, glow on hero card).
+
+## Section 1: Current Project Status Assessment
+
+Phase 4 was stable (a11y modals, radar chart, random entity, gallery filter, glitch-hover headers). This round's QA via agent-browser found ONE a11y gap: no skip-to-content link and `<main>` had no `id` (Phase 4 recommendation #10). Everything else was clean — 0 console errors, lint passing, all images lazy-loaded with alt text, radar chart stacked properly on mobile. After fixing the a11y gap, work shifted to new features (Manifesto, Play Matrix, Back-to-top) and styling polish.
+
+## Section 2: Completed Modifications & Verification
+
+### Bugs Fixed
+- **Skip-to-content + main id (a11y)** — Added a visually-hidden "SKIP TO CONTENT →" link that appears on focus (sr-only → focus:not-sr-only), pointing to `#main`. The `<main>` element now has `id="main"`. Keyboard users can now skip the navbar on Tab.
+
+### New Features Added
+1. **Manifesto Section** (`manifesto-section.tsx`) — A bold typographic creed block with 8 manifesto lines (alternating normal/accent text with colored stroke + offset shadow). Framer-motion staggered reveal from alternating sides. Section header "MANIFESTO" has glitch-hover. Signature row with 7 colored swatches (one per member) that scale+rotate on hover. Placed between HARAPAN and QUOTE. Section §06.
+2. **Play Matrix** (`compatibility-matrix.tsx`) — An interactive member×game compatibility grid. 7 members (rows, sorted by total play score) × 4 games (columns: MINECRAFT/ROBLOX/ML/D&D). 4 intensity levels (MAIN=3 yellow, CASUAL=2 cyan, RARE=1 orange, —=0). Hover a cell → detail panel below shows member×game + intensity + contextual description. Click a game header → highlights that column (dims others). Legend bar above. §07.
+3. **Back-to-Top button** (`back-to-top.tsx`) — Fixed bottom-left button (above the sound toggle) that appears after scrolling 600px. Shows live scroll percentage badge. Click → smooth-scrolls to top + plays "submit" SFX. Hover → turns lime green.
+
+### Data Added
+- `COMPATIBILITY` — Record of 7 members × 4 games with intensity levels (0-3). E.g. Rasya mains Minecraft+Roblox (3,3), Reza mains ML+D&D (3,3), Aldi mains Minecraft (3).
+- `GAME_LABELS` — Display labels for the 4 games.
+
+### Styling Applied
+- **Grain on opening screen** — Added `<div className="ud-grain">` to the OpeningScreen for film-grain texture consistency.
+- **Glow on hero MISSION card** — Added `.ud-glow` class (pulsing box-shadow) + `text-[#d4ff00]` to the THE MISSION card so the glow color matches the lime accent.
+- **Glitch-hover on new headers** — MANIFESTO and PLAY MATRIX headers have `.ud-glitch-hover` + `data-text`.
+- **Manifesto accent lines** — Colored stroke (WebkitTextStroke) + offset text-shadow on accent lines using the brand palette.
+- **Matrix color-coded cells** — Each intensity level has a distinct background color (yellow/cyan/orange/transparent) with opacity for the "—" level.
+
+### Verification Results
+- ✅ ESLint: 0 errors, 0 warnings
+- ✅ Agent Browser E2E: grain on opening, skip link present + `main#main`, MANIFESTO/PLAY MATRIX/THE CREED all render, manifesto content confirmed (WE ARE A GRAVITY, CHAOS IS OUR CANVAS), Play Matrix has 8 grid rows (header + 7 members) with colored member labels + game columns, Back-to-top appears after scroll, hero card has `.ud-glow`, **zero console errors**
+- ✅ VLM: confirms Play Matrix renders as a proper grid (member names left, game columns top, color-coded cells)
+- ✅ All images still lazy-loaded with alt text (verified in QA)
+
+## Section 3: Unresolved Issues / Risks / Next-phase Recommendations
+
+### Current Status: ✅ Phase 5 Complete & Verified
+Site now has 7 sections on the About page (hero, collective, stats radar, timeline, play matrix, harapan, manifesto, quote, guestbook), full a11y (skip link, ARIA modals, focus trap), back-to-top with scroll %, and rich styling (grain, glow, glitch, stickers, tilt, scanlines). Zero errors, lint clean.
+
+### Next-phase recommendations (priority order):
+1. **next/image optimization** — Replace remaining raw `<img>` with `next/image` for responsive sizing + blur placeholders. Biggest perf win remaining.
+2. **Admin auth** — NextAuth (single shared password) so only the 7 members can upload / moderate guestbook (the `approved` field exists but isn't used).
+3. **Production storage** — Swap `saveImage` in upload route to Cloudinary/Uploadthing for Render deploy.
+4. **Guestbook moderation UI** — Admin can delete/toggle `approved` on entries.
+5. **Timeline images** — Add a photo/illustration to each timeline milestone (currently text-only).
+6. **Quote widget persistence** — localStorage to remember last quote across page switches.
+7. **Mobile nav** — Consider hamburger sheet for very small screens (navbar stacks vertically now).
+8. **Lazy-load modals + radar** — `next/dynamic` for MemberDetailModal, PhotoLightbox, StatsRadarSection, CompatibilityMatrix (below-the-fold, framer-motion + recharts heavy).
+9. **Play Matrix mobile** — The grid has `overflow-x-auto` + `min-w-[520px]` so it scrolls horizontally on mobile; consider a stacked card layout alternative for very small screens.
+10. **Theme persistence** — next-themes already persists via localStorage, but verify dark mode survives page switches (it should).
+
+### Known minor notes:
+- The Play Matrix uses `grid-cols-[120px_repeat(4,1fr)]` which requires a 520px min-width — horizontal scroll on mobile is the intentional fallback.
+- The BackToTop button sits at `bottom-24 left-6` to avoid overlapping the SoundToggle at `bottom-6 left-6`.
+- The Manifesto's accent lines use `WebkitTextStroke` which is well-supported but not in the official CSS spec — acceptable for a stylistic effect.
+- The compatibility data is hand-curated lore, not derived from real play-time tracking — it's flavor content.

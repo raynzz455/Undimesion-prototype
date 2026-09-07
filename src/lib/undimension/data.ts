@@ -545,3 +545,22 @@ export const RANDOM_QUOTES: { text: string; author: string }[] = [
   { text: "Aku ghosting grup 3 bulan, balik dan seolah tak terjadi apa-apa. Itu persahabatan.", author: "RIFQI" },
   { text: "Tanpa drama, hidup terlalu sunyi. Aku sediakan dramanya.", author: "DUDIT" },
 ];
+
+// Member × Game compatibility matrix (who plays what)
+// Values: 3 = main/frequent, 2 = casual, 1 = rare, 0 = no
+export const COMPATIBILITY: Record<string, Record<string, number>> = {
+  aldi:  { minecraft: 3, roblox: 2, ml: 2, dnd: 1 },
+  razka: { minecraft: 3, roblox: 1, ml: 2, dnd: 3 },
+  reza:  { minecraft: 2, roblox: 1, ml: 3, dnd: 3 },
+  abyan: { minecraft: 2, roblox: 2, ml: 3, dnd: 1 },
+  rasya: { minecraft: 3, roblox: 3, ml: 2, dnd: 2 },
+  rifqi: { minecraft: 1, roblox: 2, ml: 1, dnd: 2 },
+  dudit: { minecraft: 2, roblox: 3, ml: 3, dnd: 2 },
+};
+
+export const GAME_LABELS: Record<string, string> = {
+  minecraft: "MINECRAFT",
+  roblox: "ROBLOX",
+  ml: "MOBILE LEGENDS",
+  dnd: "D&D",
+};

@@ -8,6 +8,7 @@ export function OpeningScreen({ onEnter }: { onEnter: () => void }) {
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center bg-[#09090b] overflow-hidden selection:bg-[#ff4d4d] selection:text-white">
       <StarField variant="dark" />
+      <div className="ud-grain" aria-hidden />
       <Blackhole />
       <Planets />
       <div className="relative z-10 flex flex-col items-center justify-center text-center w-full px-4">
