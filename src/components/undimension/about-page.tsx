@@ -15,6 +15,7 @@ import { CosmicStarMap } from "./cosmic-star-map";
 import { MEMBERS, HARAPAN, type Member } from "@/lib/undimension/data";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useSfx } from "@/hooks/use-sfx";
+import { useHashMember } from "@/hooks/use-hash-member";
 import { UserRound, Shuffle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -49,7 +50,7 @@ function HeroSection() {
           </p>
         </div>
         <div className="flex-1 w-full relative">
-          <div className="border-4 border-black dark:border-white bg-black dark:bg-[#111] p-8 shadow-[12px_12px_0_#000] dark:shadow-[12px_12px_0_#ff4d4d] rotate-2 text-white no-color-transition hover:rotate-0 hover:scale-105 transition-transform ud-glow ud-grad-border text-[#d4ff00]">
+          <div className="border-4 border-black dark:border-white bg-black dark:bg-[#111] p-8 shadow-[12px_12px_0_#000] dark:shadow-[12px_12px_0_#ff4d4d] rotate-2 text-white no-color-transition hover:rotate-0 hover:scale-105 transition-transform ud-glow ud-grad-border ud-corners text-[#d4ff00]">
             <StarGraphic className="w-12 h-12 text-[#d4ff00] mb-6 animate-spin-slow" />
             <h2 className="font-bebas text-6xl mb-4">THE MISSION</h2>
             <p className="font-mono-ud text-lg mb-6 leading-relaxed">
@@ -382,6 +383,15 @@ export function AboutPage() {
     play("close");
     setSelected(null);
   };
+
+  // Deep-link: auto-open member modal when URL has #member-{id}
+  useHashMember((id) => {
+    const m = MEMBERS.find((x) => x.id === id);
+    if (m) {
+      play("open");
+      setSelected(m);
+    }
+  });
 
   return (
     <div className="page-enter bg-[#f4f4f0] dark:bg-[#09090b] pt-28 md:pt-36 min-h-screen relative overflow-hidden">

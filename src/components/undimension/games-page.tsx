@@ -8,13 +8,28 @@ import { cn } from "@/lib/utils";
 
 function GameCarousel({ images, title }: { images: string[]; title: string }) {
   const [idx, setIdx] = useState(0);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
+    const DURATION = 4500;
+    const TICK = 50;
+    let elapsed = 0;
     const timer = setInterval(() => {
-      setIdx((prev) => (prev + 1) % images.length);
-    }, 4500);
+      elapsed += TICK;
+      setProgress(Math.min(100, (elapsed / DURATION) * 100));
+      if (elapsed >= DURATION) {
+        setIdx((prev) => (prev + 1) % images.length);
+        elapsed = 0;
+        setProgress(0);
+      }
+    }, TICK);
     return () => clearInterval(timer);
   }, [images.length]);
+
+  const goTo = (i: number) => {
+    setIdx(i);
+    setProgress(0);
+  };
 
   return (
     <div className="relative border-4 md:border-8 border-black shadow-[8px_8px_0_#000] md:shadow-[16px_16px_0_#000] w-full bg-[#8b8b8b] p-2 md:p-4 rotate-1 md:rotate-2 hover:rotate-0 transition-transform">
@@ -34,13 +49,24 @@ function GameCarousel({ images, title }: { images: string[]; title: string }) {
           <span className="w-2 h-2 bg-[#ff4d4d] rounded-full ud-blink" />
           <span className="font-mono-ud text-[9px] font-black text-white tracking-widest">REC</span>
         </div>
+        {/* Tape-deck counter (bottom-left) */}
+        <div className="absolute bottom-2 left-2 bg-black/70 px-2 py-0.5 border border-white/30 font-mono-ud text-[9px] font-black text-[#d4ff00] tracking-widest">
+          ▶ {String(idx + 1).padStart(2, "0")}/{String(images.length).padStart(2, "0")}
+        </div>
       </div>
-      <div className="flex justify-between items-center mt-3 md:mt-4">
+      {/* Tape-deck progress bar */}
+      <div className="mt-2 h-1.5 bg-black border border-black overflow-hidden">
+        <div
+          className="h-full bg-[#d4ff00] transition-all duration-50 ease-linear"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+      <div className="flex justify-between items-center mt-2 md:mt-3">
         <div className="flex gap-1 md:gap-2">
           {images.map((_, i) => (
             <button
               key={i}
-              onClick={() => setIdx(i)}
+              onClick={() => goTo(i)}
               className={cn(
                 "w-3 h-3 md:w-4 md:h-4 border-2 border-black transition-colors",
                 i === idx ? "bg-[#d4ff00]" : "bg-white",

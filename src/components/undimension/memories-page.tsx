@@ -10,7 +10,7 @@ import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useSfx } from "@/hooks/use-sfx";
 import { useFetch } from "@/hooks/use-fetch";
 import { cn } from "@/lib/utils";
-import { Upload, Loader2, X, Maximize2, RefreshCw, ImageOff } from "lucide-react";
+import { Upload, Loader2, X, Maximize2, RefreshCw, ImageOff, Dices } from "lucide-react";
 
 function GalleryCard({ p, onOpen }: { p: GalleryPhoto; onOpen: () => void }) {
   return (
@@ -265,12 +265,27 @@ export function MemoriesPage() {
             collective archive. Klik foto untuk fullscreen · Upload kenanganmu sendiri — backend otomatis konversi ke WebP via sharp.
           </div>
           {!loading && (
-            <button
-              onClick={() => { play("click"); refetch(); }}
-              className="mt-3 inline-flex items-center gap-2 bg-black dark:bg-white text-white dark:text-black font-mono-ud text-xs font-black px-3 py-1.5 border-2 border-black dark:border-white hover:-translate-y-0.5 transition-transform no-color-transition"
-            >
-              <RefreshCw className="w-3 h-3" /> REFRESH FEED
-            </button>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => { play("click"); refetch(); }}
+                className="inline-flex items-center gap-2 bg-black dark:bg-white text-white dark:text-black font-mono-ud text-xs font-black px-3 py-1.5 border-2 border-black dark:border-white hover:-translate-y-0.5 transition-transform no-color-transition"
+              >
+                <RefreshCw className="w-3 h-3" /> REFRESH FEED
+              </button>
+              {allPhotos.length > 0 && (
+                <button
+                  onClick={() => {
+                    play("submit");
+                    const i = Math.floor(Math.random() * allPhotos.length);
+                    setAuthorFilter(null);
+                    openLightbox(i);
+                  }}
+                  className="inline-flex items-center gap-2 bg-[#ff00ff] text-white font-mono-ud text-xs font-black px-3 py-1.5 border-2 border-black dark:border-white hover:-translate-y-0.5 hover:bg-[#d4ff00] hover:text-black transition-all no-color-transition"
+                >
+                  <Dices className="w-3 h-3" /> I'M FEELING CHAOTIC
+                </button>
+              )}
+            </div>
           )}
 
           {/* Author filter chips */}

@@ -524,3 +524,55 @@ Site now has 11 About sections (added Cosmic Star Map), a Share button on member
 - The Share button's Web Share API requires HTTPS in production; the clipboard fallback works everywhere.
 - The wobble hover is 0.5s — short enough to not be annoying on repeated hovers.
 - `COSMIC_COORDS` positions are hand-curated for visual balance (not derived from real data).
+
+---
+Task ID: 10
+Agent: main (Z.ai Code)
+Task: QA testing, add deep-link hash listener (#member-{id} auto-opens modal), "I'm Feeling Chaotic" random photo button on Gallery, tape-deck progress bar on Games carousels, apply .ud-corners to hero card.
+
+## Section 1: Current Project Status Assessment
+
+Phase 9 was stable (Cosmic Star Map, Share button, corner frames, wobble hover). This round's QA via agent-browser found NO bugs — all 11 About sections render, star map works on mobile, fixed buttons properly stacked, zero console errors. However, the Phase 9 recommendation #8 (deep-link) was identified as a missing feature: the Share button generates `#member-{id}` URLs but visiting them didn't auto-open the modal. This was the highest-priority fix since it makes the Share feature actually functional. After implementing it, work shifted to new features (random photo button, tape-deck progress) and styling polish (ud-corners application).
+
+## Section 2: Completed Modifications & Verification
+
+### New Features Added
+1. **Deep-link Hash Listener** (`use-hash-member.ts` hook + wired into AboutPage) — Visiting `/#member-aldi` (or any member id) now auto-opens that member's detail modal after the user clicks ENTER. The hook checks the hash on mount (300ms delay for render) + listens for `hashchange` events. After opening, it clears the hash via `history.replaceState` so re-opening works cleanly. Finds the member by id from `MEMBERS` array and calls `setSelected(m)`. **This makes the Share button's generated URLs actually functional.**
+2. **"I'm Feeling Chaotic" Button** (on Gallery page) — A magenta button with Dices icon that picks a random photo from the gallery and opens it in the lightbox. Clears any active author filter first so the random index maps correctly. Plays "submit" SFX. Sits next to the REFRESH FEED button in a flex row.
+3. **Tape-Deck Progress Bar** (on Games carousels) — Added a lime-green progress bar below each game carousel image that fills over 4.5s (matching the auto-advance interval), then resets when the next image loads. Updated the timer from a simple `setInterval` to a 50ms tick that tracks elapsed time + progress percentage. Also added a "▶ 01/04" frame counter overlay (bottom-left of the image) and a `goTo()` helper that resets progress when a dot is clicked.
+
+### Styling Applied
+- **`.ud-corners` applied to hero MISSION card** — The decorative L-shaped corner brackets (defined in Phase 9 but unused) are now applied to the THE MISSION card in the hero section, giving it a camera-viewfinder look. Combined with existing `.ud-glow` + `.ud-grad-border`.
+- **Tape-deck visual details** — Progress bar uses `duration-50 ease-linear` for smooth fill, frame counter uses `▶` play icon + zero-padded numbers, all in the lime accent color.
+
+### Hook Added
+- `use-hash-member.ts` — Hash listener hook: checks `#member-{id}` on mount + hashchange, calls callback with id, clears hash after. 300ms mount delay to ensure page has rendered.
+
+### Verification Results
+- ✅ ESLint: 0 errors, 0 warnings
+- ✅ Agent Browser E2E: deep-link `#member-razka` → modal opens with "Rembo" (h2 inside dialog) + "THE ARCHITECT" confirmed, hash cleared after; "I'M FEELING CHAOTIC" button exists + opens lightbox (FRAME_ confirmed); Games CRT + progress bars render; hero MISSION card has `.ud-corners`; **zero console errors**
+- ✅ VLM: confirms tape-deck progress bar (neon yellow/lime fill on darker track) + frame counter on Games carousels
+
+## Section 3: Unresolved Issues / Risks / Next-phase Recommendations
+
+### Current Status: ✅ Phase 10 Complete & Verified
+Site now has functional deep-links (Share URLs work), a random photo discovery button, tape-deck progress bars on Games, and corner-frame styling on the hero. Zero errors, lint clean.
+
+### Next-phase recommendations (priority order):
+1. **next/image optimization** — Replace remaining raw `<img>` with `next/image` for responsive sizing + blur placeholders. Biggest perf win remaining.
+2. **Admin auth** — NextAuth (single shared password) so only the 7 members can upload / moderate guestbook.
+3. **Production storage** — Swap `saveImage` in upload route to Cloudinary/Uploadthing for Render deploy.
+4. **Guestbook moderation UI** — Admin can delete/toggle `approved` on entries.
+5. **Timeline images** — Add a photo/illustration to each timeline milestone (currently text-only).
+6. **Lazy-load modals + heavy sections** — `next/dynamic` for MemberDetailModal, PhotoLightbox, StatsRadarSection, CompatibilityMatrix, MissionControl, Soundboard, KeyboardShortcutsOverlay, CosmicStarMap.
+7. **Play Matrix mobile** — Stacked card layout alternative for very small screens.
+8. **Deep-link for gallery photos** — Similar hash system for `#photo-{id}` to share individual gallery photos.
+9. **Tape-deck pause on hover** — Pause the carousel progress when the user hovers over the image.
+10. **Apply .ud-corners to more containers** — Star map, section headers, footer for consistency.
+
+### Known minor notes:
+- The deep-link hook has a 300ms delay on mount to ensure the AboutPage has rendered. If the user navigates directly to `#member-x` and clicks ENTER very fast, the hook fires after ENTER mounts AboutPage.
+- The hash is cleared via `history.replaceState` after opening — this means the browser back button won't re-trigger the modal.
+- The "I'm Feeling Chaotic" button picks from `allPhotos` (unfiltered) but clears the author filter first, so the lightbox index maps correctly to the full array.
+- The tape-deck progress bar uses 50ms ticks — 90 setState calls per 4.5s cycle per carousel. With 4 carousels (only 1 visible at a time due to scrolling), this is acceptable.
+- The `goTo()` helper resets progress to 0 when a dot is clicked — prevents the bar from jumping mid-fill.
