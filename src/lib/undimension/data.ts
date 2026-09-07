@@ -7,6 +7,11 @@ export type Member = {
   color: string; // bg-* utility
   highlight: string; // text-* utility
   bio: string;
+  tagline: string; // short punchy one-liner for modal
+  quote: string; // a personal quote shown in modal
+  funFacts: string[]; // 3-4 bullet facts
+  element: string; // thematic element (e.g. "FIRE", "VOID")
+  joinYear: string;
   stats: { label: string; value: string }[];
   socials: { label: string; href: string }[];
 };
@@ -21,6 +26,16 @@ export const MEMBERS: Member[] = [
     color: "bg-[#ff4d4d]",
     highlight: "text-[#ff4d4d]",
     bio: "Titik nol dari mana semua orbit dimulai. Sang pendiri yang menyalakan percikan pertama dan tak pernah membiarkannya padam, sejauh apapun anggota lainnya pergi.",
+    tagline: "Lit the first spark. Never let it die.",
+    quote: "Sejauh apapun kita terbang, gravitasi pertemanan selalu menarik kita kembali ke orbit yang sama.",
+    funFacts: [
+      "Selalu jadi orang pertama yang online di grup",
+      "Pemilik rekor 'paling sering ngajak nongkrong'",
+      "Punya playlist spotify untuk tiap mood anggota",
+      "Tidak pernah telat — kecuali sengaja",
+    ],
+    element: "FIRE",
+    joinYear: "2020",
     stats: [
       { label: "PWR", value: "99" },
       { label: "AGI", value: "MAX" },
@@ -41,6 +56,16 @@ export const MEMBERS: Member[] = [
     color: "bg-[#00e5ff]",
     highlight: "text-[#00e5ff]",
     bio: "Perancang struktur di balik kekacauan. Setiap blueprint yang dia buat ternyata jadi peta untuk petualangan yang tak terduga.",
+    tagline: "Designs the chaos others call home.",
+    quote: "Setiap struktur yang aku bangun punya pintu rahasia. Itu bukan bug — itu feature.",
+    funFacts: [
+      "Bisa ngoding sambil denger podcast true crime",
+      "Arsip screenshot-nya punya 4000+ file",
+      "Selalu bawa charger cadangan ke mana-mana",
+      "Menghitung optimasi FPS sebelum beli HP",
+    ],
+    element: "ICE",
+    joinYear: "2020",
     stats: [
       { label: "PWR", value: "88" },
       { label: "AGI", value: "97" },
@@ -61,6 +86,16 @@ export const MEMBERS: Member[] = [
     color: "bg-[#d4ff00]",
     highlight: "text-[#d4ff00]",
     bio: "Pikirannya selalu lima langkah di depan. Saat yang lain panik, dia sudah menyiapkan tiga rencana cadangan.",
+    tagline: "Five moves ahead before you blink.",
+    quote: "Rencana A gagal? Tenang. Aku punya rencana B sampai Z, dan dua di antaranya melibatkan ayam.",
+    funFacts: [
+      "Punya notes folder khusus berisi 'what-if scenarios'",
+      "Menang ranked 1v3 dengan strategi mind-game",
+      "Tidur 5 jam tapi terlihat segar (kecurigaan robot)",
+      "Pernah invalidate sebuah patch game dalam 30 menit",
+    ],
+    element: "MIND",
+    joinYear: "2020",
     stats: [
       { label: "PWR", value: "75" },
       { label: "AGI", value: "80" },
@@ -81,6 +116,16 @@ export const MEMBERS: Member[] = [
     color: "bg-[#ff00ff]",
     highlight: "text-[#ff00ff]",
     bio: "Barisan depan yang tak pernah mundur. Kalau ada tembok, dia yang duluan nubruk — dan biasanya temboknya yang kalah.",
+    tagline: "Runs headfirst. Walls lose.",
+    quote: "Pikir dulu itu nanti. Sekarang, charge!",
+    funFacts: [
+      "Pernah push tower sendirian dan menang",
+      "Reaksi dodge creeper: 0.2 detik",
+      "Koleksi skin game lebih mahal dari motor",
+      "Motto: 'lebih baik regret daripada penasaran'",
+    ],
+    element: "STORM",
+    joinYear: "2020",
     stats: [
       { label: "PWR", value: "MAX" },
       { label: "AGI", value: "85" },
@@ -101,6 +146,16 @@ export const MEMBERS: Member[] = [
     color: "bg-[#ff8c00]",
     highlight: "text-[#ff8c00]",
     bio: "Yang tak pernah bisa ditebak. Strateginya? Tidak ada. Dan itu justru strategi paling mematikan yang pernah ada.",
+    tagline: "No plan. That's the plan.",
+    quote: "Kalau musuh bisa nebak langkahku, berarti aku belum cukup random.",
+    funFacts: [
+      "Pernah menang tournament pake pick random",
+      "Punya 12 meme yang hanya dimengerti circle ini",
+      "Spontan ngajak roadtrip tengah malam — berkali-kali",
+      "Quote-nya di-pin di 5 server discord berbeda",
+    ],
+    element: "CHAOS",
+    joinYear: "2020",
     stats: [
       { label: "PWR", value: "82" },
       { label: "AGI", value: "MAX" },
@@ -121,6 +176,16 @@ export const MEMBERS: Member[] = [
     color: "bg-[#00ff00]",
     highlight: "text-[#00ff00]",
     bio: "Misteri berjalan. Kadang hadir, kadang hilang, tapi selalu muncul tepat saat dibutuhkan. Seperti glitch di matriks.",
+    tagline: "Here when it matters. Gone otherwise.",
+    quote: "Online status-ku tidak mencerminkan realita. Aku selalu ada — di latar.",
+    funFacts: [
+      "Pernah ghosting 3 bulan lalu balik seolah tak terjadi apa-apa",
+      "Punya 6 alias di platform berbeda",
+      "Reaction time-nya konstan di bawah 150ms (dicurigai AI)",
+      "Hanya muncul di chat saat ada yang butuh di-save",
+    ],
+    element: "VOID",
+    joinYear: "2020",
     stats: [
       { label: "PWR", value: "??" },
       { label: "AGI", value: "??" },
@@ -141,6 +206,16 @@ export const MEMBERS: Member[] = [
     color: "bg-[#8a2be2]",
     highlight: "text-[#8a2be2]",
     bio: "Elemen yang mempercepat reaksi. Tanpa dia, semuanya akan berjalan lambat. Dengan dia, semuanya jadi ledakan.",
+    tagline: "Accelerator of every reaction.",
+    quote: "Aku bukan pemicu masalah. Aku cuma yang bikin semuanya jadi lebih cepat — termasuk kelar-nya.",
+    funFacts: [
+      "Pernah convert 3 orang jadi main game baru dalam sehari",
+      "Menyebar rekomendasi anime lebih cepat dari algoritma",
+      "Penemu 'meta baru' yang 80% akurat",
+      "Tanggung jawab atas 60% drama server",
+    ],
+    element: "ENERGY",
+    joinYear: "2020",
     stats: [
       { label: "PWR", value: "90" },
       { label: "AGI", value: "88" },

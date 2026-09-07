@@ -360,3 +360,209 @@ html {
 .font-mono-ud { font-family: var(--font-mono-ud), monospace; }
 .font-cinzel { font-family: var(--font-cinzel), serif; }
 .font-chakra { font-family: var(--font-chakra), sans-serif; }
+
+/* ═────────────────────────────────────────════════════════════
+   UNDIMENSION — Extended Neo-Brutalism FX Pack (s1)
+   Pure CSS utilities. Appended; existing rules untouched.
+   Palette: red #ff4d4d, cyan #00e5ff, lime #d4ff00, magenta #ff00ff,
+   orange #ff8c00, green #00ff00, purple #8a2be2, ink #09090b, paper #f4f4f0
+   ═────────────────────────────────────────════════════════════ */
+
+/* ── 1. Glitch text effect (RGB-split, periodic bursts) ── */
+.ud-glitch,
+.ud-glitch-hover {
+  position: relative;
+  display: inline-block;
+  isolation: isolate;
+}
+.ud-glitch::before,
+.ud-glitch::after,
+.ud-glitch-hover::before,
+.ud-glitch-hover::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+}
+.ud-glitch::before {
+  color: var(--ud-magenta, #ff00ff);
+  z-index: 2;
+  animation: ud-glitch-magenta 4s infinite steps(1, end);
+}
+.ud-glitch::after {
+  color: var(--ud-cyan, #00e5ff);
+  z-index: 1;
+  animation: ud-glitch-cyan 4s infinite steps(1, end);
+}
+/* Mostly-clean text with periodic glitch bursts (~5% of the cycle) */
+@keyframes ud-glitch-magenta {
+  0%, 90%, 100% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 0 0); }
+  91% { opacity: 1; transform: translate(-2px, 1px); clip-path: inset(10% 0 60% 0); }
+  92% { opacity: 1; transform: translate(2px, -1px); clip-path: inset(50% 0 20% 0); }
+  93% { opacity: 1; transform: translate(-1px, 2px); clip-path: inset(20% 0 50% 0); }
+  94% { opacity: 1; transform: translate(1px, -2px); clip-path: inset(70% 0 5% 0); }
+  95% { opacity: 0; }
+}
+@keyframes ud-glitch-cyan {
+  0%, 90%, 100% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 0 0); }
+  91% { opacity: 1; transform: translate(2px, -1px); clip-path: inset(60% 0 15% 0); }
+  92% { opacity: 1; transform: translate(-2px, 1px); clip-path: inset(15% 0 55% 0); }
+  93% { opacity: 1; transform: translate(1px, 2px); clip-path: inset(40% 0 30% 0); }
+  94% { opacity: 1; transform: translate(-1px, -2px); clip-path: inset(5% 0 70% 0); }
+  95% { opacity: 0; }
+}
+/* Hover variant: clean by default, glitches while hovered */
+.ud-glitch-hover:hover::before {
+  opacity: 1;
+  animation: ud-glitch-magenta 0.6s infinite steps(1, end);
+}
+.ud-glitch-hover:hover::after {
+  opacity: 1;
+  animation: ud-glitch-cyan 0.6s infinite steps(1, end);
+}
+
+/* ── 2. Scroll-reveal ── */
+.ud-reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+.ud-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── 3. Washi-tape strips & rubber stamp ── */
+.ud-tape,
+.ud-tape-tr {
+  position: relative;
+}
+.ud-tape::before,
+.ud-tape-tr::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  width: 88px;
+  height: 26px;
+  background-color: rgba(255, 140, 0, 0.55); /* orange washi */
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0.18) 0 4px,
+    transparent 4px 9px
+  );
+  border-left: 1px dashed rgba(0, 0, 0, 0.35);
+  border-right: 1px dashed rgba(0, 0, 0, 0.35);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.18);
+  z-index: 5;
+  pointer-events: none;
+}
+.ud-tape::before {
+  left: 14px;
+  transform: rotate(-7deg);
+}
+.ud-tape-tr::before {
+  right: 14px;
+  left: auto;
+  transform: rotate(7deg);
+}
+.ud-stamp-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  padding: 6px;
+  border: 3px dashed currentColor;
+  border-radius: 50%;
+  transform: rotate(-12deg);
+  box-shadow: inset 0 0 0 2px currentColor;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--ud-red, #ff4d4d);
+  opacity: 0.85;
+  user-select: none;
+}
+
+/* ── 4. Brutalist button press ── */
+.ud-press {
+  --ud-shadow-x: 8px;
+  --ud-shadow-y: 8px;
+  transition: transform 0.08s ease-out, box-shadow 0.08s ease-out;
+  will-change: transform;
+}
+.ud-press:active {
+  transform: translate(var(--ud-shadow-x), var(--ud-shadow-y));
+  box-shadow: 0 0 0 currentColor;
+}
+
+/* ── 5. Film-grain overlay (SVG feTurbulence) ── */
+.ud-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px 200px;
+}
+
+/* ── 6. Tilt card 3D hover ── */
+.ud-tilt {
+  transition: transform 0.3s ease-out;
+  will-change: transform;
+}
+.ud-tilt:hover {
+  transform: perspective(1000px) rotateX(2deg) rotateY(-2deg) scale(1.03);
+}
+
+/* ── 7. Blinking caret ── */
+.ud-caret::after {
+  content: "▋";
+  display: inline-block;
+  margin-left: 0.15em;
+  animation: ud-blink 1s steps(2) infinite;
+}
+@keyframes ud-blink {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── 8. Marquee reverse + pause on hover ── */
+.animate-marquee-rev {
+  display: flex;
+  animation: ud-marquee 18s linear infinite reverse;
+  min-width: 200%;
+  will-change: transform;
+}
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* ── 9. Glow pulse for accent borders ── */
+/* Note: existing @keyframes ud-glow-pulse animates opacity for the blackhole.
+   This box-shadow variant is named distinctly to avoid clobbering it. */
+.ud-glow {
+  box-shadow: 0 0 0 0 currentColor;
+  animation: ud-box-glow-pulse 2s ease-in-out infinite;
+}
+@keyframes ud-box-glow-pulse {
+  0%, 100% { box-shadow: 0 0 5px 0 currentColor; }
+  50%      { box-shadow: 0 0 20px 4px currentColor; }
+}
+
+/* ── 10. Cyan selection variant ── */
+.ud-sel-cyan::selection,
+.ud-sel-cyan *::selection {
+  background: var(--ud-cyan, #00e5ff);
+  color: #000;
+}

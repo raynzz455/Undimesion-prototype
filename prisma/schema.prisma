@@ -39,3 +39,14 @@ model GalleryPhoto {
 
   @@index([createdAt])
 }
+
+model GuestbookEntry {
+  id        String   @id @default(cuid())
+  name      String
+  message   String
+  color     String   @default("#ff4d4d")
+  approved  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

@@ -1,8 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import { StarField } from "./star-field";
 import { StarGraphic, Marquee } from "./primitives";
-import { MEMBERS, HARAPAN } from "@/lib/undimension/data";
+import { MemberDetailModal } from "./member-detail-modal";
+import { GuestbookSection } from "./guestbook-section";
+import { MEMBERS, HARAPAN, type Member } from "@/lib/undimension/data";
+import { useScrollReveal } from "@/hooks/use-scroll-reveal";
+import { useSfx } from "@/hooks/use-sfx";
+import { UserRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 function HeroSection() {
@@ -71,14 +77,15 @@ function MarqueeBar() {
   );
 }
 
-function MemberCard({ m, i }: { m: (typeof MEMBERS)[number]; i: number }) {
+function MemberCard({ m, i, onOpen }: { m: Member; i: number; onOpen: () => void }) {
   const isEven = i % 2 === 0;
   return (
     <div
       className={cn(
-        "relative w-full border-8 border-black dark:border-white p-6 md:p-12 z-10 group ud-cv-auto",
+        "relative w-full border-8 border-black dark:border-white p-6 md:p-12 z-10 group ud-cv-auto ud-reveal",
         m.color,
       )}
+      data-reveal-delay={String((i % 3) * 80)}
     >
       {/* Giant Background Nickname */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 flex items-center justify-center opacity-30 mix-blend-color-burn pointer-events-none">
@@ -108,8 +115,7 @@ function MemberCard({ m, i }: { m: (typeof MEMBERS)[number]; i: number }) {
           )}
         >
           <div className="border-8 border-black dark:border-white bg-black p-3 shadow-[16px_16px_0_#000] dark:shadow-[16px_16px_0_#fff]">
-            <div className="relative overflow-hidden group-hover:scale-[1.02] transition-transform">
-              { }
+            <div className="relative overflow-hidden group-hover:scale-[1.02] transition-transform cursor-pointer" onClick={onOpen} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") onOpen(); }}>
               <img
                 src={m.img}
                 alt={m.nick}
@@ -177,8 +183,22 @@ function MemberCard({ m, i }: { m: (typeof MEMBERS)[number]; i: number }) {
             </div>
           </div>
 
+          {/* View Profile Button */}
+          <div className="mt-10 -rotate-1">
+            <button
+              onClick={onOpen}
+              className={cn(
+                "w-full md:w-auto bg-black text-white dark:bg-white dark:text-black border-4 border-black dark:border-white py-4 px-8 font-bebas text-2xl md:text-3xl shadow-[8px_8px_0_#000] dark:shadow-[8px_8px_0_#fff] hover:translate-y-1 hover:translate-x-1 hover:shadow-[0_0_0_#000] transition-all no-color-transition flex items-center justify-center gap-3",
+              )}
+            >
+              <UserRound className="w-6 h-6" />
+              VIEW FULL DOSSIER
+              <span className="font-mono-ud text-sm opacity-60">[+]</span>
+            </button>
+          </div>
+
           {/* Social Buttons */}
-          <div className="mt-10 flex gap-4 md:gap-6 -rotate-1">
+          <div className="mt-6 flex gap-4 md:gap-6 -rotate-1">
             {m.socials.map((social) => (
               <a
                 href={social.href}
@@ -195,7 +215,7 @@ function MemberCard({ m, i }: { m: (typeof MEMBERS)[number]; i: number }) {
   );
 }
 
-function TheCollective() {
+function TheCollective({ onOpenMember }: { onOpenMember: (m: Member) => void }) {
   return (
     <div className="bg-white dark:bg-[#1a1a1a] py-32 px-6 md:px-12 border-b-8 border-black dark:border-white relative z-10">
       <div className="max-w-7xl mx-auto">
@@ -204,7 +224,7 @@ function TheCollective() {
             WHO WE ARE
           </h2>
           <h2
-            className="font-bebas text-8xl md:text-[150px] uppercase text-black dark:text-white relative z-10"
+            className="font-bebas text-8xl md:text-[150px] uppercase text-black dark:text-white relative z-10 ud-reveal"
             style={{ textShadow: "10px 10px 0px #00e5ff" }}
           >
             THE COLLECTIVE
@@ -212,11 +232,14 @@ function TheCollective() {
           <p className="font-mono-ud font-black text-2xl mt-4 bg-black text-[#d4ff00] dark:bg-[#d4ff00] dark:text-black inline-block px-8 py-3 border-4 border-black dark:border-white shadow-[8px_8px_0_#ff4d4d] rotate-2 relative z-10">
             Mengenal Entitas di Balik Anomali Ini
           </p>
+          <p className="font-mono-ud text-sm text-black/50 dark:text-white/50 mt-4 max-w-md mx-auto">
+            Klik foto atau tombol <span className="font-bold">VIEW FULL DOSSIER</span> untuk membuka profil lengkap tiap entitas.
+          </p>
         </div>
 
         <div className="flex flex-col gap-32 md:gap-48 mt-20">
           {MEMBERS.map((m, i) => (
-            <MemberCard key={m.id} m={m} i={i} />
+            <MemberCard key={m.id} m={m} i={i} onOpen={() => onOpenMember(m)} />
           ))}
         </div>
       </div>
@@ -323,13 +346,28 @@ function HarapanSection() {
 }
 
 export function AboutPage() {
+  const [selected, setSelected] = useState<Member | null>(null);
+  useScrollReveal();
+  const { play } = useSfx();
+
+  const openMember = (m: Member) => {
+    play("open");
+    setSelected(m);
+  };
+  const closeModal = () => {
+    play("close");
+    setSelected(null);
+  };
+
   return (
     <div className="page-enter bg-[#f4f4f0] dark:bg-[#09090b] pt-40 min-h-screen relative overflow-hidden">
       <StarField variant="adaptive" className="fixed z-[1]" />
       <HeroSection />
       <MarqueeBar />
-      <TheCollective />
+      <TheCollective onOpenMember={openMember} />
       <HarapanSection />
+      <GuestbookSection />
+      <MemberDetailModal member={selected} onClose={closeModal} />
     </div>
   );
 }

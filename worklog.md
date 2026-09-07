@@ -45,3 +45,103 @@ Unresolved / Next-phase recommendations:
 - Add a "memories" detail modal (click polaroid → fullscreen view).
 - Add sound effects / easter eggs for neo-brutalism flair.
 - Deploy to Render with PostgreSQL (swap SQLite) + Cloudinary bucket.
+
+---
+
+Task ID: s1
+Agent: frontend-styling-expert
+Task: Enhance `/home/z/my-project/src/app/globals.css` with 10 additional neo-brutalism CSS effect utilities (appended; existing rules untouched).
+
+Work Log:
+- Read existing `globals.css` (363 lines) to inventory existing rules: starfield, marquee, spin, intro animations, CRT scanlines, barcode, scrollbar, selection, reduced-motion, font helpers, and brand palette (`--ud-red/cyan/lime/magenta/orange/green/purple/ink/paper`).
+- Identified pre-existing `@keyframes ud-glow-pulse` (animates opacity for the blackhole). To respect "do not modify existing rules", the new box-shadow glow keyframe is named `ud-box-glow-pulse` (documented in inline comment).
+- Appended a new "Extended Neo-Brutalism FX Pack (s1)" section at end of file (lines 364-568) with 10 effect blocks, all pure CSS, palette-restricted.
+- Ran `bun run lint` → 0 errors, 0 warnings. ESLint output is empty (clean).
+
+CSS rules added (all appended, none modified):
+1. **Glitch text effect** — `.ud-glitch` + `.ud-glitch-hover`. Uses `::before`/`::after` with `content: attr(data-text)`, magenta (#ff00ff) + cyan (#00e5ff) RGB split, `clip-path: inset(...)` slices, `steps(1, end)` keyframes that show clean text ~90% of cycle then burst 91-95%. Hover variant uses faster 0.6s loop. Keyframes: `ud-glitch-magenta`, `ud-glitch-cyan`.
+2. **Scroll-reveal** — `.ud-reveal` (opacity:0; translateY(40px)) → `.ud-reveal.is-visible` (opacity:1; translateY(0)). 0.7s `cubic-bezier(0.16, 1, 0.3, 1)` transition on `opacity` + `transform`. `will-change: opacity, transform`. JS toggle intentional (not added here).
+3. **Washi tape + stamp** — `.ud-tape` (top-left, rotate -7deg), `.ud-tape-tr` (top-right, rotate +7deg): 88×26px semi-transparent orange (rgba(255,140,0,.55)) strips with 45deg hatched repeating-linear-gradient, dashed side borders, drop shadow. `.ud-stamp-circle`: 96px dashed-border circle, `border-radius: 50%` (only round shape allowed), `rotate(-12deg)`, `box-shadow: inset 0 0 0 2px currentColor`, red color, uppercase letterspacing.
+4. **Brutalist button press** — `.ud-press` declares `--ud-shadow-x: 8px; --ud-shadow-y: 8px;` (overridable per-element). `:active` does `transform: translate(var(--ud-shadow-x), var(--ud-shadow-y))` + `box-shadow: 0 0 0 currentColor`. 0.08s transition. Works with arbitrary `shadow-[8px_8px_0_#000]` Tailwind utilities by overriding the CSS vars inline.
+5. **Film-grain overlay** — `.ud-grain`: `position: fixed; inset: 0; z-index: 9999; pointer-events: none; mix-blend-mode: multiply; opacity: 0.04`. Background is an inline SVG data URI using `<feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/>` properly URL-encoded (`%3C`, `%3E`, `%23`, `%25`). 200×200 tiled.
+6. **Tilt card 3D hover** — `.ud-tilt` (`transition: transform 0.3s ease-out; will-change: transform`) + `.ud-tilt:hover` applies `transform: perspective(1000px) rotateX(2deg) rotateY(-2deg) scale(1.03)`.
+7. **Blinking caret** — `.ud-caret::after` renders `▋` block, `animation: ud-blink 1s steps(2) infinite`. Keyframe `ud-blink`: `from { opacity: 0 } to { opacity: 1 }`.
+8. **Marquee reverse + pause on hover** — `.animate-marquee-rev` mirrors existing `.animate-marquee` with `reverse` direction (18s linear). Added `.animate-marquee:hover { animation-play-state: paused; }`.
+9. **Glow pulse** — `.ud-glow`: `box-shadow: 0 0 0 0 currentColor; animation: ud-box-glow-pulse 2s ease-in-out infinite;`. Keyframe `ud-box-glow-pulse`: 0/100% → `0 0 5px 0 currentColor`, 50% → `0 0 20px 4px currentColor`. (Renamed from spec'd `ud-glow-pulse` to avoid clobbering the existing blackhole keyframe of same name — see inline comment at line 552.)
+10. **Cyan selection variant** — `.ud-sel-cyan::selection` + `.ud-sel-cyan *::selection`: `background: var(--ud-cyan, #00e5ff); color: #000;`.
+
+Stage Summary:
+- All 10 effect utilities delivered as pure CSS, appended after existing `/* ── Utility font helpers ── */` block. No existing rule was modified or removed.
+- Performance: only `transform`/`opacity`/`box-shadow` animated; `will-change` scoped to `.ud-reveal`, `.ud-press`, `.ud-tilt`, and the two marquee utilities (matching existing pattern). Reduced-motion `@media` block at line 346 already covers all new animations globally (no per-rule opt-outs needed).
+- Palette compliance verified: only #ff4d4d (red), #00e5ff (cyan), #ff00ff (magenta), #ff8c00 (orange, via rgba) used; no indigo/blue introduced. `currentColor` used where element color drives the effect (stamp, press, glow, sel-cyan).
+- ESLint: 0 errors, 0 warnings. Clean.
+- Next steps for downstream agents: (a) wire `.ud-reveal` to IntersectionObserver in a client component to toggle `.is-visible`; (b) add a single `<div class="ud-grain" aria-hidden="true" />` to `RootLayout` for global film grain; (c) apply `.ud-glitch`/`.ud-glitch-hover` to headings that have `data-text` attributes; (d) compose `.ud-press` + Tailwind `shadow-[Npx_Npx_0_#000]` on buttons (override `--ud-shadow-x/y` to match); (e) add `.ud-tape`/`.ud-tape-tr` to polaroid cards in Gallery; (f) add `.ud-stamp-circle` to member badges.
+
+---
+Task ID: 2
+Agent: main (Z.ai Code) + frontend-styling-expert subagent (Task s1)
+Task: QA testing, fix bugs, improve styling with more details, add more features and functionality.
+
+## Section 1: Current Project Status Assessment
+
+Phase 1 (core neo-brutalism profile site) was stable and verified. This round focused on QA + feature expansion. QA via agent-browser confirmed: all 3 pages render with zero console errors, navigation works, 7 members render, upload modal works, no runtime issues. No bugs found — the foundation was solid, so work shifted to new features + styling polish.
+
+## Section 2: Completed Modifications & Verification
+
+### New Features Added
+1. **Member Detail Modal** (`member-detail-modal.tsx`) — Click any member card or "VIEW FULL DOSSIER" button → fullscreen profile overlay with framer-motion spring animation. Shows: ID badge, join year, element (FIRE/ICE/MIND/STORM/CHAOS/VOID/ENERGY), tagline, bio, personal quote (with Quote icon), fun facts list (4 per member), RPG stats grid, social links. ESC closes. Backdrop click closes.
+2. **Photo Lightbox** (`photo-lightbox.tsx`) — Click any gallery polaroid → fullscreen viewer with prev/next navigation (← → arrow keys + on-screen buttons), FRAME_XX counter, CRT scanlines overlay. ESC closes.
+3. **Guestbook Section** (`guestbook-section.tsx` + `/api/guestbook`) — DB-backed guestbook at the bottom of About page. Sticky form panel (name + message, 280 char limit, char counter). Entries render as masonry polaroid cards with deterministic accent color (hash from name). Loading skeletons, empty state, error handling. Framer-motion staggered reveal.
+4. **Sound Effects** (`use-sfx.ts`) — Web Audio API synthesized SFX (no audio files). Types: click, hover, open, close, submit, error. Toggleable via fixed bottom-left button (Volume2/VolumeX icon). Respects prefers-reduced-motion. AudioContext lazily created on first user interaction.
+5. **Konami Code Easter Egg** (`use-konamiCode` hook) — ↑↑↓↓←→←→BA triggers a "CHAOS MODE UNLOCKED" magenta overlay with SFX. Auto-dismisses after 3.5s.
+6. **Extended Footer** — 4-column footer: brand blurb, quick nav links (clickable → page switch), metrics grid (07 members, 2020 est, 04 games, ∞ dimensions), bottom bar with marquee tagline + "Built with chaos · Powered by bonds".
+
+### Data Extensions
+- Member type extended with: `tagline`, `quote`, `funFacts[]` (4 per member), `element`, `joinYear`. All 7 members populated with rich lore.
+- Prisma schema: added `GuestbookEntry` model (id, name, message, color, approved, createdAt).
+- Seed script: now seeds 4 curated guestbook entries (only if table empty).
+
+### Styling Polish (Task s1 — delegated to frontend-styling-expert subagent)
+Added 10 CSS effect blocks to `globals.css`:
+1. `.ud-glitch` / `.ud-glitch-hover` — RGB-split glitch text effect
+2. `.ud-reveal` / `.ud-reveal.is-visible` — scroll-reveal (IntersectionObserver toggles class)
+3. `.ud-tape` / `.ud-tape-tr` / `.ud-stamp-circle` — washi tape + rubber stamp decorations
+4. `.ud-press` — brutalist button-press effect (translate + shadow collapse)
+5. `.ud-grain` — SVG noise film-grain overlay
+6. `.ud-tilt` — 3D perspective hover tilt
+7. `.ud-caret::after` — blinking block cursor
+8. `.animate-marquee-rev` + pause-on-hover
+9. `.ud-glow` — pulsing box-shadow glow
+10. `.ud-sel-cyan::selection` — cyan selection variant
+
+### Hooks Added
+- `use-scroll-reveal.ts` — IntersectionObserver hook, auto-scans `.ud-reveal` elements, respects reduced-motion, supports `data-reveal-delay` for stagger.
+- `use-sfx.ts` — SFX + konami code hooks.
+
+### Verification Results
+- ✅ ESLint: 0 errors, 0 warnings
+- ✅ Agent Browser E2E: opening → enter → about (7 VIEW FULL DOSSIER buttons found) → member modal opens (FUN FACTS, RPG STATS, ELEMENT confirmed) → ESC closes → guestbook visible → gallery lightbox opens (FRAME_ confirmed) → next nav works → close works → sound toggle exists → **zero console errors**
+- ✅ Guestbook POST (curl): entry created with deterministic color, persisted, GET returns it
+- ✅ Guestbook POST (browser UI): form fills, SEND works, entry appears instantly (POST 200 in 13ms)
+- ✅ VLM analysis of modal: confirms neo-brutalist detail view rendering
+- ✅ 4 curated guestbook entries seeded (Wanderer_07, Pixel Phantom, Orbit Guest, Void Walker)
+
+## Section 3: Unresolved Issues / Risks / Next-phase Recommendations
+
+### Current Status: ✅ Phase 2 Complete & Verified
+All features working, no console errors, lint clean, DB seeded. The site now has interactive depth: member dossiers, photo lightbox, live guestbook, SFX, easter eggs, scroll animations, and rich CSS effects.
+
+### Next-phase recommendations (priority order):
+1. **Wire gallery to live API** — Currently MemoriesPage uses static `GALLERY_PHOTOS` + client-side append. Switch to TanStack Query fetching from `/api/gallery` so uploaded photos persist across reloads and are shared with all visitors.
+2. **Admin auth** — Add NextAuth (even a single shared password) so only the 7 members can upload to gallery / guestbook moderation.
+3. **Production storage** — Swap `saveImage` in upload route to Cloudinary/Uploadthing for Render deploy. DB already stores URLs so frontend won't change.
+4. **next/image optimization** — Replace raw `<img>` with `next/image` for automatic responsive sizing + lazy loading.
+5. **Glitch effect on titles** — Apply `.ud-glitch` class with `data-text` attribute to UNDIMENSION title and section headers for the RGB-split effect (CSS is ready, just needs wiring).
+6. **Guestbook moderation** — Add an admin endpoint to toggle `approved` flag on entries (schema field already exists).
+7. **Mobile UX audit** — Test all new modals/lightbox on small screens; the member modal especially may need layout adjustments on mobile.
+8. **Performance budget** — Monitor bundle size after adding framer-motion to multiple components; consider code-splitting modals if needed.
+
+### Known minor notes:
+- The `useSfx` hook creates an AudioContext lazily — first SFX after page load may have a ~50ms delay. Acceptable for UI feedback.
+- Guestbook has no rate-limiting; for production add basic IP-based throttling or a honeypot field.
+- The konami easter egg overlay is `pointer-events: none` so it won't block interaction even while showing.

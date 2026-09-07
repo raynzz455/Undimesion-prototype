@@ -1,6 +1,13 @@
 import { db } from "../src/lib/db";
 import { MEMBERS } from "../src/lib/undimension/data";
 
+const SEED_GUESTBOOK = [
+  { name: "Wanderer_07", message: "Across dimensions, the orbit holds. Salam chaos dari ujung galaksi.", color: "#ff4d4d" },
+  { name: "Pixel Phantom", message: "Situs ini bikin nostalgia SMK banget. Neo-brutalism for the win.", color: "#00e5ff" },
+  { name: "Orbit Guest", message: "Seven souls, one gravity. Tetap bersama walau terpisah ratusan parsec.", color: "#d4ff00" },
+  { name: "Void Walker", message: "Gallery of Chaos lives up to its name. Loved every frame.", color: "#ff00ff" },
+];
+
 async function main() {
   console.log("🌱 Seeding Undimension database...");
 
@@ -36,8 +43,20 @@ async function main() {
     });
     console.log(`  ✓ ${m.nick} (${m.role})`);
   }
-
   console.log(`\n✅ Seeded ${MEMBERS.length} members.`);
+
+  // Seed guestbook if empty
+  const existing = await db.guestbookEntry.count();
+  if (existing === 0) {
+    console.log("\n📝 Seeding guestbook...");
+    for (const g of SEED_GUESTBOOK) {
+      await db.guestbookEntry.create({ data: g });
+      console.log(`  ✓ ${g.name}`);
+    }
+    console.log(`✅ Seeded ${SEED_GUESTBOOK.length} guestbook entries.`);
+  } else {
+    console.log(`\n📝 Guestbook already has ${existing} entries — skipping seed.`);
+  }
 }
 
 main()

@@ -3,26 +3,37 @@
 import { useState } from "react";
 import { StarField } from "./star-field";
 import { StarGraphic } from "./primitives";
+import { PhotoLightbox } from "./photo-lightbox";
 import { GALLERY_PHOTOS, type GalleryPhoto } from "@/lib/undimension/data";
+import { useScrollReveal } from "@/hooks/use-scroll-reveal";
+import { useSfx } from "@/hooks/use-sfx";
 import { cn } from "@/lib/utils";
-import { Upload, Loader2, X } from "lucide-react";
+import { Upload, Loader2, X, Maximize2 } from "lucide-react";
 
-function GalleryCard({ p }: { p: GalleryPhoto }) {
+function GalleryCard({ p, onOpen }: { p: GalleryPhoto; onOpen: () => void }) {
   return (
     <div
       className={cn(
-        "border-4 border-black dark:border-white shadow-[8px_8px_0_#000] dark:shadow-[8px_8px_0_#fff] bg-white dark:bg-[#1a1a1a] p-4 inline-block w-full transform hover:rotate-0 hover:z-50 hover:scale-105 transition-transform z-10 relative no-color-transition",
+        "border-4 border-black dark:border-white shadow-[8px_8px_0_#000] dark:shadow-[8px_8px_0_#fff] bg-white dark:bg-[#1a1a1a] p-4 inline-block w-full transform hover:rotate-0 hover:z-50 hover:scale-105 transition-transform z-10 relative no-color-transition cursor-pointer ud-reveal",
         p.rotate,
       )}
+      onClick={onOpen}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === "Enter") onOpen(); }}
     >
       <div className="border-4 border-black dark:border-white bg-black overflow-hidden mb-4 relative">
-        { }
         <img
           src={p.img}
           alt={p.title}
           className="w-full h-auto grayscale hover:grayscale-0 contrast-125 transition-all duration-300 opacity-90 hover:opacity-100"
           loading="lazy"
         />
+        <div className="absolute inset-0 ud-scanlines opacity-30 pointer-events-none" />
+        {/* Expand hint */}
+        <div className="absolute top-2 right-2 bg-[#d4ff00] border-2 border-black p-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Maximize2 className="w-4 h-4 text-black" />
+        </div>
       </div>
       <div className="flex justify-between items-end border-t-4 border-black dark:border-white pt-4">
         <span className="font-bebas text-4xl text-black dark:text-white leading-none">
@@ -188,6 +199,18 @@ function UploadWidget({ onUploaded }: { onUploaded: (photo: GalleryPhoto) => voi
 
 export function MemoriesPage() {
   const [photos, setPhotos] = useState<GalleryPhoto[]>(GALLERY_PHOTOS);
+  const [lightboxIndex, setLightboxIndex] = useState(-1);
+  useScrollReveal();
+  const { play } = useSfx();
+
+  const openLightbox = (i: number) => {
+    play("open");
+    setLightboxIndex(i);
+  };
+  const closeLightbox = () => {
+    play("close");
+    setLightboxIndex(-1);
+  };
 
   return (
     <div className="page-enter bg-[#00e5ff] dark:bg-[#004d56] pt-40 pb-24 min-h-screen relative overflow-hidden">
@@ -217,20 +240,25 @@ export function MemoriesPage() {
           </p>
           <div className="mt-6 font-mono-ud text-sm text-black/70 dark:text-white/70 border-l-4 border-black dark:border-white pl-4 max-w-2xl">
             <span className="font-bold">{photos.length} FRAMES</span> tersimpan di
-            collective archive. Upload kenanganmu sendiri — backend otomatis
-            konversi ke WebP via sharp untuk loading kilat.
+            collective archive. Klik foto untuk fullscreen · Upload kenanganmu sendiri — backend otomatis konversi ke WebP via sharp.
           </div>
         </div>
 
         <div className="columns-1 md:columns-2 lg:columns-3 gap-10 space-y-10">
-          {photos.map((p) => (
-            <GalleryCard key={p.id} p={p} />
+          {photos.map((p, i) => (
+            <GalleryCard key={p.id} p={p} onOpen={() => openLightbox(i)} />
           ))}
         </div>
       </div>
 
       <UploadWidget
         onUploaded={(photo) => setPhotos((prev) => [photo, ...prev])}
+      />
+      <PhotoLightbox
+        photos={photos}
+        index={lightboxIndex}
+        onClose={closeLightbox}
+        onNavigate={(i) => { play("click"); setLightboxIndex(i); }}
       />
     </div>
   );
