@@ -5,6 +5,8 @@ import { StarField } from "./star-field";
 import { StarGraphic, Marquee } from "./primitives";
 import { MemberDetailModal } from "./member-detail-modal";
 import { GuestbookSection } from "./guestbook-section";
+import { TimelineSection } from "./timeline-section";
+import { QuoteWidget } from "./quote-widget";
 import { MEMBERS, HARAPAN, type Member } from "@/lib/undimension/data";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useSfx } from "@/hooks/use-sfx";
@@ -26,7 +28,8 @@ function HeroSection() {
             WE ARE
             <br />
             <span
-              className="text-black dark:text-white"
+              className="text-black dark:text-white ud-glitch-hover cursor-pointer"
+              data-text="UNDIMENSION"
               style={{
                 textShadow:
                   "-4px -4px 0 #ff4d4d, 4px -4px 0 #ff4d4d, -4px 4px 0 #ff4d4d, 4px 4px 0 #ff4d4d, 12px 12px 0px #d4ff00",
@@ -249,10 +252,9 @@ function TheCollective({ onOpenMember }: { onOpenMember: (m: Member) => void }) 
 
 function HarapanCardItem({ card }: { card: (typeof HARAPAN)[number] }) {
   return (
-    <div className={cn("relative transform hover:rotate-0 hover:scale-105 hover:z-50 transition-all duration-300 group", card.rotate)}>
+    <div className={cn("relative transform hover:rotate-0 hover:scale-105 hover:z-50 transition-all duration-300 group ud-tilt ud-reveal", card.rotate)}>
       <div className={cn("border-8 border-black", card.bg, card.shadow)}>
         <div className="border-b-8 border-black overflow-hidden relative">
-          { }
           <img
             src={card.img}
             alt={card.title}
@@ -365,7 +367,9 @@ export function AboutPage() {
       <HeroSection />
       <MarqueeBar />
       <TheCollective onOpenMember={openMember} />
+      <TimelineSection />
       <HarapanSection />
+      <QuoteWidget />
       <GuestbookSection />
       <MemberDetailModal member={selected} onClose={closeModal} />
     </div>

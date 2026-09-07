@@ -451,3 +451,97 @@ export const GALLERY_PHOTOS: GalleryPhoto[] = [
     author: "ALDI",
   },
 ];
+
+export type TimelineMilestone = {
+  id: string;
+  year: string;
+  season: string;
+  title: string;
+  description: string;
+  color: string;
+  icon: string;
+};
+
+export const TIMELINE: TimelineMilestone[] = [
+  {
+    id: "t1",
+    year: "2020",
+    season: "AUTUMN",
+    title: "THE SPARK",
+    description:
+      "Tujuh anak SMK dipertemukan oleh satu meja kosong di pojok kantin. Obrolan tentang game jadi jembatan, dan tanpa disadari, sebuah orbit terbentuk.",
+    color: "#ff4d4d",
+    icon: "✦",
+  },
+  {
+    id: "t2",
+    year: "2021",
+    season: "WINTER",
+    title: "FIRST DUNGEON",
+    description:
+      "Kampanye D&D pertama yang berakhir total party kill di ruang pertama. Bukan kegagalan — itu inisiasi. Dari sini lahir inside joke yang bertahan bertahun-tahun.",
+    color: "#00e5ff",
+    icon: "🎲",
+  },
+  {
+    id: "t3",
+    year: "2022",
+    season: "SPRING",
+    title: "MINECRAFT ERA",
+    description:
+      "Server survival private dibangun. Base utama digrebeg creeper 47 kali. Diamond pertama ditambang bareng pada jam 3 pagi. Kenangan itu tak tergantikan.",
+    color: "#d4ff00",
+    icon: "⛏",
+  },
+  {
+    id: "t4",
+    year: "2023",
+    season: "SUMMER",
+    title: "MOBILE LEGENDS GRIND",
+    description:
+      "Push rank sampai Mythic dengan komposisi draft penuh chaos. Persahabatan diuji oleh lag, afk, dan saling menyalahkan — tapi tidak pernah patah.",
+    color: "#ff00ff",
+    icon: "⚔",
+  },
+  {
+    id: "t5",
+    year: "2024",
+    season: "AUTUMN",
+    title: "THE ROBLOX CHAOS",
+    description:
+      "Era obby absurd dan roleplay yang nggak masuk akal. Oof terdengar ratusan kali sehari. collective imajinasi mencapai puncak kekacauan yang indah.",
+    color: "#ff8c00",
+    icon: "◉",
+  },
+  {
+    id: "t6",
+    year: "2025",
+    season: "WINTER",
+    title: "DIMENSIONAL DRIFT",
+    description:
+      "Satu per satu mulai sibuk: kuliah, kerja, hidup. Grup sepi. Tapi setiap ada yang butuh, orbit selalu menarik kita kembali. Gravitasi tidak pernah lemah.",
+    color: "#8a2be2",
+    icon: "∞",
+  },
+  {
+    id: "t7",
+    year: "2026",
+    season: "NOW",
+    title: "UNDIMENSION MANIFEST",
+    description:
+      "Web profile ini lahir sebagai konstanta digital. Tempat menyimpan kenangan, harapan, dan bukti bahwa tujuh orbit yang berbeda bisa tetap selaras.",
+    color: "#00ff00",
+    icon: "★",
+  },
+];
+
+export const RANDOM_QUOTES: { text: string; author: string }[] = [
+  { text: "Chaos is just order you haven't understood yet.", author: "THE COLLECTIVE" },
+  { text: "Tujuh orbit, satu gravitasi. Itu cukup.", author: "ALDI" },
+  { text: "Kalau kita tidak saling menyalahkan di ranked, kita bukan teman.", author: "REZA" },
+  { text: "Build dulu, fikir nanti. Itu filosofi kami.", author: "RAZKA" },
+  { text: "Yang penting bunyi 'oof'-nya keras.", author: "RASYA" },
+  { text: "Roll for initiative. Roll for friendship. Critical hit.", author: "ABYAN" },
+  { text: "Aku ghosting grup 3 bulan, balik dan seolah tak terjadi apa-apa. Itu persahabatan.", author: "RIFQI" },
+  { text: "Tanpa drama, hidup terlalu sunyi. Aku sediakan dramanya.", author: "DUDIT" },
+];

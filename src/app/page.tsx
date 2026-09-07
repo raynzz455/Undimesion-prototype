@@ -180,10 +180,12 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col selection:bg-[#ff4d4d] selection:text-white">
+    <div className="min-h-screen flex flex-col selection:bg-[#ff4d4d] selection:text-white relative">
+      {/* Film grain overlay — subtle texture across the whole app */}
+      <div className="ud-grain" aria-hidden />
       <ScrollProgress />
       <NavBar current={page} setPage={setPage} />
-      <main className="flex-1">
+      <main className="flex-1 relative z-10">
         {page === "about" && <AboutPage />}
         {page === "memories" && <MemoriesPage />}
         {page === "games" && <GamesPage />}

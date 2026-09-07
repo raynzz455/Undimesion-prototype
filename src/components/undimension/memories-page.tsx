@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { StarField } from "./star-field";
 import { StarGraphic } from "./primitives";
 import { PhotoLightbox } from "./photo-lightbox";
-import { GALLERY_PHOTOS, type GalleryPhoto } from "@/lib/undimension/data";
+import { type GalleryPhoto } from "@/lib/undimension/data";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useSfx } from "@/hooks/use-sfx";
+import { useFetch } from "@/hooks/use-fetch";
 import { cn } from "@/lib/utils";
-import { Upload, Loader2, X, Maximize2 } from "lucide-react";
+import { Upload, Loader2, X, Maximize2, RefreshCw } from "lucide-react";
 
 function GalleryCard({ p, onOpen }: { p: GalleryPhoto; onOpen: () => void }) {
   return (
@@ -50,7 +52,7 @@ function GalleryCard({ p, onOpen }: { p: GalleryPhoto; onOpen: () => void }) {
   );
 }
 
-function UploadWidget({ onUploaded }: { onUploaded: (photo: GalleryPhoto) => void }) {
+function UploadWidget({ onUploaded }: { onUploaded: () => void }) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
@@ -78,16 +80,7 @@ function UploadWidget({ onUploaded }: { onUploaded: (photo: GalleryPhoto) => voi
         throw new Error(data.error || "Upload gagal");
       }
       const data = await res.json();
-      onUploaded({
-        id: data.id,
-        img: data.url,
-        title: title.toUpperCase(),
-        date,
-        rotate: ["-rotate-2", "rotate-2", "-rotate-1", "rotate-3", "-rotate-3"][
-          Math.floor(Math.random() * 5)
-        ],
-        author: (author || "ANON").toUpperCase(),
-      });
+      onUploaded();
       setOpen(false);
       setFile(null);
       setTitle("");
@@ -197,8 +190,27 @@ function UploadWidget({ onUploaded }: { onUploaded: (photo: GalleryPhoto) => voi
   );
 }
 
+function GallerySkeleton() {
+  return (
+    <div className="columns-1 md:columns-2 lg:columns-3 gap-10 space-y-10">
+      {[0, 1, 2, 3, 4, 5].map((i) => (
+        <div
+          key={i}
+          className="border-4 border-black dark:border-white bg-white dark:bg-[#1a1a1a] p-4 shadow-[8px_8px_0_#000] dark:shadow-[8px_8px_0_#fff]"
+          style={{ transform: `rotate(${[-2, 1, -1, 2, -3, 3][i]}deg)` }}
+        >
+          <div className="border-4 border-black dark:border-white bg-black/20 dark:bg-white/10 mb-4 aspect-[4/3] animate-pulse" />
+          <div className="h-8 w-2/3 bg-black/10 dark:bg-white/10 animate-pulse mb-2" />
+          <div className="h-4 w-1/3 bg-black/10 dark:bg-white/10 animate-pulse" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function MemoriesPage() {
-  const [photos, setPhotos] = useState<GalleryPhoto[]>(GALLERY_PHOTOS);
+  const { data, loading, refetch } = useFetch<{ photos: GalleryPhoto[]; count: number }>("/api/gallery");
+  const photos = data?.photos ?? [];
   const [lightboxIndex, setLightboxIndex] = useState(-1);
   useScrollReveal();
   const { play } = useSfx();
@@ -239,20 +251,32 @@ export function MemoriesPage() {
             Momen mentah. Tanpa filter. Tanpa batas.
           </p>
           <div className="mt-6 font-mono-ud text-sm text-black/70 dark:text-white/70 border-l-4 border-black dark:border-white pl-4 max-w-2xl">
-            <span className="font-bold">{photos.length} FRAMES</span> tersimpan di
+            <span className="font-bold">{loading ? "..." : `${photos.length} FRAMES`}</span> tersimpan di
             collective archive. Klik foto untuk fullscreen · Upload kenanganmu sendiri — backend otomatis konversi ke WebP via sharp.
           </div>
+          {!loading && (
+            <button
+              onClick={() => { play("click"); refetch(); }}
+              className="mt-3 inline-flex items-center gap-2 bg-black dark:bg-white text-white dark:text-black font-mono-ud text-xs font-black px-3 py-1.5 border-2 border-black dark:border-white hover:-translate-y-0.5 transition-transform no-color-transition"
+            >
+              <RefreshCw className="w-3 h-3" /> REFRESH FEED
+            </button>
+          )}
         </div>
 
-        <div className="columns-1 md:columns-2 lg:columns-3 gap-10 space-y-10">
-          {photos.map((p, i) => (
-            <GalleryCard key={p.id} p={p} onOpen={() => openLightbox(i)} />
-          ))}
-        </div>
+        {loading ? (
+          <GallerySkeleton />
+        ) : (
+          <div className="columns-1 md:columns-2 lg:columns-3 gap-10 space-y-10">
+            {photos.map((p, i) => (
+              <GalleryCard key={p.id} p={p} onOpen={() => openLightbox(i)} />
+            ))}
+          </div>
+        )}
       </div>
 
       <UploadWidget
-        onUploaded={(photo) => setPhotos((prev) => [photo, ...prev])}
+        onUploaded={() => { play("submit"); refetch(); }}
       />
       <PhotoLightbox
         photos={photos}

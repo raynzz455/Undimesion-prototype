@@ -21,10 +21,8 @@ export function MemberDetailModal({
       if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
     return () => {
       window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
     };
   }, [open, onClose]);
 
@@ -32,7 +30,8 @@ export function MemberDetailModal({
     <AnimatePresence>
       {open && member && (
         <motion.div
-          className="fixed inset-0 z-[80] flex items-start md:items-center justify-center p-3 md:p-6 overflow-y-auto"
+          className="fixed inset-0 z-[80] flex items-start md:items-center justify-center p-3 md:p-6 overflow-y-auto overscroll-contain"
+          style={{ WebkitOverflowScrolling: "touch" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -47,13 +46,13 @@ export function MemberDetailModal({
           {/* Modal */}
           <motion.div
             className={cn(
-              "relative w-full max-w-3xl my-4 md:my-8 border-8 border-black dark:border-white shadow-[16px_16px_0_#000] dark:shadow-[16px_16px_0_#d4ff00]",
+              "relative w-full max-w-3xl my-4 md:my-8 border-8 border-black dark:border-white shadow-[8px_8px_0_#000] md:shadow-[16px_16px_0_#000] dark:md:shadow-[16px_16px_0_#d4ff00]",
               member.color,
             )}
-            initial={{ scale: 0.85, y: 40, rotate: -2 }}
+            initial={{ scale: 0.92, y: 20, rotate: -1 }}
             animate={{ scale: 1, y: 0, rotate: 0 }}
-            exit={{ scale: 0.85, y: 40, rotate: -2 }}
-            transition={{ type: "spring", stiffness: 300, damping: 24 }}
+            exit={{ scale: 0.92, y: 20, rotate: -1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 26 }}
           >
             {/* Close button */}
             <button

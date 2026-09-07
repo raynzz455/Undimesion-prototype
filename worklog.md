@@ -145,3 +145,65 @@ All features working, no console errors, lint clean, DB seeded. The site now has
 - The `useSfx` hook creates an AudioContext lazily — first SFX after page load may have a ~50ms delay. Acceptable for UI feedback.
 - Guestbook has no rate-limiting; for production add basic IP-based throttling or a honeypot field.
 - The konami easter egg overlay is `pointer-events: none` so it won't block interaction even while showing.
+
+---
+Task ID: 3
+Agent: main (Z.ai Code)
+Task: QA testing, fix mobile modal scroll bug, wire gallery to live API, add Timeline + Quote rotation features, apply glitch effects + grain overlay.
+
+## Section 1: Current Project Status Assessment
+
+Phase 2 was stable (member modal, lightbox, guestbook, SFX, konami, CSS FX pack all working). This round's QA via agent-browser + VLM revealed ONE real bug: the member detail modal was not scrollable on mobile (content cut off, body overflow:hidden lock prevented page scroll, modal flex container wasn't the scroll parent). Everything else was clean — no console errors, lint passing. After fixing the bug, work shifted to new features (Timeline, Quote widget, live gallery API) and applying the previously-built CSS effects (glitch on titles, grain overlay, tilt on cards).
+
+## Section 2: Completed Modifications & Verification
+
+### Bug Fixed
+- **Mobile modal scroll (member-detail-modal.tsx)** — Root cause: `document.body.style.overflow = "hidden"` was set on modal open, but the overlay's `flex items-start + overflow-y-auto` didn't become the scroll parent on mobile because content height equaled viewport height (modal was taller than viewport but body was locked). Fix: removed the body overflow lock entirely; the overlay container now scrolls naturally with the page. Also reduced spring animation distance (scale 0.92/y:20 vs 0.85/40) and used responsive shadow (8px mobile, 16px desktop) to avoid horizontal overflow. Verified via VLM + agent-browser: FUN FACTS, RPG STATS, JOINED all reachable by scrolling on 390×844 viewport, ESC closes.
+
+### New Features Added
+1. **Timeline / Journey Section** (`timeline-section.tsx`) — A vertical alternating-side timeline of 7 milestones (2020 THE SPARK → 2026 UNDIMENSION MANIFEST), each with year, season, title, description, color, and icon. Framer-motion `whileInView` reveal, color-accented cards, vertical connector line, circular icon nodes with colored backgrounds, end cap "...AND THE ORBIT CONTINUES". Placed between THE COLLECTIVE and HARAPAN KAMI.
+2. **Quote Widget** (`quote-widget.tsx`) — Auto-rotating quote carousel (8 quotes from members/collective) with AnimatePresence blur transitions every 6s. Pause on hover, click to shuffle, dot indicators (8 dots), shuffle button. Placed between HARAPAN KAMI and GUESTBOOK on a black/white scanlined band.
+3. **Live Gallery API** (`memories-page.tsx` + `use-fetch.ts`) — Gallery now fetches from `/api/gallery` on mount via a new lightweight `useFetch` hook (AbortController-safe, no external deps, defers setState to satisfy react-hooks rules). Loading skeletons (6 polaroid-shaped pulsing placeholders with random rotation), REFRESH FEED button, frame count from API. Uploads now trigger `refetch()` so new photos appear from the DB (persist across reloads + shared with all visitors).
+
+### Data Added
+- `TimelineMilestone[]` — 7 milestones with rich Indonesian lore (THE SPARK, FIRST DUNGEON, MINECRAFT ERA, MOBILE LEGENDS GRIND, THE ROBLOX CHAOS, DIMENSIONAL DRIFT, UNDIMENSION MANIFEST).
+- `RANDOM_QUOTES[]` — 8 quotes (1 collective + 1 per member).
+
+### Styling Applied (wiring previously-built CSS)
+- **Glitch on UNDIMENSION title** — opening screen `<h1>` now has `.ud-glitch` + `data-text="UNDIMENSION"` for the RGB-split effect.
+- **Glitch-hover on hero title** — About page "UNDIMENSION" span has `.ud-glitch-hover` for hover-triggered glitch.
+- **Grain overlay** — `<div className="ud-grain">` added to main page wrapper; subtle film-grain texture across the whole app (z-9999, pointer-events-none, mix-blend-multiply, 0.04 opacity).
+- **Tilt on Harapan cards** — `.ud-tilt` added to the 4 hope cards for 3D perspective hover.
+- **Scroll-reveal** — `.ud-reveal` added to timeline cards + harapan cards for staggered entrance.
+
+### Hook Added
+- `use-fetch.ts` — Lightweight fetch hook (AbortController, mountedRef guard, deferred setState, refetch via tick counter). Used by MemoriesPage. Avoids adding TanStack Query provider globally for this single use case.
+
+### Verification Results
+- ✅ ESLint: 0 errors, 0 warnings
+- ✅ Agent Browser E2E: glitch class present on opening title + hero span, Timeline renders (THE JOURNEY / CHRONOLOGY / THE SPARK / UNDIMENSION MANIFEST all confirmed), Quote widget renders (TRANSMISSION + 8 dots), Gallery live fetch (GET /api/gallery 200, REFRESH button present), **zero console errors**
+- ✅ Mobile modal fix verified on 390×844: scrolled to bottom, FUN FACTS + RPG STATS + JOINED all reachable, ESC closes
+- ✅ Gallery API: GET 200 in 113ms, DB photos + static photos merged
+- ✅ Guestbook API: GET 200 in 294ms, 4 seeded entries returned
+
+## Section 3: Unresolved Issues / Risks / Next-phase Recommendations
+
+### Current Status: ✅ Phase 3 Complete & Verified
+Site now has: opening → about (hero + collective + timeline + harapan + quote + guestbook) → gallery (live API + lightbox) → games. All features working, zero errors, mobile-fixed.
+
+### Next-phase recommendations (priority order):
+1. **next/image optimization** — Replace remaining raw `<img>` tags with `next/image` for automatic responsive sizing + lazy loading + blur placeholders. Biggest perf win remaining.
+2. **Admin auth** — Add NextAuth (single shared password) so only the 7 members can upload to gallery / moderate guestbook (the `approved` flag exists in schema but isn't used yet).
+3. **Production storage** — Swap `saveImage` in upload route to Cloudinary/Uploadthing for Render deploy.
+4. **Guestbook moderation UI** — Admin can delete/toggle `approved` on entries. Schema field exists, just needs an endpoint + UI.
+5. **Timeline images** — Add a photo/illustration to each timeline milestone card (currently text-only). Would make it more visual.
+6. **Quote widget persistence** — Remember which quote was last shown (localStorage) so it doesn't reset on page switch.
+7. **Mobile nav audit** — The navbar stacks vertically on mobile (ABOUT/GALLERY/GAMES/DARK); test tap targets and consider a hamburger sheet for very small screens.
+8. **Performance budget** — Bundle now includes framer-motion in timeline + quote + modal + lightbox. Consider `next/dynamic` lazy-loading the modals/lightbox since they're below-the-fold.
+9. **Accessibility** — Add focus-trap to modals/lightbox (currently focus can escape to background). Add `role="dialog"` + `aria-modal`.
+10. **Empty gallery state** — If API returns 0 photos, show a friendly empty state (currently just shows nothing).
+
+### Known minor notes:
+- The grain overlay uses `mix-blend-mode: multiply` which darkens slightly on light mode — acceptable, gives a printed-paper feel.
+- Timeline vertical connector line uses absolute positioning; on very narrow screens (<360px) the icon nodes may overlap text. Acceptable for now (min target is 390px).
+- The `useFetch` hook defers `setLoading(true)` via `Promise.resolve().then()` to satisfy the `react-hooks/set-state-in-effect` rule — adds ~1 frame delay, imperceptible.
