@@ -12,6 +12,7 @@ import { ManifestoSection } from "./manifesto-section";
 import { CompatibilityMatrix } from "./compatibility-matrix";
 import { MissionControl } from "./mission-control";
 import { CosmicStarMap } from "./cosmic-star-map";
+import { ChaosDice } from "./chaos-dice";
 import { MEMBERS, HARAPAN, type Member } from "@/lib/undimension/data";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useSfx } from "@/hooks/use-sfx";
@@ -404,8 +405,15 @@ export function AboutPage() {
       <CompatibilityMatrix />
       <HarapanSection />
       <ManifestoSection />
-      <QuoteWidget />
       <CosmicStarMap />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 border-t-8 border-black dark:border-white">
+        <div className="border-b-4 lg:border-b-0 lg:border-r-4 border-black dark:border-white">
+          <QuoteWidget />
+        </div>
+        <div className="bg-[#09090b] dark:bg-white p-6 md:p-12 flex items-center justify-center">
+          <ChaosDice />
+        </div>
+      </div>
       <MissionControl />
       <GuestbookSection />
       <MemberDetailModal member={selected} onClose={closeModal} />

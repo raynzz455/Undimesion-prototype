@@ -576,3 +576,52 @@ Site now has functional deep-links (Share URLs work), a random photo discovery b
 - The "I'm Feeling Chaotic" button picks from `allPhotos` (unfiltered) but clears the author filter first, so the lightbox index maps correctly to the full array.
 - The tape-deck progress bar uses 50ms ticks — 90 setState calls per 4.5s cycle per carousel. With 4 carousels (only 1 visible at a time due to scrolling), this is acceptable.
 - The `goTo()` helper resets progress to 0 when a dot is clicked — prevents the bar from jumping mid-fill.
+
+---
+Task ID: 11
+Agent: main (Z.ai Code)
+Task: QA testing, fix client-side crash (ud-crt on fixed element), add Chaos Dice widget, retro boot sequence on opening screen, Quote+Dice side-by-side layout.
+
+## Section 1: Current Project Status Assessment
+
+Phase 10 was stable (deep-links, random photo button, tape-deck progress). This round started with a client-side crash discovered during QA: the BootSequence component (added to opening-screen.tsx) caused an "Application error: a client-side exception has occurred" because the `.ud-crt` CSS class (which sets `position: relative` + `::after` overlay with `mix-blend-mode: multiply`) was applied to a `position: fixed` element, causing a hydration/runtime conflict. The server rendered fine (HTTP 200, "UNDIMENSION" in HTML) but the client crashed during hydration. Fixed by removing `.ud-crt` from the BootSequence's fixed-position container and simplifying the text rendering. After the fix, all features work. Then added the ChaosDice widget and side-by-side Quote+Dice layout.
+
+## Section 2: Completed Modifications & Verification
+
+### Bugs Fixed
+- **Client-side crash (BootSequence + ud-crt)** — The `.ud-crt` class sets `position: relative` which conflicts with `position: fixed` on the BootSequence container, causing a hydration crash. Fixed by removing `.ud-crt` from the BootSequence div and simplifying the line rendering (removed the two-tone `line.slice(indexOf(">"))` logic). The boot sequence now renders as simple green monospace text lines without the CRT overlay effect. Server still returns 200, client now hydrates correctly.
+
+### New Features Added
+1. **Retro Boot Sequence** (in `opening-screen.tsx`) — A fixed top-left terminal panel on the opening screen that types out 6 boot messages one by one (every 400ms): "INITIALIZING UNDIMENSION KERNEL...", "LOADING 7 ENTITIES... OK", "CALIBRATING GRAVITATIONAL FIELD... OK", "ESTABLISHING ORBITAL LOCK... OK", "CHAOS ENGINE: ONLINE", "WELCOME, TRAVELER." Has a terminal-style header with 3 colored dots (red/yellow/green) + "SYS:BOOT" label, and a blinking cursor while typing. Uses `useState` + `useEffect` with `setInterval`. `pointer-events: none` + `aria-hidden` so it doesn't interfere with interaction.
+2. **Chaos Dice Widget** (`chaos-dice.tsx`) — An interactive dice-rolling widget that randomly picks a member + an activity suggestion. Click "ROLL THE DICE" → rapid cycling animation (12 cycles at 80ms each, playing "hover" SFX each cycle) → lands on a random member + activity. Shows: member nick (in their color) + role, and a "MISI:" (mission) box with the activity. 7 members × 10 activities = 70 combinations. "ROLL AGAIN" button for re-rolling. Uses `.ud-corners` for the viewfinder look. Placed in a 2-column grid alongside the QuoteWidget (Quote left, Dice right).
+
+### Layout Change
+- **Quote + Dice side-by-side** — The QuoteWidget (previously full-width standalone) is now in a 2-column grid with the ChaosDice widget. On mobile they stack vertically (Quote on top, Dice below). On desktop they're side-by-side with a 4px divider border. Both sit between the CosmicStarMap and MissionControl sections.
+
+### Verification Results
+- ✅ ESLint: 0 errors, 0 warnings
+- ✅ Agent Browser E2E: opening screen renders "UNDIMENSION" + boot sequence ("KERNEL" confirmed), ENTER navigates to About, all 11 sections render (including new "CHAOS DICE"), ChaosDice "ROLL THE DICE" button present, clicking roll → "MISI:" result appears, **zero console errors**
+- ✅ VLM: confirms boot sequence ("retro terminal boot sequence with green text" + "SYS:BOOT" + initialization messages) and ChaosDice widget ("activity suggestion generator that selects a member and assigns them a task")
+
+## Section 3: Unresolved Issues / Risks / Next-phase Recommendations
+
+### Current Status: ✅ Phase 11 Complete & Verified
+Site now has a retro boot sequence on the opening screen, a Chaos Dice random activity generator, and a side-by-side Quote+Dice layout. The client-side crash is fixed. Zero errors, lint clean.
+
+### Next-phase recommendations (priority order):
+1. **next/image optimization** — Replace remaining raw `<img>` with `next/image` for responsive sizing + blur placeholders. Biggest perf win remaining.
+2. **Admin auth** — NextAuth (single shared password) so only the 7 members can upload / moderate guestbook.
+3. **Production storage** — Swap `saveImage` in upload route to Cloudinary/Uploadthing for Render deploy.
+4. **Guestbook moderation UI** — Admin can delete/toggle `approved` on entries.
+5. **Timeline images** — Add a photo/illustration to each timeline milestone.
+6. **Lazy-load modals + heavy sections** — `next/dynamic` for MemberDetailModal, PhotoLightbox, StatsRadarSection, CompatibilityMatrix, MissionControl, Soundboard, KeyboardShortcutsOverlay, CosmicStarMap, ChaosDice.
+7. **ChaosDice deep-link** — Allow sharing a dice result via URL hash.
+8. **Boot sequence skip** — Click anywhere on the boot panel to skip to the end.
+9. **More activities** — Expand the ACTIVITIES array (currently 10) with more inside jokes.
+10. **Quote+Dice mobile spacing** — Test the 2-column grid on 390px; may need padding adjustments.
+
+### Known minor notes:
+- The `.ud-crt` class should NOT be used on `position: fixed` elements — it sets `position: relative` which conflicts. Use it only on `position: relative` or default-position elements.
+- The BootSequence types lines every 400ms (6 lines = 2.4s total) — completes before the user typically clicks ENTER.
+- The ChaosDice cycling animation plays 12 "hover" SFX in rapid succession (80ms each = ~1s) — this is intentional for the "rolling" feel but could be muted if it's too noisy.
+- The Quote+Dice grid uses `gap-0` with explicit border dividers for the brutalist aesthetic.

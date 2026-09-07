@@ -32,7 +32,7 @@ function BootSequence() {
 
   return (
     <div
-      className="fixed top-20 left-4 md:left-8 z-20 max-w-xs font-mono-ud text-[10px] md:text-xs text-[#00ff00] bg-black/70 border border-[#00ff00]/40 p-3 pointer-events-none ud-crt"
+      className="fixed top-20 left-4 md:left-8 z-20 max-w-xs font-mono-ud text-[10px] md:text-xs text-[#00ff00] bg-black/70 border border-[#00ff00]/40 p-3 pointer-events-none"
       aria-hidden
     >
       <div className="flex items-center gap-1 mb-2 pb-1 border-b border-[#00ff00]/30">
@@ -42,9 +42,8 @@ function BootSequence() {
         <span className="ml-2 text-[#00ff00]/60 tracking-widest">SYS:BOOT</span>
       </div>
       {lines.map((line, i) => (
-        <div key={i} className="leading-tight">
-          <span className="text-[#00ff00]/60">{line.slice(0, line.indexOf(">") + 2)}</span>
-          <span className="text-[#00ff00]">{line.slice(line.indexOf(">") + 2)}</span>
+        <div key={i} className="leading-tight text-[#00ff00]">
+          {line}
         </div>
       ))}
       {lines.length < BOOT_LINES.length && (
