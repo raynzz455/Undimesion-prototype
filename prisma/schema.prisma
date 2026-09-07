@@ -50,3 +50,16 @@ model GuestbookEntry {
 
   @@index([createdAt])
 }
+
+model NewsArticle {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  category  String   @default("UPDATE")
+  author    String   @default("THE COLLECTIVE")
+  img       String?
+  pinned    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

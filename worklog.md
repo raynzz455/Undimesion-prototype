@@ -672,3 +672,59 @@ RANDOM ENTITY now works reliably — no same-member-twice, modal always updates 
 - The `lastOpenedIdRef` is a useRef (not state) — it doesn't trigger re-renders, it just stores the value for the next randomMember() call to read.
 - The 150ms close-reopen delay is tuned to be just long enough for AnimatePresence to play the exit animation before the enter starts. Too short = animation glitch; too long = feels laggy.
 - The ChaosDice's `result` dependency in useCallback means the roll function is recreated on each result change — acceptable since it's only called on click.
+
+---
+Task ID: 13
+Agent: main (Z.ai Code)
+Task: Recreate missing upload route (Render-ready sharp WebP), add News Portal section (DB-backed articles), redesign Gallery with paginated carousel (1 2 3 pages, auto-advance, full-area grid).
+
+## Section 1: Current Project Status Assessment
+
+User requested: (1) upload image for Render deployment, (2) a dedicated news portal section, (3) gallery with pagination 1 2 3 and auto-advancing carousel for "spam foto". QA revealed the upload route (`/api/gallery/upload`) was MISSING entirely — the memories-page called it but the route file didn't exist, so uploads would 404. After recreating the upload route, built the News Portal and redesigned the Gallery with a paginated carousel.
+
+## Section 2: Completed Modifications & Verification
+
+### Bugs Fixed
+- **Missing upload route** — Recreated `src/app/api/gallery/upload/route.ts` with sharp WebP conversion (resize to 1280px, quality 78), saves to `/public/gallery/uploads/`. Returns JSON with id, url, title, author, date, rotate + meta (originalSizeKb, webpSizeKb, savingsPercent). Render-ready: swap `saveImage` to Cloudinary/Uploadthing for production, DB stores final URL so frontend doesn't change. Verified via curl: 1KB PNG → 0.1KB WebP (86% savings), POST 200 in 1698ms.
+
+### New Features Added
+1. **News Portal** (`news-portal.tsx` + `/api/news` + `NewsArticle` Prisma model) — A DB-backed news/article feed section (§10) on the About page. Left column: article cards (2-col grid) with category badge (color-coded: UPDATE cyan, EVENT red, CHAOS magenta, MILESTONE lime, NOTICE orange), pinned indicator, title, body (line-clamp-3), author + time-ago. Right column: sticky "BROADCAST" form with category dropdown, title input, body textarea, author input, PUBLISH button. Loading skeletons, empty state. 5 seed articles (UNDIMENSION V3 LAUNCHED, EVENT NOSTALGIA SMK 2026, CHAOS MODE UNLOCKED, MILESTONE 7 TAHUN, GALLERY UPLOAD LIVE). API: GET returns articles sorted by pinned+date, POST creates new article.
+2. **Paginated Carousel Gallery** (`memories-page.tsx` redesigned) — Replaced the masonry grid with a paginated carousel: photos split into pages of 6, displayed in a 2-3 column grid inside a bordered "viewport" container. Features:
+   - **Pagination buttons** (1, 2, 3...) — click to jump to any page, current page highlighted in red with scale+shadow
+   - **Auto-advance** — cycles to next page every 5 seconds, with a lime progress bar showing time until next advance
+   - **Play/Pause toggle** — magenta button to pause/resume auto-advance
+   - **Prev/Next buttons** — manual navigation
+   - **Page counter** — "PAGE 01/03" readout + AUTO/PAUSED status
+   - **AnimatePresence transitions** — pages slide left/right with blur on change
+   - **Corner readouts** — PAGE number + AUTO/PAUSED status in terminal style
+   - Kept: author filter, I'M FEELING CHAOTIC random button, REFRESH, upload widget, lightbox
+
+### Data/Schema Added
+- `NewsArticle` Prisma model: id, title, body, category, author, img (nullable), pinned, createdAt.
+- 5 seed news articles.
+- `scripts/seed-news.ts` — seeds articles if table empty.
+
+### Verification Results
+- ✅ ESLint: 0 errors, 0 warnings
+- ✅ Agent Browser E2E: News Portal renders (NEWS PORTAL + article "UNDIMENSION V3 LAUNCHED" + BROADCAST form visible), Gallery paginated carousel renders (PAGINATION visible, 2 page buttons, grid visible), pagination click → PAGE 2 ACTIVE, AUTOPLAY ON, upload API POST 200 (WebP saved), news API GET returns articles, **zero console errors**
+- ✅ VLM: confirms gallery layout with pagination
+
+## Section 3: Unresolved Issues / Risks / Next-phase Recommendations
+
+### Current Status: ✅ Phase 13 Complete & Verified
+Upload route recreated (Render-ready), News Portal live with 5 articles, Gallery redesigned with paginated auto-advancing carousel. Zero errors, lint clean.
+
+### Next-phase recommendations:
+1. **Render deploy** — Set DATABASE_URL to PostgreSQL, swap upload storage to Cloudinary, deploy.
+2. **News article detail view** — Click article → modal with full body.
+3. **News image upload** — Currently `img` field exists but no upload UI in the form.
+4. **Gallery infinite scroll alternative** — For very large photo counts, consider infinite scroll as an alternative to pagination.
+5. **Pagination keyboard nav** — Arrow keys to switch pages.
+6. **News categories filter** — Filter articles by category.
+7. **Gallery page size toggle** — Let user choose 6/12/24 photos per page.
+
+### Known minor notes:
+- The paginated carousel shows 6 photos per page in a 2-3 column grid. With 8 seeded photos, that's 2 pages.
+- Auto-advance pauses when the user manually navigates (via Prev/Next/page click) — actually no, it keeps auto-advancing. The PAUSE button is the only way to stop it. Consider pausing on user interaction.
+- The upload route saves to local `/public/gallery/uploads/` — on Render, this is ephemeral (lost on redeploy). Must swap to cloud storage before production.
+- News articles have a `pinned` field but no UI to pin/unpin yet — only via DB.

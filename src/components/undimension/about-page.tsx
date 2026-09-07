@@ -13,6 +13,7 @@ import { CompatibilityMatrix } from "./compatibility-matrix";
 import { MissionControl } from "./mission-control";
 import { CosmicStarMap } from "./cosmic-star-map";
 import { ChaosDice } from "./chaos-dice";
+import { NewsPortal } from "./news-portal";
 import { MEMBERS, HARAPAN, type Member } from "@/lib/undimension/data";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useSfx } from "@/hooks/use-sfx";
@@ -430,6 +431,7 @@ export function AboutPage() {
         </div>
       </div>
       <MissionControl />
+      <NewsPortal />
       <GuestbookSection />
       <MemberDetailModal member={selected} onClose={closeModal} />
     </div>
