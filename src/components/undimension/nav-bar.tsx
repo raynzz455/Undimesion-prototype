@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useTheme } from "next-themes";
 import { StarGraphic } from "./primitives";
-import { Menu, X, Sun, Moon } from "lucide-react";
+import { useChaos } from "./chaos-provider";
+import { Menu, X, Sun, Moon, Shuffle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type Page = "about" | "memories" | "games";
@@ -23,6 +24,7 @@ export function NavBar({
 }) {
   const { theme, setTheme } = useTheme();
   const isDark = theme === "dark";
+  const { chaos, toggle: toggleChaos, reroll } = useChaos();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const go = (p: Page) => {
@@ -49,8 +51,20 @@ export function NavBar({
           </span>
         </button>
 
-        {/* Mobile actions: theme + hamburger */}
+        {/* Mobile actions: theme + chaos + hamburger */}
         <div className="flex items-center gap-2 md:hidden">
+          <button
+            onClick={() => toggleChaos()}
+            className={cn(
+              "w-9 h-9 flex items-center justify-center border-4 border-black shadow-[3px_3px_0_#000] active:translate-x-1 active:translate-y-1 active:shadow-[0_0_0_#000] no-color-transition transition-colors",
+              chaos ? "bg-[#ff00ff] text-white" : "bg-white text-black",
+            )}
+            aria-label="Toggle chaos mode"
+            aria-pressed={chaos}
+            title="Chaos mode"
+          >
+            <Shuffle className="w-4 h-4" />
+          </button>
           <button
             onClick={() => setTheme(isDark ? "light" : "dark")}
             className="w-9 h-9 flex items-center justify-center border-4 border-black bg-white text-black shadow-[3px_3px_0_#000] active:translate-x-1 active:translate-y-1 active:shadow-[0_0_0_#000] no-color-transition"
@@ -87,6 +101,20 @@ export function NavBar({
           </button>
         ))}
         <button
+          onClick={() => toggleChaos()}
+          className={cn(
+            "hidden md:flex items-center justify-center px-4 border-l-4 border-black dark:border-white transition-colors",
+            chaos
+              ? "bg-[#ff00ff] text-white hover:bg-black"
+              : "bg-white dark:bg-black text-black dark:text-white hover:bg-[#ff00ff] hover:text-white",
+          )}
+          aria-label="Toggle chaos mode"
+          aria-pressed={chaos}
+          title="Chaos mode — randomize colors"
+        >
+          <Shuffle className="w-5 h-5" />
+        </button>
+        <button
           onClick={() => setTheme(isDark ? "light" : "dark")}
           className="hidden md:flex items-center justify-center px-6 border-l-4 border-black dark:border-white bg-[#00e5ff] text-black hover:bg-black hover:text-[#00e5ff] transition-colors"
           aria-label="Toggle theme"
@@ -118,6 +146,30 @@ export function NavBar({
               )}
             </button>
           ))}
+          {/* Chaos mode toggle in mobile menu */}
+          <button
+            onClick={() => { toggleChaos(); }}
+            className={cn(
+              "w-full px-5 py-4 font-bebas text-2xl uppercase tracking-widest transition-colors border-black dark:border-white text-left flex items-center justify-between border-b-4",
+              chaos
+                ? "bg-[#ff00ff] text-white"
+                : "bg-transparent text-black dark:text-white hover:bg-[#ff00ff] hover:text-white",
+            )}
+          >
+            <span className="flex items-center gap-2">
+              <Shuffle className="w-5 h-5" />
+              CHAOS MODE
+            </span>
+            <span className="font-mono-ud text-xs">{chaos ? "● ON" : "○ OFF"}</span>
+          </button>
+          {chaos && (
+            <button
+              onClick={() => reroll()}
+              className="w-full px-5 py-3 font-mono-ud text-sm uppercase tracking-widest bg-[#d4ff00] text-black border-b-4 border-black text-left flex items-center gap-2"
+            >
+              <Shuffle className="w-4 h-4" /> REROLL COLORS
+            </button>
+          )}
           {/* Keyboard shortcut hint */}
           <div className="px-5 py-2 bg-[#d4ff00] text-black border-t-4 border-black">
             <p className="font-mono-ud text-[10px] font-black tracking-[0.2em] uppercase">

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Volume2, VolumeX, Music, X } from "lucide-react";
+import { Music, X } from "lucide-react";
 import { useSfx, type SfxType } from "@/hooks/use-sfx";
 import { cn } from "@/lib/utils";
 
@@ -15,8 +15,15 @@ const SFX_BUTTONS: { type: SfxType; label: string; color: string }[] = [
   { type: "error", label: "ERROR", color: "#8a2be2" },
 ];
 
-export function Soundboard() {
-  const [open, setOpen] = useState(false);
+export function Soundboard({
+  open,
+  onOpen,
+  onClose,
+}: {
+  open: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+}) {
   const { play, ensureCtx } = useSfx(true);
   const [lastPlayed, setLastPlayed] = useState<string | null>(null);
 
@@ -31,10 +38,10 @@ export function Soundboard() {
     <>
       {/* Trigger button — stacked above the "?" button */}
       <button
-        onClick={() => setOpen(true)}
+        onClick={onOpen}
         className="fixed bottom-[4.5rem] right-6 z-[55] w-12 h-12 flex items-center justify-center bg-[#ff00ff] text-white border-4 border-black dark:border-white shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff] hover:-translate-y-1 hover:rotate-12 transition-all no-color-transition"
         aria-label="Open soundboard"
-        title="Soundboard 🎵"
+        title="Soundboard 🎵 (B)"
       >
         <Music className="w-5 h-5" />
       </button>
@@ -51,7 +58,7 @@ export function Soundboard() {
           >
             <div
               className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-              onClick={() => setOpen(false)}
+              onClick={onClose}
             />
             <motion.div
               role="dialog"
@@ -65,7 +72,7 @@ export function Soundboard() {
               transition={{ type: "spring", stiffness: 300, damping: 24 }}
             >
               <button
-                onClick={() => setOpen(false)}
+                onClick={onClose}
                 className="absolute -top-5 -right-5 z-30 w-10 h-10 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-black dark:border-white shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] hover:rotate-90 transition-transform no-color-transition"
                 aria-label="Close soundboard"
               >

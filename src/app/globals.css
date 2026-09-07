@@ -647,3 +647,74 @@ html {
   80% { transform: translate(1px, 2px); }
 }
 .ud-shake { animation: ud-shake 0.3s linear 3; }
+
+/* ───────────────────────────────────────────
+   CHAOS MODE (Task f1 — Phase 8)
+   When <html> has .chaos class, the brand accent
+   colors are randomized via CSS custom properties.
+   The overrides below map hardcoded Tailwind arbitrary
+   colors to the (now randomized) CSS vars.
+   ─────────────────────────────────────────── */
+html.chaos {
+  /* Smooth color transitions when rerolling */
+}
+html.chaos body,
+html.chaos body * {
+  transition-property: background-color, border-color, color, fill, stroke, box-shadow, text-shadow;
+  transition-duration: 400ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Map the 7 brand colors to their CSS vars under chaos mode */
+html.chaos .bg-\[\#ff4d4d\] { background-color: var(--ud-red, #ff4d4d) !important; }
+html.chaos .bg-\[\#00e5ff\] { background-color: var(--ud-cyan, #00e5ff) !important; }
+html.chaos .bg-\[\#d4ff00\] { background-color: var(--ud-lime, #d4ff00) !important; }
+html.chaos .bg-\[\#ff00ff\] { background-color: var(--ud-magenta, #ff00ff) !important; }
+html.chaos .bg-\[\#ff8c00\] { background-color: var(--ud-orange, #ff8c00) !important; }
+html.chaos .bg-\[\#00ff00\] { background-color: var(--ud-green, #00ff00) !important; }
+html.chaos .bg-\[\#8a2be2\] { background-color: var(--ud-purple, #8a2be2) !important; }
+
+html.chaos .text-\[\#ff4d4d\] { color: var(--ud-red, #ff4d4d) !important; }
+html.chaos .text-\[\#00e5ff\] { color: var(--ud-cyan, #00e5ff) !important; }
+html.chaos .text-\[\#d4ff00\] { color: var(--ud-lime, #d4ff00) !important; }
+html.chaos .text-\[\#ff00ff\] { color: var(--ud-magenta, #ff00ff) !important; }
+html.chaos .text-\[\#ff8c00\] { color: var(--ud-orange, #ff8c00) !important; }
+html.chaos .text-\[\#00ff00\] { color: var(--ud-green, #00ff00) !important; }
+html.chaos .text-\[\#8a2be2\] { color: var(--ud-purple, #8a2be2) !important; }
+
+html.chaos .border-\[\#ff4d4d\] { border-color: var(--ud-red, #ff4d4d) !important; }
+html.chaos .border-\[\#00e5ff\] { border-color: var(--ud-cyan, #00e5ff) !important; }
+html.chaos .border-\[\#d4ff00\] { border-color: var(--ud-lime, #d4ff00) !important; }
+html.chaos .border-\[\#ff00ff\] { border-color: var(--ud-magenta, #ff00ff) !important; }
+
+/* Shadow color overrides removed — the class-name escaping for arbitrary
+   shadow values with hex (#) is too fragile across CSS parsers.
+   Chaos mode still recolors bg/text/border; shadows keep their original color
+   which is acceptable (shadows are black/white in most cases anyway). */
+
+/* Pulsing chaos indicator badge (shown when chaos is on) */
+html.chaos::before {
+  content: "CHAOS";
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9998;
+  background: var(--ud-magenta, #ff00ff);
+  color: #000;
+  font-family: var(--font-bebas), sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.3em;
+  padding: 2px 16px;
+  border: 2px solid #000;
+  border-top: none;
+  pointer-events: none;
+  animation: ud-chaos-pulse 2s ease-in-out infinite;
+}
+@keyframes ud-chaos-pulse {
+  0%, 100% { opacity: 0.7; transform: translateX(-50%) translateY(0); }
+  50% { opacity: 1; transform: translateX(-50%) translateY(2px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.chaos::before { animation: none; }
+}

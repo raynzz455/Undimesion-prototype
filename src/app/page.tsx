@@ -160,6 +160,7 @@ export default function Home() {
   const [soundOn, setSoundOn] = useState(true);
   const [konami, setKonami] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [soundboardOpen, setSoundboardOpen] = useState(false);
 
   const { play, ensureCtx } = useSfx(soundOn);
 
@@ -184,6 +185,11 @@ export default function Home() {
       } else if (e.key === "s" || e.key === "S") {
         setPage("games");
         play("click");
+      } else if (e.key === "b" || e.key === "B") {
+        if (!shortcutsOpen) {
+          setSoundboardOpen((o) => !o);
+          play("click");
+        }
       } else if (e.key === "a" || e.key === "A") {
         setPage("about");
         play("click");
@@ -242,7 +248,11 @@ export default function Home() {
       >
         ?
       </button>
-      <Soundboard />
+      <Soundboard
+        open={soundboardOpen}
+        onOpen={() => setSoundboardOpen(true)}
+        onClose={() => setSoundboardOpen(false)}
+      />
       <KeyboardShortcutsOverlay open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
       <KonamiOverlay show={konami} />
     </div>

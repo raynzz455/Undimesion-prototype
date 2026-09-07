@@ -3,6 +3,7 @@ import { Bebas_Neue, Outfit, Space_Mono, Cinzel, Chakra_Petch } from "next/font/
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/undimension/theme-provider";
+import { ChaosProvider } from "@/components/undimension/chaos-provider";
 
 const bebas = Bebas_Neue({
   variable: "--font-bebas",
@@ -79,8 +80,10 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          {children}
-          <Toaster />
+          <ChaosProvider>
+            {children}
+            <Toaster />
+          </ChaosProvider>
         </ThemeProvider>
       </body>
     </html>

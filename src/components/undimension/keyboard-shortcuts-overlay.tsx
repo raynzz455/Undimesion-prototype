@@ -8,6 +8,10 @@ import { useFocusTrap } from "@/hooks/use-focus-trap";
 const SHORTCUTS = [
   { keys: ["?"], desc: "Tampilkan dialog ini" },
   { keys: ["ESC"], desc: "Tutup modal / lightbox" },
+  { keys: ["G"], desc: "Pergi ke Gallery" },
+  { keys: ["S"], desc: "Pergi ke Games" },
+  { keys: ["A"], desc: "Pergi ke About" },
+  { keys: ["B"], desc: "Buka Soundboard" },
   { keys: ["Tab"], desc: "Navigasi fokus berikutnya" },
   { keys: ["Shift", "Tab"], desc: "Navigasi fokus sebelumnya" },
   { keys: ["Enter"], desc: "Aktifkan elemen fokus" },
