@@ -7,10 +7,11 @@ import { MemberDetailModal } from "./member-detail-modal";
 import { GuestbookSection } from "./guestbook-section";
 import { TimelineSection } from "./timeline-section";
 import { QuoteWidget } from "./quote-widget";
+import { StatsRadarSection } from "./stats-radar-section";
 import { MEMBERS, HARAPAN, type Member } from "@/lib/undimension/data";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useSfx } from "@/hooks/use-sfx";
-import { UserRound } from "lucide-react";
+import { UserRound, Shuffle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 function HeroSection() {
@@ -219,6 +220,10 @@ function MemberCard({ m, i, onOpen }: { m: Member; i: number; onOpen: () => void
 }
 
 function TheCollective({ onOpenMember }: { onOpenMember: (m: Member) => void }) {
+  const randomMember = () => {
+    const m = MEMBERS[Math.floor(Math.random() * MEMBERS.length)];
+    onOpenMember(m);
+  };
   return (
     <div className="bg-white dark:bg-[#1a1a1a] py-32 px-6 md:px-12 border-b-8 border-black dark:border-white relative z-10">
       <div className="max-w-7xl mx-auto">
@@ -227,7 +232,8 @@ function TheCollective({ onOpenMember }: { onOpenMember: (m: Member) => void }) 
             WHO WE ARE
           </h2>
           <h2
-            className="font-bebas text-8xl md:text-[150px] uppercase text-black dark:text-white relative z-10 ud-reveal"
+            className="font-bebas text-8xl md:text-[150px] uppercase text-black dark:text-white relative z-10 ud-reveal ud-glitch-hover cursor-pointer"
+            data-text="THE COLLECTIVE"
             style={{ textShadow: "10px 10px 0px #00e5ff" }}
           >
             THE COLLECTIVE
@@ -238,6 +244,12 @@ function TheCollective({ onOpenMember }: { onOpenMember: (m: Member) => void }) 
           <p className="font-mono-ud text-sm text-black/50 dark:text-white/50 mt-4 max-w-md mx-auto">
             Klik foto atau tombol <span className="font-bold">VIEW FULL DOSSIER</span> untuk membuka profil lengkap tiap entitas.
           </p>
+          <button
+            onClick={randomMember}
+            className="mt-6 inline-flex items-center gap-2 bg-[#ff00ff] text-white border-4 border-black dark:border-white font-bebas text-2xl px-6 py-3 shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff] hover:-translate-y-1 hover:shadow-[8px_8px_0_#d4ff00] transition-all no-color-transition"
+          >
+            <Shuffle className="w-5 h-5" /> RANDOM ENTITY
+          </button>
         </div>
 
         <div className="flex flex-col gap-32 md:gap-48 mt-20">
@@ -252,8 +264,14 @@ function TheCollective({ onOpenMember }: { onOpenMember: (m: Member) => void }) 
 
 function HarapanCardItem({ card }: { card: (typeof HARAPAN)[number] }) {
   return (
-    <div className={cn("relative transform hover:rotate-0 hover:scale-105 hover:z-50 transition-all duration-300 group ud-tilt ud-reveal", card.rotate)}>
-      <div className={cn("border-8 border-black", card.bg, card.shadow)}>
+    <div className={cn("relative transform hover:rotate-0 hover:scale-105 hover:z-50 transition-all duration-300 group ud-tilt ud-reveal ud-tape", card.rotate)}>
+      <div className={cn("border-8 border-black relative", card.bg, card.shadow)}>
+        {/* Circular stamp decoration */}
+        <div className="ud-stamp-circle absolute -top-3 -left-3 z-20 text-[#ff4d4d] hidden md:flex">
+          <span className="font-bebas text-[10px] text-center leading-tight">
+            {card.stamp.split("_")[0]}<br/>{card.stamp.split("_")[1]}
+          </span>
+        </div>
         <div className="border-b-8 border-black overflow-hidden relative">
           <img
             src={card.img}
@@ -367,6 +385,7 @@ export function AboutPage() {
       <HeroSection />
       <MarqueeBar />
       <TheCollective onOpenMember={openMember} />
+      <StatsRadarSection />
       <TimelineSection />
       <HarapanSection />
       <QuoteWidget />

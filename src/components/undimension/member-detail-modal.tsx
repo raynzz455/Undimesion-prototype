@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Quote, Sparkles, Calendar, Flame } from "lucide-react";
 import type { Member } from "@/lib/undimension/data";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { cn } from "@/lib/utils";
 
 export function MemberDetailModal({
@@ -14,6 +15,8 @@ export function MemberDetailModal({
   onClose: () => void;
 }) {
   const open = member !== null;
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, open);
 
   useEffect(() => {
     if (!open) return;
@@ -45,8 +48,13 @@ export function MemberDetailModal({
 
           {/* Modal */}
           <motion.div
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ud-member-modal-title"
+            tabIndex={-1}
             className={cn(
-              "relative w-full max-w-3xl my-4 md:my-8 border-8 border-black dark:border-white shadow-[8px_8px_0_#000] md:shadow-[16px_16px_0_#000] dark:md:shadow-[16px_16px_0_#d4ff00]",
+              "relative w-full max-w-3xl my-4 md:my-8 border-8 border-black dark:border-white shadow-[8px_8px_0_#000] md:shadow-[16px_16px_0_#000] dark:md:shadow-[16px_16px_0_#d4ff00] outline-none",
               member.color,
             )}
             initial={{ scale: 0.92, y: 20, rotate: -1 }}
@@ -88,7 +96,7 @@ export function MemberDetailModal({
                   <div className="inline-block bg-[#d4ff00] text-black font-mono-ud text-xs font-black px-3 py-1 border-2 border-white mb-3 -rotate-1">
                     ID_{member.id.toUpperCase()} · EST. {member.joinYear}
                   </div>
-                  <h2 className="font-bebas text-5xl md:text-7xl leading-none uppercase">
+                  <h2 id="ud-member-modal-title" className="font-bebas text-5xl md:text-7xl leading-none uppercase">
                     {member.nick}
                   </h2>
                   <p className="font-mono-ud text-sm text-white/70 mb-2">

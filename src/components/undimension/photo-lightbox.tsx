@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import type { GalleryPhoto } from "@/lib/undimension/data";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 
 export function PhotoLightbox({
   photos,
@@ -18,6 +19,8 @@ export function PhotoLightbox({
 }) {
   const open = index >= 0 && index < photos.length;
   const photo = open ? photos[index] : null;
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, open);
 
   const next = useCallback(() => {
     if (!open) return;
@@ -37,10 +40,8 @@ export function PhotoLightbox({
       else if (e.key === "ArrowLeft") prev();
     };
     window.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
     return () => {
       window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
     };
   }, [open, onClose, next, prev]);
 
@@ -48,7 +49,8 @@ export function PhotoLightbox({
     <AnimatePresence>
       {open && photo && (
         <motion.div
-          className="fixed inset-0 z-[80] flex items-center justify-center p-4 md:p-8"
+          className="fixed inset-0 z-[80] flex items-start md:items-center justify-center p-4 md:p-8 overflow-y-auto overscroll-contain"
+          style={{ WebkitOverflowScrolling: "touch" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -73,8 +75,13 @@ export function PhotoLightbox({
 
           {/* Photo card */}
           <motion.div
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ud-lightbox-title"
+            tabIndex={-1}
             key={photo.id}
-            className="relative w-full max-w-3xl bg-white dark:bg-[#1a1a1a] border-4 border-black dark:border-white shadow-[12px_12px_0_#000] dark:shadow-[12px_12px_0_#d4ff00] p-3 md:p-4"
+            className="relative w-full max-w-3xl bg-white dark:bg-[#1a1a1a] border-4 border-black dark:border-white shadow-[8px_8px_0_#000] md:shadow-[12px_12px_0_#000] dark:md:shadow-[12px_12px_0_#d4ff00] p-3 md:p-4 my-4 md:my-0 outline-none"
             initial={{ scale: 0.85, rotate: -3, y: 30 }}
             animate={{ scale: 1, rotate: 0, y: 0 }}
             exit={{ scale: 0.85, rotate: 3, y: 30 }}
@@ -102,7 +109,7 @@ export function PhotoLightbox({
 
             <div className="flex items-end justify-between gap-3 border-t-4 border-black dark:border-white pt-3">
               <div>
-                <h3 className="font-bebas text-3xl md:text-4xl text-black dark:text-white leading-none">
+                <h3 id="ud-lightbox-title" className="font-bebas text-3xl md:text-4xl text-black dark:text-white leading-none">
                   {photo.title}
                 </h3>
                 <p className="font-mono-ud text-xs text-black/60 dark:text-white/60 tracking-[0.2em] mt-1">

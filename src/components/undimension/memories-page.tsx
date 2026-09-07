@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { StarField } from "./star-field";
 import { StarGraphic } from "./primitives";
@@ -10,7 +10,7 @@ import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useSfx } from "@/hooks/use-sfx";
 import { useFetch } from "@/hooks/use-fetch";
 import { cn } from "@/lib/utils";
-import { Upload, Loader2, X, Maximize2, RefreshCw } from "lucide-react";
+import { Upload, Loader2, X, Maximize2, RefreshCw, ImageOff } from "lucide-react";
 
 function GalleryCard({ p, onOpen }: { p: GalleryPhoto; onOpen: () => void }) {
   return (
@@ -210,10 +210,19 @@ function GallerySkeleton() {
 
 export function MemoriesPage() {
   const { data, loading, refetch } = useFetch<{ photos: GalleryPhoto[]; count: number }>("/api/gallery");
-  const photos = data?.photos ?? [];
   const [lightboxIndex, setLightboxIndex] = useState(-1);
+  const [authorFilter, setAuthorFilter] = useState<string | null>(null);
   useScrollReveal();
   const { play } = useSfx();
+
+  const allPhotos = data?.photos ?? [];
+  const authors = useMemo(() => {
+    const set = new Set(allPhotos.map((p) => p.author));
+    return Array.from(set).sort();
+  }, [allPhotos]);
+  const photos = authorFilter
+    ? allPhotos.filter((p) => p.author === authorFilter)
+    : allPhotos;
 
   const openLightbox = (i: number) => {
     play("open");
@@ -236,7 +245,8 @@ export function MemoriesPage() {
             style={{ textShadow: "8px 8px 0px #000" }}
           >
             <span
-              className="text-white dark:text-[#ff4d4d]"
+              className="text-white dark:text-[#ff4d4d] ud-glitch-hover cursor-pointer"
+              data-text="GALLERY"
               style={{
                 textShadow:
                   "-4px -4px 0 #000, 4px -4px 0 #000, -4px 4px 0 #000, 4px 4px 0 #000, 10px 10px 0px #d4ff00",
@@ -262,10 +272,64 @@ export function MemoriesPage() {
               <RefreshCw className="w-3 h-3" /> REFRESH FEED
             </button>
           )}
+
+          {/* Author filter chips */}
+          {!loading && authors.length > 0 && (
+            <div className="mt-6 flex flex-wrap items-center gap-2">
+              <span className="font-mono-ud text-[10px] font-black tracking-[0.2em] uppercase text-black/50 dark:text-white/50 mr-1">
+                FILTER:
+              </span>
+              <button
+                onClick={() => { play("click"); setAuthorFilter(null); }}
+                className={cn(
+                  "px-2 py-1 border-2 border-black dark:border-white font-mono-ud text-[10px] font-black uppercase tracking-wider transition-all no-color-transition",
+                  authorFilter === null
+                    ? "bg-black text-white dark:bg-white dark:text-black"
+                    : "bg-transparent text-black/60 dark:text-white/60 hover:bg-black/10 dark:hover:bg-white/10",
+                )}
+              >
+                ALL ({allPhotos.length})
+              </button>
+              {authors.map((a) => (
+                <button
+                  key={a}
+                  onClick={() => { play("click"); setAuthorFilter(a === authorFilter ? null : a); }}
+                  className={cn(
+                    "px-2 py-1 border-2 border-black dark:border-white font-mono-ud text-[10px] font-black uppercase tracking-wider transition-all no-color-transition",
+                    authorFilter === a
+                      ? "bg-[#ff4d4d] text-white"
+                      : "bg-transparent text-black/60 dark:text-white/60 hover:bg-black/10 dark:hover:bg-white/10",
+                  )}
+                >
+                  {a}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {loading ? (
           <GallerySkeleton />
+        ) : photos.length === 0 ? (
+          <div className="border-4 border-dashed border-black dark:border-white p-16 text-center bg-white/50 dark:bg-black/30">
+            <ImageOff className="w-16 h-16 mx-auto mb-4 text-black/40 dark:text-white/40" />
+            <p className="font-bebas text-5xl text-black dark:text-white mb-2">
+              {authorFilter ? "NO FRAMES FROM THIS AUTHOR" : "THE VOID IS EMPTY"}
+            </p>
+            <p className="font-mono-ud text-sm text-black/60 dark:text-white/60 max-w-md mx-auto">
+              {authorFilter
+                ? `Belum ada foto dari ${authorFilter}. Coba filter lain atau upload sendiri.`
+                : "Archive collective masih kosong. Upload kenangan pertamamu untuk mengisi chaos."}
+            </p>
+            {authorFilter && (
+              <button
+                onClick={() => { play("click"); setAuthorFilter(null); }}
+                className="mt-4 bg-[#ff4d4d] text-white border-4 border-black dark:border-white font-bebas text-xl px-4 py-2 shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] hover:-translate-y-0.5 transition-transform no-color-transition"
+              >
+                ← SHOW ALL
+              </button>
+            )}
+          </div>
         ) : (
           <div className="columns-1 md:columns-2 lg:columns-3 gap-10 space-y-10">
             {photos.map((p, i) => (
