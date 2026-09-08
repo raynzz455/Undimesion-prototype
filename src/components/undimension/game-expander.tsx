@@ -107,6 +107,15 @@ export function GameDetailModal({
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" onClick={onClose} />
 
+          {/* X Close button — fixed to viewport, floats above modal */}
+          <button
+            onClick={onClose}
+            className="fixed top-4 right-4 z-[90] w-12 h-12 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-white shadow-[4px_4px_0_#000] hover:rotate-90 transition-transform no-color-transition"
+            aria-label="Close"
+          >
+            <X className="w-6 h-6" />
+          </button>
+
           {/* Modal */}
           <motion.div
             ref={panelRef}
@@ -120,14 +129,6 @@ export function GameDetailModal({
             exit={{ scale: 0.92, y: 20 }}
             transition={{ type: "spring", stiffness: 300, damping: 26 }}
           >
-            {/* X Close button — sticky, no wrapper */}
-            <button
-              onClick={onClose}
-              className="sticky top-1 z-30 ml-auto mr-2 mt-2 block w-10 h-10 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-white shadow-[4px_4px_0_#000] hover:rotate-90 transition-transform no-color-transition"
-              aria-label="Close"
-            >
-              <X className="w-5 h-5" />
-            </button>
 
             {/* Header banner */}
             <div className="p-6 border-b-4 border-white" style={{ backgroundColor: accent }}>

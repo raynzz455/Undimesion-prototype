@@ -49,8 +49,7 @@ export function PhotoLightbox({
     <AnimatePresence>
       {open && photo && (
         <motion.div
-          className="fixed inset-0 z-[80] flex items-start md:items-center justify-center p-4 md:p-8 overflow-y-auto overscroll-contain"
-          style={{ WebkitOverflowScrolling: "touch" }}
+          className="fixed inset-0 z-[80] flex items-center justify-center p-4 md:p-8"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -61,6 +60,15 @@ export function PhotoLightbox({
             className="absolute inset-0 bg-black/90 backdrop-blur-sm"
             onClick={onClose}
           />
+
+          {/* X Close button — fixed to viewport */}
+          <button
+            onClick={onClose}
+            className="fixed top-4 right-4 z-[90] w-12 h-12 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-black dark:border-white shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] hover:rotate-90 transition-transform no-color-transition"
+            aria-label="Close"
+          >
+            <X className="w-6 h-6" />
+          </button>
 
           {/* Nav prev */}
           {photos.length > 1 && (
@@ -87,15 +95,6 @@ export function PhotoLightbox({
             exit={{ scale: 0.85, rotate: 3, y: 30 }}
             transition={{ type: "spring", stiffness: 300, damping: 26 }}
           >
-            {/* X Close button — sticky, no wrapper */}
-            <button
-              onClick={onClose}
-              className="sticky top-1 z-30 ml-auto mr-1 mb-1 block w-10 h-10 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-black dark:border-white shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] hover:rotate-90 transition-transform no-color-transition"
-              aria-label="Close"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
             <div className="border-4 border-black dark:border-white bg-black overflow-hidden mb-3 relative">
               <img
                 src={photo.img}

@@ -240,14 +240,23 @@ function AchievementModal({
     <AnimatePresence>
       {open && achievement && (
         <motion.div
-          className="fixed inset-0 z-[85] flex items-start md:items-center justify-center p-4 md:p-8 overflow-y-auto overscroll-contain pt-24 md:pt-8"
-          style={{ WebkitOverflowScrolling: "touch" }}
+          className="fixed inset-0 z-[85] flex items-center justify-center p-4 md:p-8"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
         >
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
+
+          {/* X Close button — fixed to viewport */}
+          <button
+            onClick={onClose}
+            className="fixed top-4 right-4 z-[90] w-12 h-12 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-white shadow-[4px_4px_0_#000] hover:rotate-90 transition-transform no-color-transition"
+            aria-label="Close"
+          >
+            <X className="w-6 h-6" />
+          </button>
+
           <motion.div
             ref={panelRef}
             role="dialog"
@@ -260,14 +269,6 @@ function AchievementModal({
             exit={{ scale: 0.85, y: 30, rotate: -2 }}
             transition={{ type: "spring", stiffness: 300, damping: 24 }}
           >
-            {/* X Close button — sticky, no wrapper */}
-            <button
-              onClick={onClose}
-              className="sticky top-1 z-30 ml-auto mr-2 mt-2 block w-10 h-10 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-black dark:border-white shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] hover:rotate-90 transition-transform no-color-transition"
-              aria-label="Close"
-            >
-              <X className="w-5 h-5" />
-            </button>
 
             {/* Colored header banner */}
             <div className="p-6 border-b-8 border-black dark:border-white" style={{ backgroundColor: memberColor }}>
