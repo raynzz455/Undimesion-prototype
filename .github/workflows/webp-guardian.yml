@@ -141,13 +141,13 @@ jobs:
       - name: Sync to Supabase (optional)
         if: steps.scan.outputs.found != '0' && steps.convert.outputs.converted != '0'
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: |
           cd ../repo
-          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_KEY" ]; then
+          if [ -z "$NEXT_PUBLIC_SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_KEY" ]; then
             echo "ℹ Supabase secrets not set. Skipping cloud sync."
-            echo "  Set SUPABASE_URL + SUPABASE_SERVICE_KEY in repo secrets to enable."
+            echo "  Set NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_KEY in repo secrets to enable."
             exit 0
           fi
 
@@ -157,7 +157,7 @@ jobs:
             BASENAME=$(basename "$FILE")
             HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
               -X POST \
-              "${SUPABASE_URL}/storage/v1/object/gallery/${BASENAME}" \
+              "${NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/gallery/${BASENAME}" \
               -H "Authorization: Bearer ${SUPABASE_SERVICE_KEY}" \
               -H "Content-Type: image/webp" \
               --data-binary @"$FILE")

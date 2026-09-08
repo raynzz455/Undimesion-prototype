@@ -1,25 +1,22 @@
 # Render Blueprint — UNDIMENSION Backend
 # https://render.com/docs/blueprint-spec
 #
-# This file configures the backend deployment on Render.
-# It creates a PostgreSQL database + a web service (Node.js API).
-#
-# Prerequisites:
+# Setup:
 #   1. Push this repo to GitHub
 #   2. Go to render.com → New → Blueprint
 #   3. Select this repo → render.yaml will be auto-detected
-#   4. Set environment variables in Render dashboard:
-#      - SUPABASE_URL (for image storage)
-#      - SUPABASE_SERVICE_KEY (for image storage)
-#   5. Deploy!
+#   4. Set these env vars manually in Render dashboard:
+#      - NEXT_PUBLIC_SUPABASE_URL (from Supabase → Settings → API → Project URL)
+#      - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (sb_publishable_xxx)
+#      - SUPABASE_SERVICE_KEY (service_role key — SECRET, server-only)
+#   5. DATABASE_URL is auto-set by Render PostgreSQL
+#   6. Deploy!
 
 databases:
   - name: undimension-db
     databaseName: undimension
     user: undimension
     plan: free
-    # Render will automatically set DATABASE_URL to:
-    # postgresql://undimension:PASSWORD@HOST:5432/undimension
 
 services:
   - type: web
@@ -36,10 +33,11 @@ services:
           property: connectionString
       - key: NODE_ENV
         value: production
-      - key: SUPABASE_URL
-        sync: false  # Set manually in Render dashboard
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+        sync: false
       - key: SUPABASE_SERVICE_KEY
-        sync: false  # Set manually in Render dashboard
-    # Auto-deploy from main branch
+        sync: false
     autoDeploy: true
     branch: main
