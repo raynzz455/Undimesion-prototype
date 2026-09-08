@@ -4,28 +4,22 @@ import { motion } from "framer-motion";
 import { TIMELINE } from "@/lib/undimension/data";
 import { cn } from "@/lib/utils";
 
-function TimelineCard({ m, align }: { m: (typeof TIMELINE)[number]; align: "left" | "right" }) {
+function TimelineCard({ m }: { m: (typeof TIMELINE)[number] }) {
   return (
     <motion.div
-      initial={{ opacity: 0, x: align === "left" ? -30 : 30, y: 10 }}
+      initial={{ opacity: 0, x: 20, y: 10 }}
       whileInView={{ opacity: 1, x: 0, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className={cn(
-        "relative border-4 border-black dark:border-white bg-white dark:bg-[#1a1a1a] p-5 shadow-[8px_8px_0_#000] dark:shadow-[8px_8px_0_#fff] ud-reveal",
-        align === "left" ? "md:rotate-1" : "md:-rotate-1",
-      )}
+      className="relative border-4 border-black dark:border-white bg-white dark:bg-[#1a1a1a] p-5 shadow-[8px_8px_0_#000] dark:shadow-[8px_8px_0_#fff] ud-reveal md:rotate-1"
     >
-      {/* Color accent bar */}
+      {/* Color accent bar on left */}
       <div
-        className={cn(
-          "absolute top-0 bottom-0 w-2 border-r-4 border-black dark:border-white",
-          align === "left" ? "right-0" : "left-0",
-        )}
+        className="absolute top-0 bottom-0 left-0 w-2 border-r-4 border-black dark:border-white"
         style={{ backgroundColor: m.color }}
       />
-      <div className={cn("px-3", align === "left" && "md:pr-3")}>
-        <div className="flex items-baseline gap-2 mb-2" style={{ flexDirection: align === "right" ? "row-reverse" : "row" }}>
+      <div className="pl-3">
+        <div className="flex items-baseline gap-2 mb-2">
           <span
             className="font-bebas text-5xl md:text-6xl leading-none"
             style={{ color: m.color, WebkitTextStroke: "1.5px #000" }}
@@ -48,49 +42,44 @@ function TimelineCard({ m, align }: { m: (typeof TIMELINE)[number]; align: "left
 }
 
 function TimelineNode({ m, i }: { m: (typeof TIMELINE)[number]; i: number }) {
-  const isEven = i % 2 === 0;
+  const isLast = i === TIMELINE.length - 1;
   return (
-    <div className="relative flex items-center">
-      {/* Left card (even index) */}
-      <div className={cn(
-        "hidden md:block md:w-1/2 md:pr-12",
-        isEven ? "text-right" : "order-3 md:pl-12",
-      )}>
-        {isEven && <TimelineCard m={m} align="right" />}
+    <div className="relative md:flex md:items-start">
+      {/* ── Mobile: left icon + connector + card on right ── */}
+      <div className="md:hidden flex items-start gap-4">
+        <div className="flex flex-col items-center flex-shrink-0">
+          <div
+            className="w-14 h-14 rounded-full border-4 border-black dark:border-white flex items-center justify-center font-bebas text-2xl shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] bg-white"
+            style={{ backgroundColor: m.color }}
+          >
+            <span className="text-black drop-shadow-[1px_1px_0_#fff]">{m.icon}</span>
+          </div>
+          {!isLast && (
+            <div className="w-1 flex-1 bg-black dark:bg-white mt-1 min-h-[40px]" />
+          )}
+        </div>
+        <div className="flex-1 pb-8">
+          <TimelineCard m={m} />
+        </div>
       </div>
 
-      {/* Center node + dashed connector */}
-      <div className="relative z-10 flex flex-col items-center flex-shrink-0">
+      {/* ── Desktop: centered icon, card always on right ── */}
+      {/* Center icon + connector — absolute, centered horizontally */}
+      <div className="hidden md:flex md:flex-col md:items-center md:absolute md:left-1/2 md:-translate-x-1/2 md:top-0 md:bottom-0 md:z-10">
         <div
-          className="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-black dark:border-white flex items-center justify-center font-bebas text-3xl md:text-4xl text-black shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff] bg-white"
+          className="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-black dark:border-white flex items-center justify-center font-bebas text-3xl md:text-4xl shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff] bg-white flex-shrink-0"
           style={{ backgroundColor: m.color }}
         >
           <span className="text-black drop-shadow-[1px_1px_0_#fff]">{m.icon}</span>
         </div>
-        {/* Year label below node */}
-        <span
-          className="font-bebas text-xl mt-1 md:hidden"
-          style={{ color: m.color }}
-        >
-          {m.year}
-        </span>
+        {!isLast && (
+          <div className="w-1 flex-1 bg-black dark:bg-white mt-1" />
+        )}
       </div>
 
-      {/* Right card (odd index) / mobile full */}
-      <div className={cn(
-        "md:w-1/2 w-full md:pl-12",
-        isEven && "order-3",
-      )}>
-        {/* Mobile: always show card */}
-        <div className="md:hidden mb-6 ml-4">
-          <TimelineCard m={m} align="left" />
-        </div>
-        {/* Desktop: show if odd */}
-        {!isEven && (
-          <div className="hidden md:block">
-            <TimelineCard m={m} align="left" />
-          </div>
-        )}
+      {/* Card (desktop) — always on right side, offset from center */}
+      <div className="hidden md:block md:w-1/2 md:ml-auto md:pl-16 md:pr-4 md:pb-16">
+        <TimelineCard m={m} />
       </div>
     </div>
   );
@@ -123,29 +112,15 @@ export function TimelineSection() {
           </p>
         </div>
 
-        {/* Timeline with centered dashed line */}
-        <div className="relative">
-          {/* Vertical dashed line — absolutely centered */}
-          <div
-            className="hidden md:block absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-1 border-l-4 border-dashed border-black dark:border-white"
-            aria-hidden
-          />
-          {/* Mobile: left-aligned dashed line */}
-          <div
-            className="md:hidden absolute left-8 top-0 bottom-0 w-1 border-l-4 border-dashed border-black dark:border-white"
-            aria-hidden
-          />
-
-          {/* Timeline nodes */}
-          <div className="flex flex-col gap-12 md:gap-20 relative z-10">
-            {TIMELINE.map((m, i) => (
-              <TimelineNode key={m.id} m={m} i={i} />
-            ))}
-          </div>
+        {/* Timeline */}
+        <div className="flex flex-col">
+          {TIMELINE.map((m, i) => (
+            <TimelineNode key={m.id} m={m} i={i} />
+          ))}
         </div>
 
         {/* End cap */}
-        <div className="relative flex justify-center mt-12">
+        <div className="relative flex justify-center mt-4">
           <div className="font-bebas text-2xl md:text-3xl bg-[#ff4d4d] text-white px-6 py-2 border-4 border-black dark:border-white shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff] -rotate-2">
             ... AND THE ORBIT CONTINUES
           </div>
