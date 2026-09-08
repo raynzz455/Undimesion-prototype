@@ -1,4 +1,4 @@
-// UNDIMENSION — Prisma Schema (Complete)
+// UNDIMENSION — Prisma Schema (Complete — 15 tables)
 // Supports SQLite (dev) and PostgreSQL (production)
 // For production: change provider to "postgresql"
 
@@ -13,29 +13,39 @@ datasource db {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// ABOUT PAGE TABLES
+// ABOUT PAGE TABLES (3)
 // ═══════════════════════════════════════════════════════════════════════════
 
 model Member {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  name        String
-  nick        String
-  role        String
-  img         String
-  color       String
-  highlight   String
-  bio         String
-  statsJson   String   @default("[]")
-  socialsJson String   @default("[]")
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  name            String
+  nick            String
+  role            String
+  img             String
+  color           String
+  highlight       String
+  bio             String
+  statsJson       String   @default("[]")       // D&D 6-stat: [{label,value}]
+  socialsJson     String   @default("[]")       // [{label,href}]
+  // Portfolio CV fields
+  taglineCareer   String   @default("")         // "Full-Stack Developer"
+  location        String   @default("")         // "Jakarta, ID"
+  availability    String   @default("EMPLOYED") // EMPLOYED, OPEN TO WORK, FREELANCE
+  educationJson   String   @default("[]")       // [{school,degree,period,description}]
+  workHistoryJson String   @default("[]")       // [{company,role,period,description,current}]
+  skillsJson      String   @default("[]")       // [{name,level,category}]
+  // Meta
+  order           Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   // Relations
-  dndCharacters     DnDCharacter[]
-  portfolioProjects PortfolioProject[]
-  achievements      Achievement[]
+  dndCharacters       DnDCharacter[]
+  portfolioProjects   PortfolioProject[]
+  achievements        Achievement[]
+  gamePlayerStats     GamePlayerStat[]
+  gameCompatibilities GameCompatibility[]
 
   @@index([order])
 }
@@ -65,13 +75,13 @@ model NewsArticle {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// GALLERY TABLE
+// GALLERY TABLE (1)
 // ═══════════════════════════════════════════════════════════════════════════
 
 model GalleryPhoto {
   id        String   @id @default(cuid())
   title     String
-  img       String   // URL → Supabase bucket: gallery/uploads/*.webp
+  img       String   // URL → Supabase: gallery/uploads/*.webp
   author    String
   date      String
   rotate    String   @default("-rotate-2")
@@ -83,21 +93,80 @@ model GalleryPhoto {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// GAMES TABLES
+// GAMES TABLES (5)
 // ═══════════════════════════════════════════════════════════════════════════
 
-/// Game moment photos (Minecraft, Roblox, ML moments)
+/// Game metadata (Minecraft, Roblox, ML, D&D)
+model Game {
+  id            String   @id @default(cuid())
+  gameId        String   @unique // 'minecraft', 'roblox', 'ml', 'dnd'
+  sector        String   // 'SEKTOR 01'
+  title         String   // 'MINECRAFT'
+  subtitle      String   // 'SURVIVAL OF THE FITTEST'
+  description   String
+  bgImg         String   // URL → Supabase: games/backgrounds/*.webp
+  accent        String   // '#5d9e35'
+  carouselTitle String   // 'OUR WORLD'
+  reverse       Boolean  @default(false)
+  fontClass     String?  // 'font-cinzel' for D&D
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  // Relations
+  moments        GameMoment[]
+  playerStats    GamePlayerStat[]
+  compatibilities GameCompatibility[]
+
+  @@index([order])
+}
+
+/// Game moment photos (Minecraft/Roblox/ML moments)
 model GameMoment {
   id          String   @id @default(cuid())
-  gameId      String   // 'minecraft', 'roblox', 'ml', 'dnd'
+  gameId       String   // FK → Game.gameId
+  game         Game     @relation(fields: [gameId], references: [gameId])
   title       String
   description String?
-  img         String   // URL → Supabase bucket: games/moments/*.webp
+  img         String   // URL → Supabase: games/moments/*.webp
   order       Int      @default(0)
   createdAt   DateTime @default(now())
 
   @@index([gameId])
   @@index([createdAt])
+}
+
+/// Per-member per-game stats (ML pro player: role, hero, KDA, WR)
+model GamePlayerStat {
+  id         String   @id @default(cuid())
+  memberId   String   // FK → Member.slug
+  member     Member   @relation(fields: [memberId], references: [slug])
+  gameId     String   // FK → Game.gameId
+  game       Game     @relation(fields: [gameId], references: [gameId])
+  role       String?  // ML: 'MIDLANER', 'JUNGLER', etc.
+  favHero    String?  // ML: 'Lancelot'
+  rank       String?  // ML: 'Mythic Glory'
+  kda        String?  // ML: '4.2/2.1/5.8'
+  winRate    String?  // ML: '68%'
+  createdAt  DateTime @default(now())
+
+  @@unique([memberId, gameId])
+  @@index([memberId])
+  @@index([gameId])
+}
+
+/// Play Matrix — member × game compatibility (0-3)
+model GameCompatibility {
+  id        String   @id @default(cuid())
+  memberId  String   // FK → Member.slug
+  member    Member   @relation(fields: [memberId], references: [slug])
+  gameId    String   // FK → Game.gameId
+  game      Game     @relation(fields: [gameId], references: [gameId])
+  level     Int      @default(0) // 0=none, 1=rare, 2=casual, 3=main
+  createdAt DateTime @default(now())
+
+  @@unique([memberId, gameId])
+  @@index([memberId])
+  @@index([gameId])
 }
 
 /// D&D characters per member
@@ -107,9 +176,9 @@ model DnDCharacter {
   member        Member   @relation(fields: [memberId], references: [slug])
   characterName String
   race          String
-  charClass     String   // 'class' is reserved in some DBs
+  charClass     String   // 'class' is reserved
   level         Int      @default(1)
-  img           String?  // URL → Supabase bucket: games/dnd/characters/*.webp
+  img           String?  // URL → Supabase: games/dnd/characters/*.webp
   str           Int      @default(10)
   dex           Int      @default(10)
   con           Int      @default(10)
@@ -123,13 +192,14 @@ model DnDCharacter {
 
 /// D&D campaigns
 model DnDCampaign {
-  id          String   @id @default(cuid())
-  name        String
-  dm          String   // Dungeon Master name
-  status      String   @default("ONGOING") // ONGOING, COMPLETED, PAUSED
-  description String
-  sessions    Int      @default(0)
-  createdAt   DateTime @default(now())
+  id           String   @id @default(cuid())
+  name         String
+  dm           String   // Dungeon Master
+  status       String   @default("ONGOING")
+  description  String
+  storyOutline String?  // Alur cerita kampanye
+  sessions     Int      @default(0)
+  createdAt    DateTime @default(now())
 
   // Relations
   images DnDCampaignImage[]
@@ -141,8 +211,8 @@ model DnDCampaign {
 model DnDCampaignImage {
   id         String   @id @default(cuid())
   campaignId String   // FK → DnDCampaign.id
-  campaign     DnDCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  img        String   // URL → Supabase bucket: games/dnd/locations/*.webp
+  campaign   DnDCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  img        String   // URL → Supabase: games/dnd/locations/*.webp
   caption    String?
   order      Int      @default(0)
   createdAt  DateTime @default(now())
@@ -151,7 +221,7 @@ model DnDCampaignImage {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// PORTFOLIO TABLES
+// PORTFOLIO TABLES (4)
 // ═══════════════════════════════════════════════════════════════════════════
 
 /// Portfolio projects per member
@@ -161,7 +231,7 @@ model PortfolioProject {
   member      Member   @relation(fields: [memberId], references: [slug])
   title       String
   description String
-  techJson    String   @default("[]") // JSON array: ["Next.js", "TypeScript"]
+  techJson    String   @default("[]") // ["Next.js", "TypeScript"]
   category    String   @default("WEB") // WEB, GAME, MOBILE, TOOL, BOT, OTHER
   status      String   @default("LIVE") // LIVE, WIP, ARCHIVED
   year        String
@@ -181,8 +251,8 @@ model PortfolioProject {
 model PortfolioProjectImage {
   id         String   @id @default(cuid())
   projectId  String   // FK → PortfolioProject.id
-  project      PortfolioProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  img        String   // URL → Supabase bucket: portfolio/projects/*.webp
+  project    PortfolioProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  img        String   // URL → Supabase: portfolio/projects/*.webp
   caption    String?
   order      Int      @default(0)
   createdAt  DateTime @default(now())
@@ -190,7 +260,7 @@ model PortfolioProjectImage {
   @@index([projectId])
 }
 
-/// Achievements per member (certificates, awards, milestones)
+/// Achievements per member (sertifikat, medali, milestone)
 model Achievement {
   id          String   @id @default(cuid())
   memberId    String   // FK → Member.slug
@@ -210,8 +280,8 @@ model Achievement {
 model AchievementImage {
   id            String   @id @default(cuid())
   achievementId String   // FK → Achievement.id
-  achievement  Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
-  img           String   // URL → Supabase bucket: portfolio/achievements/*.webp
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  img           String   // URL → Supabase: portfolio/achievements/*.webp
   caption       String?
   order         Int      @default(0)
   createdAt     DateTime @default(now())
