@@ -78,14 +78,16 @@ export function MemberDetailModal({
             exit={{ scale: 0.92, y: 20, rotate: -1 }}
             transition={{ type: "spring", stiffness: 300, damping: 26 }}
           >
-            {/* X Close button — sticky so it stays when scrolling */}
-            <button
-              onClick={onClose}
-              className="sticky top-2 float-right mr-2 z-30 w-12 h-12 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-black dark:border-white shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] hover:rotate-90 transition-transform no-color-transition"
-              aria-label="Close"
-            >
-              <X className="w-6 h-6" />
-            </button>
+            {/* X Close button — sticky wrapper, no float to avoid empty space */}
+            <div className="sticky top-0 z-30 flex justify-end p-2 bg-black/50 backdrop-blur-sm">
+              <button
+                onClick={onClose}
+                className="w-10 h-10 flex items-center justify-center bg-[#ff4d4d] text-white border-2 border-white shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] hover:rotate-90 transition-transform no-color-transition"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
             {/* Header with image + identity */}
             <div className="relative bg-black dark:bg-[#111] text-white p-6 md:p-8 border-b-8 border-black dark:border-white overflow-hidden">

@@ -40,15 +40,15 @@ function DnDStatBlock({ stats, color }: { stats: DnDStats; color: string }) {
 
 function PlayerChip({ p }: { p: any }) {
   return (
-    <div className="border-2 border-white/20 bg-[#1a1a1a] p-3 flex items-center gap-3">
-      <img src={p.img} alt={p.nick} className="w-14 h-14 object-cover border-2 border-white/40 grayscale flex-shrink-0" loading="lazy" />
+    <div className="border-2 border-white/20 bg-[#1a1a1a] p-3 flex items-center gap-4">
+      <img src={p.img} alt={p.nick} className="w-20 h-20 object-cover border-2 border-white/40 grayscale flex-shrink-0" loading="lazy" />
       <div className="flex-1 min-w-0">
-        <div className="font-bebas text-xl leading-none" style={{ color: p.color }}>{p.nick}</div>
-        {p.role && <div className="font-mono-ud text-[11px] text-white/60 mt-1">{p.role} · {p.favHero}</div>}
-        {p.dndCharacter && <div className="font-mono-ud text-[11px] text-white/60 mt-1">{p.dndCharacter}</div>}
+        <div className="font-bebas text-2xl leading-none" style={{ color: p.color }}>{p.nick}</div>
+        {p.role && <div className="font-mono-ud text-xs text-white/60 mt-1">{p.role} · {p.favHero}</div>}
+        {p.dndCharacter && <div className="font-mono-ud text-xs text-white/60 mt-1">{p.dndCharacter}</div>}
       </div>
-      {p.rank && <div className="font-mono-ud text-[11px] font-black text-right"><div className="text-[#d4ff00]">{p.rank}</div><div className="text-white/50">WR: {p.winRate}</div></div>}
-      {p.dndLevel && <div className="font-bebas text-3xl" style={{ color: p.color }}>LVL {p.dndLevel}</div>}
+      {p.rank && <div className="font-mono-ud text-xs font-black text-right"><div className="text-[#d4ff00]">{p.rank}</div><div className="text-white/50">WR: {p.winRate}</div></div>}
+      {p.dndLevel && <div className="font-bebas text-4xl" style={{ color: p.color }}>LVL {p.dndLevel}</div>}
     </div>
   );
 }
@@ -114,20 +114,22 @@ export function GameDetailModal({
             aria-modal="true"
             aria-labelledby="ud-game-detail-title"
             tabIndex={-1}
-            className="relative w-full max-w-5xl max-h-[92vh] overflow-y-auto border-8 border-white bg-[#09090b] shadow-[8px_8px_0_#000] md:shadow-[16px_16px_0_#000] outline-none"
+            className="relative w-full max-w-6xl max-h-[92vh] overflow-y-auto border-8 border-white bg-[#09090b] shadow-[8px_8px_0_#000] md:shadow-[16px_16px_0_#000] outline-none"
             initial={{ scale: 0.92, y: 20 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.92, y: 20 }}
             transition={{ type: "spring", stiffness: 300, damping: 26 }}
           >
-            {/* X Close button — sticky so it stays when scrolling */}
-            <button
-              onClick={onClose}
-              className="sticky top-2 float-right mr-2 z-30 w-12 h-12 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-white shadow-[4px_4px_0_#000] hover:rotate-90 transition-transform no-color-transition"
-              aria-label="Close"
-            >
-              <X className="w-6 h-6" />
-            </button>
+            {/* X Close button — sticky wrapper */}
+            <div className="sticky top-0 z-30 flex justify-end p-2 bg-black/50 backdrop-blur-sm">
+              <button
+                onClick={onClose}
+                className="w-10 h-10 flex items-center justify-center bg-[#ff4d4d] text-white border-2 border-white shadow-[4px_4px_0_#000] hover:rotate-90 transition-transform no-color-transition"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
             {/* Header banner */}
             <div className="p-6 border-b-4 border-white" style={{ backgroundColor: accent }}>
