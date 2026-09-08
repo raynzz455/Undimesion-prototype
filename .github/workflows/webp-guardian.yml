@@ -1,0 +1,186 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# WebP Guardian — Scans for non-WebP images, converts them, and replaces
+# the originals. The frontend ONLY accepts .webp, so this ensures no
+# PNG/JPG/GIF lingers in the uploads folder.
+#
+# Triggers:
+#   - On push to main when files in public/gallery/uploads/ change
+#   - On schedule (every hour) to catch any stragglers
+#   - Manually via workflow_dispatch
+#
+# What it does:
+#   1. Finds all non-.webp image files in public/gallery/uploads/
+#   2. Converts each to WebP (resize max 1280px, quality 78) via sharp
+#   3. Deletes the original non-WebP file
+#   4. Commits the converted .webp + deletion back to the repo
+#   5. If SUPABASE secrets are set, also uploads to Supabase bucket
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: WebP Guardian
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "public/gallery/uploads/**"
+  schedule:
+    - cron: "0 * * * *"  # Every hour
+  workflow_dispatch:
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+
+      - name: Install sharp
+        run: |
+          cd /tmp
+          bun init -y
+          bun add sharp
+          echo "SHARP_DIR=$(pwd)" >> $GITHUB_ENV
+
+      - name: Scan for non-WebP images
+        id: scan
+        run: |
+          # Find all image files that are NOT .webp
+          FILES=$(find public/gallery/uploads -type f \
+            \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" \
+               -o -name "*.gif" -o -name "*.bmp" -o -name "*.tiff" \) 2>/dev/null)
+
+          if [ -z "$FILES" ]; then
+            echo "✓ No non-WebP images found. All clean."
+            echo "found=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          COUNT=$(echo "$FILES" | wc -l)
+          echo "⚠ Found $COUNT non-WebP image(s):"
+          echo "$FILES"
+          echo "found=$COUNT" >> $GITHUB_OUTPUT
+          echo "files<<EOF" >> $GITHUB_OUTPUT
+          echo "$FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Convert to WebP + delete originals
+        if: steps.scan.outputs.found != '0'
+        run: |
+          cd /tmp  # sharp is installed here
+          CONVERTED=0
+          FAILED=0
+
+          while IFS= read -r FILE; do
+            if [ -z "$FILE" ] || [ ! -f "../repo/$FILE" ]; then continue; fi
+
+            # Work from repo root
+            cd ../repo
+
+            BASENAME=$(basename "$FILE")
+            DIRNAME=$(dirname "$FILE")
+            STEM="${BASENAME%.*}"
+            OUTPUT="$DIRNAME/$STEM.webp"
+
+            # Convert using sharp (Node.js script)
+            node -e "
+              const sharp = require('sharp');
+              const input = '$FILE';
+              const output = '$OUTPUT';
+              sharp(input)
+                .resize({ width: 1280, withoutEnlargement: true })
+                .webp({ quality: 78 })
+                .toFile(output)
+                .then(info => {
+                  const origKb = Math.round(require('fs').statSync(input).size / 1024);
+                  const webpKb = Math.round(info.size / 1024);
+                  const savings = Math.round((1 - webpKb / origKb) * 100);
+                  console.log('✓ $BASENAME → $STEM.webp (' + origKb + 'KB → ' + webpKb + 'KB, ' + savings + '% smaller)');
+                })
+                .catch(err => {
+                  console.error('✗ $BASENAME:', err.message);
+                  process.exit(1);
+                });
+            " || { FAILED=$((FAILED + 1)); cd /tmp; continue; }
+
+            # Delete the original non-WebP file
+            rm -f "$FILE"
+            echo "  🗑 Deleted original: $BASENAME"
+            CONVERTED=$((CONVERTED + 1))
+            cd /tmp
+          done <<< "${{ steps.scan.outputs.files }}"
+
+          echo "converted=$CONVERTED" >> $GITHUB_OUTPUT
+          echo "failed=$FAILED" >> $GITHUB_OUTPUT
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ Converted: $CONVERTED"
+          echo "❌ Failed: $FAILED"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+      - name: Commit converted files
+        if: steps.scan.outputs.found != '0' && steps.convert.outputs.converted != '0'
+        run: |
+          cd ../repo
+          git config user.name "WebP Guardian"
+          git config user.email "actions@github.com"
+          git add public/gallery/uploads/
+          git commit -m "chore: convert ${{ steps.convert.outputs.converted }} image(s) to WebP
+
+          Auto-converted by WebP Guardian GitHub Action.
+          Originals deleted. Frontend only accepts .webp."
+          git push
+
+      - name: Sync to Supabase (optional)
+        if: steps.scan.outputs.found != '0' && steps.convert.outputs.converted != '0'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          cd ../repo
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_KEY" ]; then
+            echo "ℹ Supabase secrets not set. Skipping cloud sync."
+            echo "  Set SUPABASE_URL + SUPABASE_SERVICE_KEY in repo secrets to enable."
+            exit 0
+          fi
+
+          echo "☁ Syncing WebP files to Supabase bucket 'gallery'..."
+          for FILE in public/gallery/uploads/*.webp; do
+            [ -f "$FILE" ] || continue
+            BASENAME=$(basename "$FILE")
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+              -X POST \
+              "${SUPABASE_URL}/storage/v1/object/gallery/${BASENAME}" \
+              -H "Authorization: Bearer ${SUPABASE_SERVICE_KEY}" \
+              -H "Content-Type: image/webp" \
+              --data-binary @"$FILE")
+            if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "201" ]; then
+              echo "  ✓ $BASENAME → Supabase"
+            else
+              echo "  ✗ $BASENAME (HTTP $HTTP_CODE)"
+            fi
+          done
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## 🔒 WebP Guardian Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Non-WebP found | ${{ steps.scan.outputs.found }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Converted | ${{ steps.convert.outputs.converted || 0 }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Failed | ${{ steps.convert.outputs.failed || 0 }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.scan.outputs.found }}" = "0" ]; then
+            echo "✅ All images are already WebP. No action needed." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠ Found and converted non-WebP images. Originals deleted." >> $GITHUB_STEP_SUMMARY
+          fi

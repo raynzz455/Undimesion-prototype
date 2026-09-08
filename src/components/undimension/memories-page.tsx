@@ -11,7 +11,7 @@ import { useSfx } from "@/hooks/use-sfx";
 import { useFetch } from "@/hooks/use-fetch";
 import { cn } from "@/lib/utils";
 import {
-  Upload, Loader2, X, Maximize2, RefreshCw, ImageOff, Dices,
+  Maximize2, RefreshCw, ImageOff, Dices,
   ChevronLeft, ChevronRight, Play, Pause,
 } from "lucide-react";
 
@@ -215,128 +215,6 @@ function PaginatedCarousel({
   );
 }
 
-function UploadWidget({ onUploaded }: { onUploaded: () => void }) {
-  const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("");
-  const [date, setDate] = useState(String(new Date().getFullYear()));
-  const [file, setFile] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleUpload = async () => {
-    if (!file || !title.trim()) {
-      setError("Judul dan foto wajib diisi.");
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const form = new FormData();
-      form.append("file", file);
-      form.append("title", title);
-      form.append("author", author || "ANON");
-      form.append("date", date);
-      const res = await fetch("/api/gallery/upload", { method: "POST", body: form });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Upload gagal");
-      }
-      onUploaded();
-      setOpen(false);
-      setFile(null);
-      setTitle("");
-      setAuthor("");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Upload gagal");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <>
-      <button
-        onClick={() => setOpen(true)}
-        className="fixed bottom-36 right-6 z-[55] bg-[#d4ff00] text-black border-4 border-black dark:border-white font-bebas text-2xl px-6 py-4 shadow-[8px_8px_0_#000] dark:shadow-[8px_8px_0_#fff] hover:-translate-y-1 hover:shadow-[12px_12px_0_#ff4d4d] transition-all no-color-transition flex items-center gap-2"
-      >
-        <Upload className="w-5 h-5" /> ADD MEMORY
-      </button>
-
-      {open && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto overscroll-contain">
-          <div className="bg-[#f4f4f0] dark:bg-[#09090b] border-4 border-black dark:border-white shadow-[12px_12px_0_#ff4d4d] p-6 w-full max-w-md relative">
-            <button
-              onClick={() => setOpen(false)}
-              className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-[#ff4d4d] text-white border-2 border-black"
-              aria-label="Close"
-            >
-              <X className="w-4 h-4" />
-            </button>
-            <h3 className="font-bebas text-4xl text-black dark:text-white mb-4">UPLOAD MEMORY</h3>
-            <p className="font-mono-ud text-xs text-black/60 dark:text-white/60 mb-4">
-              Foto akan otomatis dikonversi ke WebP oleh backend (sharp).
-            </p>
-            <div className="space-y-3">
-              <label className="block">
-                <span className="font-mono-ud text-xs font-bold text-black dark:text-white">FOTO *</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                  className="block w-full mt-1 text-xs font-mono-ud file:mr-3 file:py-2 file:px-4 file:border-2 file:border-black file:bg-[#d4ff00] file:text-black file:font-bold file:cursor-pointer file:hover:bg-[#ff4d4d] file:hover:text-white"
-                />
-              </label>
-              <label className="block">
-                <span className="font-mono-ud text-xs font-bold text-black dark:text-white">JUDUL *</span>
-                <input
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="VISI AWAL"
-                  className="block w-full mt-1 px-3 py-2 border-2 border-black dark:border-white bg-white dark:bg-black text-black dark:text-white font-mono-ud text-sm"
-                />
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <label className="block">
-                  <span className="font-mono-ud text-xs font-bold text-black dark:text-white">TAHUN</span>
-                  <input
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="block w-full mt-1 px-3 py-2 border-2 border-black dark:border-white bg-white dark:bg-black text-black dark:text-white font-mono-ud text-sm"
-                  />
-                </label>
-                <label className="block">
-                  <span className="font-mono-ud text-xs font-bold text-black dark:text-white">OLEH</span>
-                  <input
-                    value={author}
-                    onChange={(e) => setAuthor(e.target.value)}
-                    placeholder="ALDI"
-                    className="block w-full mt-1 px-3 py-2 border-2 border-black dark:border-white bg-white dark:bg-black text-black dark:text-white font-mono-ud text-sm"
-                  />
-                </label>
-              </div>
-              {error && (
-                <p className="font-mono-ud text-xs text-[#ff4d4d] font-bold">! {error}</p>
-              )}
-              <button
-                onClick={handleUpload}
-                disabled={loading}
-                className="w-full bg-black text-white dark:bg-white dark:text-black font-bebas text-2xl py-3 border-4 border-black dark:border-white shadow-[6px_6px_0_#ff4d4d] hover:-translate-y-1 hover:shadow-[8px_8px_0_#d4ff00] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <><Loader2 className="w-5 h-5 animate-spin" /> CONVERTING...</>
-                ) : (
-                  "SUBMIT"
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
-
 export function MemoriesPage() {
   const { data, loading, refetch } = useFetch<{ photos: GalleryPhoto[]; count: number }>("/api/gallery");
   const [lightboxIndex, setLightboxIndex] = useState(-1);
@@ -483,7 +361,8 @@ export function MemoriesPage() {
         )}
       </div>
 
-      <UploadWidget onUploaded={() => { play("submit"); refetch(); }} />
+      {/* Upload is now only available via /chaosmode (member-only).
+          The Gallery page is view-only for visitors. */}
       <PhotoLightbox
         photos={photos}
         index={lightboxIndex}
