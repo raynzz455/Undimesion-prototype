@@ -213,32 +213,78 @@ src/
 
 ---
 
-## 🚢 Deployment (Render)
+## 🚢 Deployment Guide
 
-### Prerequisites
-1. A Render account
-2. A PostgreSQL database (Render's managed Postgres or external)
-3. Cloud storage for images (Cloudinary / Uploadthing / S3)
+### Architecture
+```
+GitHub Repo → Vercel (FE) + Render (BE+DB) + Supabase (Bucket)
+           → GitHub Actions (WebP Guardian + Deploy + DB Migrate)
+```
 
-### Steps
+### Step 1: Supabase Setup (Image Storage + DB backup)
 
-1. **Fork/push this repo to GitHub**
+1. Go to https://supabase.com → New Project
+2. Create a bucket named `gallery` (Public)
+3. Go to Settings → API:
+   - Copy `Project URL` → `NEXT_PUBLIC_SUPABASE_URL`
+   - Copy `anon public` key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - Copy `service_role` key → `SUPABASE_SERVICE_KEY`
+4. (Optional) Go to SQL Editor → Run `prisma/migrations/0001_init.sql`
 
-2. **Create a new Web Service on Render**
-   - Build Command: `bun install && bun run db:push`
-   - Start Command: `bun run start`
+### Step 2: Render Setup (Backend + Database)
 
-3. **Set Environment Variables**
-   ```
-   DATABASE_URL=postgresql://...     # Your Postgres URL
-   NODE_ENV=production
-   ```
+1. Go to https://render.com → New → Blueprint
+2. Select this repo → `render.yaml` auto-detected
+3. Render will create:
+   - PostgreSQL database (`undimension-db`)
+   - Web service (`undimension-api`)
+4. Set environment variables in Render dashboard:
+   - `SUPABASE_URL` = your Supabase URL
+   - `SUPABASE_SERVICE_KEY` = your Supabase service key
+5. Render auto-sets `DATABASE_URL` from the PostgreSQL database
+6. Build command: `bun install && bun run db:generate && bun run db:push`
+7. Start command: `bun run start`
+8. Create a Deploy Hook: Settings → Deploy Hook → copy URL
 
-4. **Swap image storage to cloud** (in `src/app/api/gallery/upload/route.ts`)
-   - Replace the local `writeFileSync` with Cloudinary/Uploadthing upload
-   - The DB stores the final URL, so the frontend doesn't change
+### Step 3: Vercel Setup (Frontend)
 
-5. **Deploy!**
+1. Go to https://vercel.com → New Project → Import this repo
+2. Framework: Next.js (auto-detected)
+3. Set environment variables:
+   - `DATABASE_URL` = your Render PostgreSQL URL (for SSR/API)
+   - `NEXT_PUBLIC_SUPABASE_URL` = your Supabase URL
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = your Supabase anon key
+4. Deploy!
+
+### Step 4: GitHub Actions Setup (Secrets)
+
+Go to repo Settings → Secrets → Actions:
+
+| Secret | Value | Used by |
+|--------|-------|---------|
+| `RENDER_DATABASE_URL` | Render PostgreSQL URL | db-migrate.yml |
+| `RENDER_DEPLOY_HOOK_URL` | Render deploy hook URL | deploy-render.yml |
+| `VERCEL_TOKEN` | Vercel API token | deploy-vercel.yml |
+| `VERCEL_ORG_ID` | Vercel org/team ID | deploy-vercel.yml |
+| `VERCEL_PROJECT_ID` | Vercel project ID | deploy-vercel.yml |
+| `SUPABASE_URL` | Supabase URL | webp-guardian.yml |
+| `SUPABASE_SERVICE_KEY` | Supabase service key | webp-guardian.yml |
+
+### GitHub Actions Workflows
+
+| Workflow | Trigger | Function |
+|----------|---------|----------|
+| `webp-guardian.yml` | Push + hourly | Convert non-WebP → WebP, sync Supabase |
+| `deploy-vercel.yml` | Push to main | Build + deploy FE to Vercel |
+| `deploy-render.yml` | Push to main (API changes) | Trigger Render deploy hook |
+| `db-migrate.yml` | Push (prisma changes) | Run Prisma migration + seed |
+
+### Database Migration (Supabase SQL Editor)
+
+1. Go to Supabase → SQL Editor
+2. Paste contents of `prisma/migrations/0001_init.sql`
+3. Run — creates 4 tables + indexes + triggers + seed data
+4. Verify: `SELECT COUNT(*) FROM "Member";` → should be 7
 
 ---
 

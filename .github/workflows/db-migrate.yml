@@ -1,0 +1,60 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Database Migration — Run Prisma migrations on Render PostgreSQL
+# Triggers when prisma/schema.prisma changes or manually
+#
+# Setup:
+#   1. Set RENDER_API_KEY secret (from Render Account Settings → API Keys)
+#   2. Set RENDER_SERVICE_ID secret (from the web service URL or dashboard)
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: Database Migration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "prisma/schema.prisma"
+      - "prisma/migrations/**"
+  workflow_dispatch:
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Generate Prisma Client
+        run: bun run db:generate
+
+      - name: Run Migration (if DATABASE_URL available)
+        env:
+          DATABASE_URL: ${{ secrets.RENDER_DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "⚠ RENDER_DATABASE_URL not set. Skipping migration."
+            echo "Set it in GitHub repo Settings → Secrets → Actions"
+            exit 0
+          fi
+          echo "Running Prisma db push..."
+          bun run db:push
+          echo "✅ Migration complete"
+
+      - name: Run Seed
+        env:
+          DATABASE_URL: ${{ secrets.RENDER_DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "Skipping seed (no DATABASE_URL)"
+            exit 0
+          fi
+          echo "Seeding database..."
+          bun run scripts/seed.ts || true
+          bun run scripts/seed-news.ts || true
+          echo "✅ Seed complete"

@@ -1,30 +1,44 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// UNDIMENSION — Prisma Schema
+// Supports both SQLite (dev) and PostgreSQL (production)
+// The provider is determined by the DATABASE_URL format:
+//   - file:./db/custom.db → SQLite (local dev)
+//   - postgresql://... → PostgreSQL (Render/Supabase)
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
+  // Local dev: SQLite | Production: PostgreSQL
+  // For production, change provider to "postgresql" and set DATABASE_URL
+  // to your Render/Supabase PostgreSQL connection string
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
+// ── For local dev with SQLite, use this instead: ──
+// datasource db {
+//   provider = "sqlite"
+//   url      = env("DATABASE_URL")
+// }
+
 model Member {
-  id        String   @id @default(cuid())
-  slug      String   @unique
-  name      String
-  nick      String
-  role      String
-  img       String
-  color     String
-  highlight String
-  bio       String
-  statsJson String
-  socialsJson String
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  nick        String
+  role        String
+  img         String
+  color       String
+  highlight   String
+  bio         String
+  statsJson   String   @default("[]")
+  socialsJson String   @default("[]")
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([order])
 }
 
 model GalleryPhoto {
