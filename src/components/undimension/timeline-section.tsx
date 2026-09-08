@@ -61,13 +61,6 @@ function TimelineNode({ m, i }: { m: (typeof TIMELINE)[number]; i: number }) {
         >
           <span className="text-black drop-shadow-[1px_1px_0_#fff]">{m.icon}</span>
         </div>
-        {/* Year label */}
-        <span
-          className="font-bebas text-lg mt-1"
-          style={{ color: m.color }}
-        >
-          {m.year}
-        </span>
         {/* Connector line — goes down through the card center */}
         {!isLast && (
           <div className="absolute top-14 left-1/2 -translate-x-1/2 w-1 bg-black dark:bg-white z-0" style={{ height: "calc(100% - 3.5rem)" }} />

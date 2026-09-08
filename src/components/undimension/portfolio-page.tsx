@@ -84,14 +84,14 @@ function MemberSelector({
 function SkillBar({ name, level, category }: { name: string; level: number; category: string }) {
   const color = SKILL_CATEGORY_COLORS[category] || "#fff";
   return (
-    <div className="flex items-center gap-2">
-      <span className="font-mono-ud text-sm font-bold text-black/60 dark:text-white/60 w-16 tracking-wider">
+    <div className="flex items-center gap-3">
+      <span className="font-mono-ud text-xs font-bold text-black/60 dark:text-white/60 min-w-[80px] tracking-wider flex-shrink-0">
         {category}
       </span>
-      <span className="font-mono-ud text-xs font-bold text-black dark:text-white w-24 truncate">
+      <span className="font-mono-ud text-sm font-bold text-black dark:text-white min-w-[100px] truncate flex-shrink-0">
         {name}
       </span>
-      <div className="flex-1 h-3 border-2 border-black dark:border-white bg-white dark:bg-black overflow-hidden">
+      <div className="flex-1 min-w-[60px] h-3 border-2 border-black dark:border-white bg-white dark:bg-black overflow-hidden">
         <motion.div
           className="h-full"
           style={{ backgroundColor: color }}

@@ -181,6 +181,7 @@ export function StatsRadarSection() {
                         fill={MEMBER_COLORS[m.id]}
                         fillOpacity={0.18}
                         strokeWidth={2.5}
+                        isAnimationActive={false}
                       />
                     ) : null,
                   )}
