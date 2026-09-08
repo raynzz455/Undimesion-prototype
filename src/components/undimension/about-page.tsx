@@ -387,15 +387,7 @@ export function AboutPage() {
   const openMember = (m: Member) => {
     play("open");
     lastOpenedIdRef.current = m.id;
-    // If a modal is already open, close it first then reopen after a brief
-    // delay so AnimatePresence replays the enter animation. This ensures the
-    // user sees a visible transition even when switching directly between members.
-    if (selected !== null && selected.id !== m.id) {
-      setSelected(null);
-      setTimeout(() => setSelected(m), 150);
-    } else {
-      setSelected(m);
-    }
+    setSelected(m);
   };
   const closeModal = () => {
     play("close");

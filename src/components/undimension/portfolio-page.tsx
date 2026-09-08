@@ -85,7 +85,7 @@ function SkillBar({ name, level, category }: { name: string; level: number; cate
   const color = SKILL_CATEGORY_COLORS[category] || "#fff";
   return (
     <div className="flex items-center gap-2">
-      <span className="font-mono-ud text-[10px] font-bold text-black/60 dark:text-white/60 w-16 tracking-wider">
+      <span className="font-mono-ud text-sm font-bold text-black/60 dark:text-white/60 w-16 tracking-wider">
         {category}
       </span>
       <span className="font-mono-ud text-xs font-bold text-black dark:text-white w-24 truncate">
@@ -101,7 +101,7 @@ function SkillBar({ name, level, category }: { name: string; level: number; cate
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         />
       </div>
-      <span className="font-mono-ud text-[10px] font-black w-8 text-right" style={{ color }}>
+      <span className="font-mono-ud text-sm font-black w-8 text-right" style={{ color }}>
         {level}
       </span>
     </div>
@@ -121,23 +121,23 @@ function ProjectMini({ p }: { p: PortfolioProject }) {
           <Icon className="w-5 h-5 text-black" />
         </div>
         <span
-          className="font-mono-ud text-[9px] font-black px-1.5 py-0.5 border"
+          className="font-mono-ud text-xs font-black px-1.5 py-0.5 border"
           style={{ color: statusColor, borderColor: statusColor }}
         >
           {p.status}
         </span>
       </div>
       <h4 className="font-bebas text-xl text-black dark:text-white leading-none mb-1">{p.title}</h4>
-      <p className="font-mono-ud text-[10px] text-black/60 dark:text-white/60 mb-2 line-clamp-2">{p.description}</p>
+      <p className="font-mono-ud text-sm text-black/60 dark:text-white/60 mb-2 line-clamp-2">{p.description}</p>
       <div className="flex flex-wrap gap-1 mb-2">
         {p.tech.map((t) => (
-          <span key={t} className="font-mono-ud text-[9px] font-bold px-1 py-0.5 border border-black dark:border-white bg-black/5 dark:bg-white/5 text-black dark:text-white">
+          <span key={t} className="font-mono-ud text-xs font-bold px-1 py-0.5 border border-black dark:border-white bg-black/5 dark:bg-white/5 text-black dark:text-white">
             {t}
           </span>
         ))}
       </div>
       <div className="flex items-center justify-between border-t-2 border-black dark:border-white pt-2">
-        <span className="font-mono-ud text-[10px] text-black/50 dark:text-white/50">{p.year}</span>
+        <span className="font-mono-ud text-sm text-black/50 dark:text-white/50">{p.year}</span>
         <div className="flex gap-1">
           {p.repo && (
             <a href={p.repo} target="_blank" rel="noopener noreferrer" className="w-6 h-6 flex items-center justify-center bg-black dark:bg-white text-white dark:text-black border border-black dark:border-white hover:bg-[#d4ff00] hover:text-black transition-colors">
@@ -163,7 +163,7 @@ function AchievementImageCarousel({ images, color }: { images: string[]; color: 
 
   return (
     <div className="mb-4 border-4 border-black dark:border-white bg-black overflow-hidden relative">
-      <div className="font-mono-ud text-[10px] font-black tracking-[0.2em] uppercase text-white/60 px-3 py-1 border-b-2 border-white/20 flex items-center justify-between">
+      <div className="font-mono-ud text-sm font-black tracking-[0.2em] uppercase text-white/60 px-3 py-1 border-b-2 border-white/20 flex items-center justify-between">
         <span>▸ EVIDENCE / CERTIFICATE</span>
         <span>{idx + 1}/{images.length}</span>
       </div>
@@ -230,17 +230,30 @@ function AchievementModal({
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        document.body.classList.remove("modal-open");
+        onClose();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
+  // Hide navbar when modal is open
+  useEffect(() => {
+    if (open) {
+      document.body.classList.add("modal-open");
+    } else {
+      document.body.classList.remove("modal-open");
+    }
+    return () => { document.body.classList.remove("modal-open"); };
+  }, [open]);
+
   return (
     <AnimatePresence>
       {open && achievement && (
         <motion.div
-          className="fixed inset-0 z-[85] flex items-start justify-center p-4 md:p-8 pt-4 md:pt-8"
+          className="fixed inset-0 z-[85] flex items-center justify-center p-4 md:p-8"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -282,7 +295,7 @@ function AchievementModal({
                   <Trophy className="w-8 h-8 text-white" />
                 </div>
               </div>
-              <div className="font-mono-ud text-[10px] font-black tracking-[0.3em] uppercase text-black/60 text-center">
+              <div className="font-mono-ud text-sm font-black tracking-[0.3em] uppercase text-black/60 text-center">
                 ▸ ACHIEVEMENT UNLOCKED
               </div>
             </div>
@@ -381,7 +394,7 @@ function MemberPortfolio({ member }: { member: Member }) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Work History */}
           <div className="border-4 border-black dark:border-white bg-white dark:bg-[#1a1a1a] p-5 shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff]">
-            <h3 className="font-bebas text-3xl text-black dark:text-white mb-4 flex items-center gap-2 border-b-4 border-black dark:border-white pb-2">
+            <h3 className="font-bebas text-4xl text-black dark:text-white mb-4 flex items-center gap-2 border-b-4 border-black dark:border-white pb-2">
               <Briefcase className="w-6 h-6" style={{ color: memberColor }} />
               WORK EXPERIENCE
             </h3>
@@ -400,10 +413,10 @@ function MemberPortfolio({ member }: { member: Member }) {
                   )}
                   <div className="flex items-baseline justify-between gap-2 flex-wrap">
                     <span className="font-bebas text-xl text-black dark:text-white leading-none">{w.role}</span>
-                    <span className="font-mono-ud text-[10px] text-black/50 dark:text-white/50">{w.period}</span>
+                    <span className="font-mono-ud text-sm text-black/50 dark:text-white/50">{w.period}</span>
                   </div>
                   <p className="font-mono-ud text-xs font-bold" style={{ color: memberColor }}>{w.company}</p>
-                  <p className="font-mono-ud text-xs text-black/70 dark:text-white/70 mt-1">{w.description}</p>
+                  <p className="font-mono-ud text-sm text-black/70 dark:text-white/70 mt-1">{w.description}</p>
                 </motion.div>
               ))}
             </div>
@@ -411,7 +424,7 @@ function MemberPortfolio({ member }: { member: Member }) {
 
           {/* Education */}
           <div className="border-4 border-black dark:border-white bg-white dark:bg-[#1a1a1a] p-5 shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff]">
-            <h3 className="font-bebas text-3xl text-black dark:text-white mb-4 flex items-center gap-2 border-b-4 border-black dark:border-white pb-2">
+            <h3 className="font-bebas text-4xl text-black dark:text-white mb-4 flex items-center gap-2 border-b-4 border-black dark:border-white pb-2">
               <GraduationCap className="w-6 h-6" style={{ color: memberColor }} />
               EDUCATION
             </h3>
@@ -427,10 +440,10 @@ function MemberPortfolio({ member }: { member: Member }) {
                 >
                   <div className="flex items-baseline justify-between gap-2 flex-wrap">
                     <span className="font-bebas text-xl text-black dark:text-white leading-none">{e.degree}</span>
-                    <span className="font-mono-ud text-[10px] text-black/50 dark:text-white/50">{e.period}</span>
+                    <span className="font-mono-ud text-sm text-black/50 dark:text-white/50">{e.period}</span>
                   </div>
                   <p className="font-mono-ud text-xs font-bold" style={{ color: memberColor }}>{e.school}</p>
-                  {e.description && <p className="font-mono-ud text-xs text-black/70 dark:text-white/70 mt-1">{e.description}</p>}
+                  {e.description && <p className="font-mono-ud text-sm text-black/70 dark:text-white/70 mt-1">{e.description}</p>}
                 </motion.div>
               ))}
             </div>
@@ -439,7 +452,7 @@ function MemberPortfolio({ member }: { member: Member }) {
 
         {/* Skills */}
         <div className="border-4 border-black dark:border-white bg-white dark:bg-[#1a1a1a] p-5 shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff]">
-          <h3 className="font-bebas text-3xl text-black dark:text-white mb-4 flex items-center gap-2 border-b-4 border-black dark:border-white pb-2">
+          <h3 className="font-bebas text-4xl text-black dark:text-white mb-4 flex items-center gap-2 border-b-4 border-black dark:border-white pb-2">
             <Code2 className="w-6 h-6" style={{ color: memberColor }} />
             SKILLS MATRIX
           </h3>
@@ -453,7 +466,7 @@ function MemberPortfolio({ member }: { member: Member }) {
             {Object.entries(SKILL_CATEGORY_COLORS).map(([cat, color]) => (
               <div key={cat} className="flex items-center gap-1.5">
                 <span className="w-3 h-3 border border-black dark:border-white" style={{ backgroundColor: color }} />
-                <span className="font-mono-ud text-[10px] font-bold text-black/60 dark:text-white/60 tracking-wider">{cat}</span>
+                <span className="font-mono-ud text-sm font-bold text-black/60 dark:text-white/60 tracking-wider">{cat}</span>
               </div>
             ))}
           </div>
@@ -461,10 +474,10 @@ function MemberPortfolio({ member }: { member: Member }) {
 
         {/* Achievements */}
         <div className="border-4 border-black dark:border-white bg-white dark:bg-[#1a1a1a] p-5 shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff]">
-          <h3 className="font-bebas text-3xl text-black dark:text-white mb-4 flex items-center gap-2 border-b-4 border-black dark:border-white pb-2">
+          <h3 className="font-bebas text-4xl text-black dark:text-white mb-4 flex items-center gap-2 border-b-4 border-black dark:border-white pb-2">
             <Award className="w-6 h-6" style={{ color: memberColor }} />
             ACHIEVEMENTS
-            <span className="ml-auto font-mono-ud text-[10px] text-black/40 dark:text-white/40">▸ CLICK TO EXPAND</span>
+            <span className="ml-auto font-mono-ud text-sm text-black/40 dark:text-white/40">▸ CLICK TO EXPAND</span>
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {cv.achievements.map((a, i) => (
@@ -480,18 +493,18 @@ function MemberPortfolio({ member }: { member: Member }) {
                 style={{ borderLeftWidth: "4px", borderLeftColor: memberColor }}
               >
                 <div className="flex items-start justify-between gap-1 mb-1">
-                  <div className="font-bebas text-2xl text-black dark:text-white leading-none">{a.title}</div>
+                  <div className="font-bebas text-3xl text-black dark:text-white leading-none">{a.title}</div>
                   <div className="flex items-center gap-1">
                     {a.images && a.images.length > 0 && (
-                      <span className="font-mono-ud text-[9px] font-black px-1 border border-black dark:border-white bg-[#d4ff00] text-black" title="Has photos">
+                      <span className="font-mono-ud text-xs font-black px-1 border border-black dark:border-white bg-[#d4ff00] text-black" title="Has photos">
                         📷 {a.images.length}
                       </span>
                     )}
                     <Trophy className="w-4 h-4 opacity-30 group-hover:opacity-100 transition-opacity" style={{ color: memberColor }} />
                   </div>
                 </div>
-                <div className="font-mono-ud text-[10px] text-black/50 dark:text-white/50 mb-1">{a.year}</div>
-                <p className="font-mono-ud text-[10px] text-black/70 dark:text-white/70 leading-relaxed line-clamp-2">{a.description}</p>
+                <div className="font-mono-ud text-sm text-black/50 dark:text-white/50 mb-1">{a.year}</div>
+                <p className="font-mono-ud text-sm text-black/70 dark:text-white/70 leading-relaxed line-clamp-2">{a.description}</p>
               </motion.button>
             ))}
           </div>
@@ -499,7 +512,7 @@ function MemberPortfolio({ member }: { member: Member }) {
 
         {/* Projects */}
         <div className="border-4 border-black dark:border-white bg-white dark:bg-[#1a1a1a] p-5 shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff]">
-          <h3 className="font-bebas text-3xl text-black dark:text-white mb-4 flex items-center gap-2 border-b-4 border-black dark:border-white pb-2">
+          <h3 className="font-bebas text-4xl text-black dark:text-white mb-4 flex items-center gap-2 border-b-4 border-black dark:border-white pb-2">
             <Package className="w-6 h-6" style={{ color: memberColor }} />
             PROJECTS ({cv.projects.length})
           </h3>
@@ -514,7 +527,7 @@ function MemberPortfolio({ member }: { member: Member }) {
         <AchievementModal
           achievement={selectedAchievement}
           memberColor={memberColor}
-          onClose={() => { play("close"); setSelectedAchievement(null); }}
+          onClose={() => { play("close"); document.body.classList.remove("modal-open"); setSelectedAchievement(null); }}
         />
       </motion.div>
     </AnimatePresence>
@@ -555,7 +568,7 @@ export function PortfolioPage() {
           <p className="font-mono-ud text-base md:text-lg font-bold mt-4 max-w-2xl bg-[#8a2be2] text-white border-4 border-black p-3 inline-block shadow-[4px_4px_0_#000]">
             Bukan cuma player. Kami juga builder. Pilih entitas untuk lihat profil lengkapnya.
           </p>
-          <div className="mt-4 font-mono-ud text-xs text-black/60 dark:text-white/60">
+          <div className="mt-4 font-mono-ud text-sm text-black/60 dark:text-white/60">
             ▸ {MEMBERS.length} ENTITIES · CV + PROJECTS + ACHIEVEMENTS
           </div>
         </div>
@@ -563,7 +576,7 @@ export function PortfolioPage() {
         {/* Member selector */}
         <div className="bg-white dark:bg-[#09090b] border-4 border-black dark:border-white shadow-[8px_8px_0_#000] dark:shadow-[8px_8px_0_#8a2be2] p-4 mb-6">
           <div className="flex items-center justify-between mb-3">
-            <span className="font-mono-ud text-[10px] font-black tracking-[0.2em] uppercase text-black/50 dark:text-white/50">
+            <span className="font-mono-ud text-sm font-black tracking-[0.2em] uppercase text-black/50 dark:text-white/50">
               ▸ SELECT ENTITY
             </span>
             <div className="flex items-center gap-1">

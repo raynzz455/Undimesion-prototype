@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Quote, Sparkles, Calendar, Flame, Share2, Check } from "lucide-react";
 import type { Member } from "@/lib/undimension/data";
@@ -18,6 +18,20 @@ export function MemberDetailModal({
   const open = member !== null;
   const panelRef = useRef<HTMLDivElement>(null);
   useFocusTrap(panelRef, open);
+
+  // Reset scroll to top BEFORE PAINT when member changes
+  // Uses double rAF to ensure DOM is fully rendered before resetting scroll
+  useLayoutEffect(() => {
+    if (open && panelRef.current) {
+      panelRef.current.scrollTop = 0;
+      // Double rAF: first frame renders the new content, second frame resets scroll
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (panelRef.current) panelRef.current.scrollTop = 0;
+        });
+      });
+    }
+  }, [member, open]);
 
   useEffect(() => {
     if (!open) return;
@@ -88,9 +102,6 @@ export function MemberDetailModal({
               animate={{ scale: 1, y: 0, rotate: 0 }}
               exit={{ scale: 0.92, y: 20, rotate: -1 }}
               transition={{ type: "spring", stiffness: 300, damping: 26 }}
-              onAnimationComplete={() => {
-                if (panelRef.current) panelRef.current.scrollTop = 0;
-              }}
             >
 
             {/* Header with image + identity */}
