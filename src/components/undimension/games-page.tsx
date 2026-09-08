@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { StarField } from "./star-field";
 import { StarGraphic } from "./primitives";
+import { GameExpander } from "./game-expander";
 import { GAMES, type GameSection } from "@/lib/undimension/data";
 import { cn } from "@/lib/utils";
 
@@ -174,6 +175,11 @@ function GameSectionView({ game }: { game: GameSection }) {
         <div className="w-full lg:w-[55%] xl:w-[53%] flex justify-center lg:mt-0 relative z-20">
           <GameCarousel images={game.images} title={game.carouselTitle} />
         </div>
+      </div>
+
+      {/* Game Expander — detailed info per game */}
+      <div className="max-w-7xl mx-auto w-full relative z-20 mt-4">
+        <GameExpander gameId={game.id} accent={game.accent} />
       </div>
     </section>
   );

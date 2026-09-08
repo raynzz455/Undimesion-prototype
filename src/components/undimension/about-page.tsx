@@ -116,13 +116,13 @@ function MemberCard({ m, i, onOpen }: { m: Member; i: number; onOpen: () => void
           isEven ? "md:flex-row" : "md:flex-row-reverse",
         )}
       >
-        {/* Image Container */}
+        {/* Image Container — bigger on desktop */}
         <div
           className={cn(
-            "w-full md:w-[45%] relative transition-transform duration-300 z-30 group-hover:rotate-0 px-4 md:px-8",
+            "w-full md:w-[50%] lg:w-[48%] relative transition-transform duration-300 z-30 group-hover:rotate-0 px-2 md:px-6",
             isEven
-              ? "rotate-6 md:-translate-x-8 md:-translate-y-16"
-              : "-rotate-6 md:translate-x-8 md:-translate-y-16",
+              ? "rotate-6 md:-translate-x-4 md:-translate-y-12"
+              : "-rotate-6 md:translate-x-4 md:-translate-y-12",
           )}
         >
           <div className="border-8 border-black dark:border-white bg-black p-3 shadow-[16px_16px_0_#000] dark:shadow-[16px_16px_0_#fff]">
