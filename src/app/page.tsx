@@ -12,6 +12,7 @@ import { ScrollProgress } from "@/components/undimension/scroll-progress";
 import { BackToTop } from "@/components/undimension/back-to-top";
 import { KeyboardShortcutsOverlay } from "@/components/undimension/keyboard-shortcuts-overlay";
 import { Soundboard } from "@/components/undimension/soundboard";
+import { BackgroundMusic } from "@/components/undimension/background-music";
 import { StarGraphic } from "@/components/undimension/primitives";
 import { useSfx, useKonamiCode } from "@/hooks/use-sfx";
 import { useChaos } from "@/components/undimension/chaos-provider";
@@ -274,6 +275,7 @@ export default function Home() {
         onOpen={() => setSoundboardOpen(true)}
         onClose={() => setSoundboardOpen(false)}
       />
+      <BackgroundMusic />
       <KeyboardShortcutsOverlay open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
       {/* God mode floating button — only visible when godMode is unlocked */}
       {godMode && page !== "chaosmode" && (
