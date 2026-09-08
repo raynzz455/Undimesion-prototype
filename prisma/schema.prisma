@@ -1,26 +1,20 @@
-// UNDIMENSION — Prisma Schema
-// Supports both SQLite (dev) and PostgreSQL (production)
-// The provider is determined by the DATABASE_URL format:
-//   - file:./db/custom.db → SQLite (local dev)
-//   - postgresql://... → PostgreSQL (Render/Supabase)
+// UNDIMENSION — Prisma Schema (Complete)
+// Supports SQLite (dev) and PostgreSQL (production)
+// For production: change provider to "postgresql"
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  // Local dev: SQLite | Production: PostgreSQL
-  // For production, change provider to "postgresql" and set DATABASE_URL
-  // to your Render/Supabase PostgreSQL connection string
   provider = "sqlite"
   url      = env("DATABASE_URL")
+  // Production: provider = "postgresql"
 }
 
-// ── For local dev with SQLite, use this instead: ──
-// datasource db {
-//   provider = "sqlite"
-//   url      = env("DATABASE_URL")
-// }
+// ═══════════════════════════════════════════════════════════════════════════
+// ABOUT PAGE TABLES
+// ═══════════════════════════════════════════════════════════════════════════
 
 model Member {
   id          String   @id @default(cuid())
@@ -38,20 +32,12 @@ model Member {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Relations
+  dndCharacters     DnDCharacter[]
+  portfolioProjects PortfolioProject[]
+  achievements      Achievement[]
+
   @@index([order])
-}
-
-model GalleryPhoto {
-  id        String   @id @default(cuid())
-  title     String
-  img       String
-  author    String
-  date      String
-  rotate    String   @default("-rotate-2")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([createdAt])
 }
 
 model GuestbookEntry {
@@ -76,4 +62,159 @@ model NewsArticle {
   createdAt DateTime @default(now())
 
   @@index([createdAt])
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GALLERY TABLE
+// ═══════════════════════════════════════════════════════════════════════════
+
+model GalleryPhoto {
+  id        String   @id @default(cuid())
+  title     String
+  img       String   // URL → Supabase bucket: gallery/uploads/*.webp
+  author    String
+  date      String
+  rotate    String   @default("-rotate-2")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([author])
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GAMES TABLES
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Game moment photos (Minecraft, Roblox, ML moments)
+model GameMoment {
+  id          String   @id @default(cuid())
+  gameId      String   // 'minecraft', 'roblox', 'ml', 'dnd'
+  title       String
+  description String?
+  img         String   // URL → Supabase bucket: games/moments/*.webp
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([gameId])
+  @@index([createdAt])
+}
+
+/// D&D characters per member
+model DnDCharacter {
+  id            String   @id @default(cuid())
+  memberId      String   // FK → Member.slug
+  member        Member   @relation(fields: [memberId], references: [slug])
+  characterName String
+  race          String
+  charClass     String   // 'class' is reserved in some DBs
+  level         Int      @default(1)
+  img           String?  // URL → Supabase bucket: games/dnd/characters/*.webp
+  str           Int      @default(10)
+  dex           Int      @default(10)
+  con           Int      @default(10)
+  int           Int      @default(10)
+  wis           Int      @default(10)
+  cha           Int      @default(10)
+  createdAt     DateTime @default(now())
+
+  @@index([memberId])
+}
+
+/// D&D campaigns
+model DnDCampaign {
+  id          String   @id @default(cuid())
+  name        String
+  dm          String   // Dungeon Master name
+  status      String   @default("ONGOING") // ONGOING, COMPLETED, PAUSED
+  description String
+  sessions    Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  // Relations
+  images DnDCampaignImage[]
+
+  @@index([createdAt])
+}
+
+/// D&D campaign location/scene photos
+model DnDCampaignImage {
+  id         String   @id @default(cuid())
+  campaignId String   // FK → DnDCampaign.id
+  campaign     DnDCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  img        String   // URL → Supabase bucket: games/dnd/locations/*.webp
+  caption    String?
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@index([campaignId])
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PORTFOLIO TABLES
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Portfolio projects per member
+model PortfolioProject {
+  id          String   @id @default(cuid())
+  memberId    String   // FK → Member.slug
+  member      Member   @relation(fields: [memberId], references: [slug])
+  title       String
+  description String
+  techJson    String   @default("[]") // JSON array: ["Next.js", "TypeScript"]
+  category    String   @default("WEB") // WEB, GAME, MOBILE, TOOL, BOT, OTHER
+  status      String   @default("LIVE") // LIVE, WIP, ARCHIVED
+  year        String
+  link        String?  // Live demo URL
+  repo        String?  // GitHub repo URL
+  color       String   @default("#ff4d4d")
+  createdAt   DateTime @default(now())
+
+  // Relations
+  images PortfolioProjectImage[]
+
+  @@index([memberId])
+  @@index([category])
+}
+
+/// Portfolio project screenshot images
+model PortfolioProjectImage {
+  id         String   @id @default(cuid())
+  projectId  String   // FK → PortfolioProject.id
+  project      PortfolioProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  img        String   // URL → Supabase bucket: portfolio/projects/*.webp
+  caption    String?
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@index([projectId])
+}
+
+/// Achievements per member (certificates, awards, milestones)
+model Achievement {
+  id          String   @id @default(cuid())
+  memberId    String   // FK → Member.slug
+  member      Member   @relation(fields: [memberId], references: [slug])
+  title       String
+  year        String
+  description String
+  createdAt   DateTime @default(now())
+
+  // Relations
+  images AchievementImage[]
+
+  @@index([memberId])
+}
+
+/// Achievement evidence photos (sertifikat, medali, foto kemenangan)
+model AchievementImage {
+  id            String   @id @default(cuid())
+  achievementId String   // FK → Achievement.id
+  achievement  Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  img           String   // URL → Supabase bucket: portfolio/achievements/*.webp
+  caption       String?
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  @@index([achievementId])
 }
