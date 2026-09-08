@@ -770,3 +770,11 @@ html.chaos::before {
 @media (prefers-reduced-motion: reduce) {
   .ud-wobble-hover:hover { animation: none; }
 }
+
+/* Hide navbar when modal is open */
+body.modal-open nav {
+  display: none !important;
+}
+body.modal-open .ud-grain {
+  z-index: 60;
+}

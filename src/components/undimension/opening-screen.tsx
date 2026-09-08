@@ -32,7 +32,7 @@ function BootSequence() {
 
   return (
     <div
-      className="fixed top-20 left-4 md:left-8 z-20 max-w-xs font-mono-ud text-[10px] md:text-xs text-[#00ff00] bg-black/70 border border-[#00ff00]/40 p-3 pointer-events-none"
+      className="fixed top-2 left-2 md:top-4 md:left-4 z-20 max-w-[200px] md:max-w-xs font-mono-ud text-[9px] md:text-xs text-[#00ff00] bg-black/70 border border-[#00ff00]/40 p-2 md:p-3 pointer-events-none"
       aria-hidden
     >
       <div className="flex items-center gap-1 mb-2 pb-1 border-b border-[#00ff00]/30">
@@ -63,7 +63,7 @@ export function OpeningScreen({ onEnter }: { onEnter: () => void }) {
       <BootSequence />
       <div className="relative z-10 flex flex-col items-center justify-center text-center w-full px-4">
         <h1
-          className="font-bebas text-[80px] sm:text-[110px] md:text-[180px] lg:text-[240px] leading-[0.8] uppercase text-white drop-shadow-md relative z-10 animate-intro-text ud-glitch"
+          className="font-bebas text-[72px] sm:text-[110px] md:text-[180px] lg:text-[240px] leading-[0.8] uppercase text-white drop-shadow-md relative z-10 animate-intro-text ud-glitch"
           data-text="UNDIMENSION"
           style={{ textShadow: "10px 10px 0px #00e5ff" }}
         >

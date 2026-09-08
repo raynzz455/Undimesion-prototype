@@ -400,6 +400,8 @@ export function AboutPage() {
   const closeModal = () => {
     play("close");
     setSelected(null);
+    // Ensure navbar is restored immediately
+    document.body.classList.remove("modal-open");
   };
 
   // Deep-link: auto-open member modal when URL has #member-{id}

@@ -22,13 +22,29 @@ export function MemberDetailModal({
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        document.body.classList.remove("modal-open");
+        onClose();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => {
       window.removeEventListener("keydown", onKey);
     };
   }, [open, onClose]);
+
+  // Hide navbar when modal is open, restore when closed
+  useEffect(() => {
+    if (open) {
+      document.body.classList.add("modal-open");
+    } else {
+      document.body.classList.remove("modal-open");
+    }
+    // Cleanup on unmount
+    return () => {
+      document.body.classList.remove("modal-open");
+    };
+  }, [open]);
 
   return (
     <AnimatePresence>

@@ -52,20 +52,28 @@ function TimelineNode({ m, i }: { m: (typeof TIMELINE)[number]; i: number }) {
 
   return (
     <div className="relative md:grid md:grid-cols-2 md:gap-0">
-      {/* ── Mobile: vertical stack (icon left, card right) ── */}
-      <div className="md:hidden flex items-start gap-4">
-        <div className="flex flex-col items-center flex-shrink-0">
-          <div
-            className="w-14 h-14 rounded-full border-4 border-black dark:border-white flex items-center justify-center font-bebas text-2xl shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] bg-white"
-            style={{ backgroundColor: m.color }}
-          >
-            <span className="text-black drop-shadow-[1px_1px_0_#fff]">{m.icon}</span>
-          </div>
-          {!isLast && (
-            <div className="w-1 flex-1 bg-black dark:bg-white mt-1 min-h-[40px]" />
-          )}
+      {/* ── Mobile: icon on top, connector line going down through card ── */}
+      <div className="md:hidden flex flex-col items-center">
+        {/* Icon */}
+        <div
+          className="w-14 h-14 rounded-full border-4 border-black dark:border-white flex items-center justify-center font-bebas text-2xl shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] bg-white z-10"
+          style={{ backgroundColor: m.color }}
+        >
+          <span className="text-black drop-shadow-[1px_1px_0_#fff]">{m.icon}</span>
         </div>
-        <div className="flex-1 pb-8">
+        {/* Year label */}
+        <span
+          className="font-bebas text-lg mt-1"
+          style={{ color: m.color }}
+        >
+          {m.year}
+        </span>
+        {/* Connector line — goes down through the card center */}
+        {!isLast && (
+          <div className="absolute top-14 left-1/2 -translate-x-1/2 w-1 bg-black dark:bg-white z-0" style={{ height: "calc(100% - 3.5rem)" }} />
+        )}
+        {/* Card below icon */}
+        <div className="w-full pb-8 mt-3 relative z-10">
           <TimelineCard m={m} align="left" />
         </div>
       </div>
