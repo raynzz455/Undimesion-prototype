@@ -240,34 +240,67 @@ CREATE TABLE IF NOT EXISTS "AchievementImage" (
 CREATE INDEX IF NOT EXISTS "AchievementImage_achievementId_idx" ON "AchievementImage"("achievementId");
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- FOREIGN KEYS
+-- FOREIGN KEYS (PostgreSQL doesn't support IF NOT EXISTS on ADD CONSTRAINT,
+-- so we use DO $$ blocks with exception handling)
 -- ═══════════════════════════════════════════════════════════════════════════
 
-ALTER TABLE "GameMoment" ADD CONSTRAINT IF NOT EXISTS "GameMoment_gameId_fkey"
-    FOREIGN KEY ("gameId") REFERENCES "Game"("gameId") ON DELETE CASCADE;
-ALTER TABLE "GamePlayerStat" ADD CONSTRAINT IF NOT EXISTS "GamePlayerStat_memberId_fkey"
-    FOREIGN KEY ("memberId") REFERENCES "Member"("slug") ON DELETE CASCADE;
-ALTER TABLE "GamePlayerStat" ADD CONSTRAINT IF NOT EXISTS "GamePlayerStat_gameId_fkey"
-    FOREIGN KEY ("gameId") REFERENCES "Game"("gameId") ON DELETE CASCADE;
-ALTER TABLE "GameCompatibility" ADD CONSTRAINT IF NOT EXISTS "GameCompatibility_memberId_fkey"
-    FOREIGN KEY ("memberId") REFERENCES "Member"("slug") ON DELETE CASCADE;
-ALTER TABLE "GameCompatibility" ADD CONSTRAINT IF NOT EXISTS "GameCompatibility_gameId_fkey"
-    FOREIGN KEY ("gameId") REFERENCES "Game"("gameId") ON DELETE CASCADE;
-ALTER TABLE "DnDCharacter" ADD CONSTRAINT IF NOT EXISTS "DnDCharacter_memberId_fkey"
-    FOREIGN KEY ("memberId") REFERENCES "Member"("slug") ON DELETE CASCADE;
-ALTER TABLE "DnDCampaignImage" ADD CONSTRAINT IF NOT EXISTS "DnDCampaignImage_campaignId_fkey"
-    FOREIGN KEY ("campaignId") REFERENCES "DnDCampaign"("id") ON DELETE CASCADE;
-ALTER TABLE "PortfolioProject" ADD CONSTRAINT IF NOT EXISTS "PortfolioProject_memberId_fkey"
-    FOREIGN KEY ("memberId") REFERENCES "Member"("slug") ON DELETE CASCADE;
-ALTER TABLE "PortfolioProjectImage" ADD CONSTRAINT IF NOT EXISTS "PortfolioProjectImage_projectId_fkey"
-    FOREIGN KEY ("projectId") REFERENCES "PortfolioProject"("id") ON DELETE CASCADE;
-ALTER TABLE "Achievement" ADD CONSTRAINT IF NOT EXISTS "Achievement_memberId_fkey"
-    FOREIGN KEY ("memberId") REFERENCES "Member"("slug") ON DELETE CASCADE;
-ALTER TABLE "AchievementImage" ADD CONSTRAINT IF NOT EXISTS "AchievementImage_achievementId_fkey"
-    FOREIGN KEY ("achievementId") REFERENCES "Achievement"("id") ON DELETE CASCADE;
+DO $$ BEGIN
+    ALTER TABLE "GameMoment" ADD CONSTRAINT "GameMoment_gameId_fkey"
+        FOREIGN KEY ("gameId") REFERENCES "Game"("gameId") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "GamePlayerStat" ADD CONSTRAINT "GamePlayerStat_memberId_fkey"
+        FOREIGN KEY ("memberId") REFERENCES "Member"("slug") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "GamePlayerStat" ADD CONSTRAINT "GamePlayerStat_gameId_fkey"
+        FOREIGN KEY ("gameId") REFERENCES "Game"("gameId") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "GameCompatibility" ADD CONSTRAINT "GameCompatibility_memberId_fkey"
+        FOREIGN KEY ("memberId") REFERENCES "Member"("slug") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "GameCompatibility" ADD CONSTRAINT "GameCompatibility_gameId_fkey"
+        FOREIGN KEY ("gameId") REFERENCES "Game"("gameId") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "DnDCharacter" ADD CONSTRAINT "DnDCharacter_memberId_fkey"
+        FOREIGN KEY ("memberId") REFERENCES "Member"("slug") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "DnDCampaignImage" ADD CONSTRAINT "DnDCampaignImage_campaignId_fkey"
+        FOREIGN KEY ("campaignId") REFERENCES "DnDCampaign"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "PortfolioProject" ADD CONSTRAINT "PortfolioProject_memberId_fkey"
+        FOREIGN KEY ("memberId") REFERENCES "Member"("slug") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "PortfolioProjectImage" ADD CONSTRAINT "PortfolioProjectImage_projectId_fkey"
+        FOREIGN KEY ("projectId") REFERENCES "PortfolioProject"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "Achievement" ADD CONSTRAINT "Achievement_memberId_fkey"
+        FOREIGN KEY ("memberId") REFERENCES "Member"("slug") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "AchievementImage" ADD CONSTRAINT "AchievementImage_achievementId_fkey"
+        FOREIGN KEY ("achievementId") REFERENCES "Achievement"("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- TRIGGERS
+-- TRIGGERS (use DO $$ for idempotency)
 -- ═══════════════════════════════════════════════════════════════════════════
 
 CREATE OR REPLACE FUNCTION update_updatedAt_column()
@@ -278,10 +311,15 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
-CREATE TRIGGER IF NOT EXISTS update_member_updatedAt
-    BEFORE UPDATE ON "Member" FOR EACH ROW EXECUTE FUNCTION update_updatedAt_column();
-CREATE TRIGGER IF NOT EXISTS update_galleryphoto_updatedAt
-    BEFORE UPDATE ON "GalleryPhoto" FOR EACH ROW EXECUTE FUNCTION update_updatedAt_column();
+DO $$ BEGIN
+    CREATE TRIGGER update_member_updatedAt
+        BEFORE UPDATE ON "Member" FOR EACH ROW EXECUTE FUNCTION update_updatedAt_column();
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    CREATE TRIGGER update_galleryphoto_updatedAt
+        BEFORE UPDATE ON "GalleryPhoto" FOR EACH ROW EXECUTE FUNCTION update_updatedAt_column();
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- SEED DATA
