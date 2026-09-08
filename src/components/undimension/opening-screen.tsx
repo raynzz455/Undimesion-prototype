@@ -63,7 +63,7 @@ export function OpeningScreen({ onEnter }: { onEnter: () => void }) {
       <BootSequence />
       <div className="relative z-10 flex flex-col items-center justify-center text-center w-full px-4">
         <h1
-          className="font-bebas text-[110px] md:text-[180px] lg:text-[240px] leading-[0.8] uppercase text-white drop-shadow-md relative z-10 animate-intro-text ud-glitch"
+          className="font-bebas text-[64px] sm:text-[110px] md:text-[180px] lg:text-[240px] leading-[0.8] uppercase text-white drop-shadow-md relative z-10 animate-intro-text ud-glitch"
           data-text="UNDIMENSION"
           style={{ textShadow: "10px 10px 0px #00e5ff" }}
         >

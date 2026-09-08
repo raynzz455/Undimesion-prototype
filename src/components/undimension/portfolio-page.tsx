@@ -164,9 +164,9 @@ function AchievementModal({
   memberColor: string;
   onClose: () => void;
 }) {
+  const open = achievement !== null;
   const panelRef = useRef<HTMLDivElement>(null);
   useFocusTrap(panelRef, open);
-  const open = achievement !== null;
 
   useEffect(() => {
     if (!open) return;

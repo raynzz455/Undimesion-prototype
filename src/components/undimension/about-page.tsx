@@ -119,10 +119,10 @@ function MemberCard({ m, i, onOpen }: { m: Member; i: number; onOpen: () => void
         {/* Image Container */}
         <div
           className={cn(
-            "w-full md:w-[45%] relative transition-transform duration-300 z-30 group-hover:rotate-0",
+            "w-full md:w-[45%] relative transition-transform duration-300 z-30 group-hover:rotate-0 px-4 md:px-8",
             isEven
-              ? "rotate-6 md:-translate-x-16 md:-translate-y-20"
-              : "-rotate-6 md:translate-x-16 md:-translate-y-20",
+              ? "rotate-6 md:-translate-x-8 md:-translate-y-16"
+              : "-rotate-6 md:translate-x-8 md:-translate-y-16",
           )}
         >
           <div className="border-8 border-black dark:border-white bg-black p-3 shadow-[16px_16px_0_#000] dark:shadow-[16px_16px_0_#fff]">

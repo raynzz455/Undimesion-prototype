@@ -34,7 +34,7 @@ export function MemberDetailModal({
     <AnimatePresence>
       {open && member && (
         <motion.div
-          className="fixed inset-0 z-[80] flex items-center justify-center p-3 md:p-6"
+          className="fixed inset-0 z-[85] flex items-center justify-center p-3 md:p-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

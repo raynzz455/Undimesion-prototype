@@ -36,10 +36,10 @@ export function Soundboard({
 
   return (
     <>
-      {/* Trigger button — stacked above the "?" button */}
+      {/* Trigger button — same height as BackToTop arrow (bottom-24) */}
       <button
         onClick={onOpen}
-        className="fixed bottom-[4.5rem] right-6 z-[55] w-12 h-12 flex items-center justify-center bg-[#ff00ff] text-white border-4 border-black dark:border-white shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff] hover:-translate-y-1 hover:rotate-12 transition-all no-color-transition"
+        className="fixed bottom-24 right-6 z-[55] w-12 h-12 flex items-center justify-center bg-[#ff00ff] text-white border-4 border-black dark:border-white shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff] hover:-translate-y-1 hover:rotate-12 transition-all no-color-transition"
         aria-label="Open soundboard"
         title="Soundboard 🎵 (B)"
       >

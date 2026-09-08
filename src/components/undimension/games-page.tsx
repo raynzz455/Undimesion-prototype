@@ -118,7 +118,7 @@ function GameSectionView({ game }: { game: GameSection }) {
       >
         <div
           className={cn(
-            "w-full lg:w-[35%] flex flex-col relative z-20",
+            "w-full lg:w-[35%] flex flex-col relative z-20 mb-8 lg:mb-0",
             game.reverse && "lg:items-end lg:text-right",
           )}
         >
@@ -167,7 +167,7 @@ function GameSectionView({ game }: { game: GameSection }) {
             </p>
           </div>
         </div>
-        <div className="w-full lg:w-[65%] flex justify-center mt-12 lg:mt-0 relative z-20">
+        <div className="w-full lg:w-[65%] flex justify-center lg:mt-0 relative z-20">
           <GameCarousel images={game.images} title={game.carouselTitle} />
         </div>
       </div>
