@@ -15,16 +15,18 @@ import { MEMBERS, type Member } from "@/lib/undimension/data";
 import { cn } from "@/lib/utils";
 import { Radar as RadarIcon, Shuffle, Eye, EyeOff } from "lucide-react";
 
-// Stats are strings like "99", "MAX", "???". Normalize to 0-100 numbers for the chart.
+// Stats are D&D scores (3-20 range) or "MAX"/"???". Normalize to 0-100 for chart.
+// D&D scale: 3-20, so multiply by 5 (3→15, 20→100)
 function statToNum(value: string): number {
   if (value === "MAX") return 100;
-  if (value === "???" || value === "??") return 50; // unknown = mid
+  if (value === "???" || value === "??") return 50;
   const n = parseInt(value, 10);
   if (Number.isNaN(n)) return 50;
-  return Math.min(100, Math.max(0, n));
+  // D&D stats are 3-20, scale to 0-100
+  return Math.min(100, Math.max(0, n * 5));
 }
 
-// Build radar data: [{ stat: "PWR", aldi: 99, razka: 88, ... }, ...]
+// Build radar data: [{ stat: "STR", aldi: 80, razka: 40, ... }, ...]
 function buildRadarData(activeIds: Set<string>) {
   const statLabels = MEMBERS[0].stats.map((s) => s.label);
   return statLabels.map((label) => {

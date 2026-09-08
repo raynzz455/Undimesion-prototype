@@ -176,14 +176,14 @@ function MemberCard({ m, i, onOpen }: { m: Member; i: number; onOpen: () => void
               </span>
             </p>
 
-            {/* RPG Stats Blocks */}
-            <div className="mt-8 flex flex-wrap gap-4 border-t-8 border-black dark:border-white pt-6">
+            {/* D&D Stats Blocks */}
+            <div className="mt-8 flex flex-wrap gap-2 border-t-8 border-black dark:border-white pt-6">
               {m.stats.map((stat, idx) => (
                 <span
                   key={idx}
                   className={cn(
-                    "border-4 border-black dark:border-white px-4 py-2 font-bebas text-3xl",
-                    idx === 1
+                    "border-4 border-black dark:border-white px-3 py-1 font-bebas text-xl md:text-2xl",
+                    idx % 2 === 1
                       ? "bg-black text-white dark:bg-white dark:text-black"
                       : "bg-white text-black dark:bg-black dark:text-white",
                   )}

@@ -62,19 +62,19 @@ export function GameExpander({ gameId, accent }: { gameId: string; accent: strin
   if (!detail) return null;
 
   return (
-    <div className="mt-6">
+    <div>
       <button
         onClick={() => { play("click"); setOpen((o) => !o); }}
         className={cn(
-          "w-full flex items-center justify-between px-4 py-2 border-4 border-black dark:border-white font-bebas text-lg md:text-xl tracking-wider transition-all no-color-transition",
-          open ? "bg-black text-white dark:bg-white dark:text-black" : "bg-white/10 text-white hover:bg-white/20",
+          "w-full flex items-center justify-center gap-3 px-6 py-4 border-4 font-bebas text-2xl md:text-3xl tracking-widest transition-all no-color-transition shadow-[6px_6px_0_#000]",
+          open
+            ? "bg-black text-white border-white"
+            : "border-white/40 text-white hover:border-white hover:bg-white/10",
         )}
+        style={{ backgroundColor: open ? accent : "rgba(0,0,0,0.6)" }}
       >
-        <span className="flex items-center gap-2">
-          <Users className="w-4 h-4" /> EXPAND DETAILS
-          {detail.players.length > 0 && <span className="font-mono-ud text-[10px] opacity-60">({detail.players.length} PLAYERS)</span>}
-        </span>
-        <ChevronDown className={cn("w-5 h-5 transition-transform", open && "rotate-180")} />
+        <span>{open ? "CLOSE DETAIL" : "MORE DETAIL"}</span>
+        <ChevronDown className={cn("w-6 h-6 transition-transform", open && "rotate-180")} />
       </button>
 
       <AnimatePresence>

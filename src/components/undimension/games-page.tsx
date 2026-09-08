@@ -177,8 +177,8 @@ function GameSectionView({ game }: { game: GameSection }) {
         </div>
       </div>
 
-      {/* Game Expander — detailed info per game */}
-      <div className="max-w-7xl mx-auto w-full relative z-20 mt-4">
+      {/* Game Expander — at bottom of section, big button */}
+      <div className="max-w-7xl mx-auto w-full relative z-20 mt-8 pb-8">
         <GameExpander gameId={game.id} accent={game.accent} />
       </div>
     </section>

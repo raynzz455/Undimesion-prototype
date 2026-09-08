@@ -183,10 +183,10 @@ export function MemberDetailModal({
                 </ul>
               </div>
 
-              {/* Stats */}
+              {/* Stats — D&D 6-stat system */}
               <div>
-                <h3 className="font-bebas text-3xl mb-3">RPG STATS</h3>
-                <div className="grid grid-cols-3 gap-3">
+                <h3 className="font-bebas text-3xl mb-3">D&D STATS</h3>
+                <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
                   {member.stats.map((stat, i) => (
                     <div
                       key={i}
