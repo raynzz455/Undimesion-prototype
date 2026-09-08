@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Users, Image as ImageIcon, Sword, Shield, Crown, MapPin } from "lucide-react";
+import { X, Users, Image as ImageIcon, Sword, Shield, Crown, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import { GAME_DETAILS, MEMBER_DND_STATS, DND_STAT_LABELS, type DnDStats } from "@/lib/undimension/game-details";
-import { cn } from "@/lib/utils";
 import { useSfx } from "@/hooks/use-sfx";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
+import { cn } from "@/lib/utils";
 
 function statModifier(score: number): string {
   const mod = Math.floor((score - 10) / 2);
@@ -21,16 +22,14 @@ function DnDStatBlock({ stats, color }: { stats: DnDStats; color: string }) {
         return (
           <div
             key={key}
-            className="border-2 border-black dark:border-white bg-black dark:bg-white text-center p-2 group relative"
+            className="border-2 border-white bg-black text-center p-2 group relative"
             style={{ borderTopColor: color, borderTopWidth: "4px" }}
           >
-            <div className="font-bebas text-2xl text-white dark:text-black leading-none">{key}</div>
+            <div className="font-bebas text-2xl text-white leading-none">{key}</div>
             <div className="font-bebas text-4xl leading-none my-1" style={{ color }}>{val}</div>
-            <div className="font-mono-ud text-[9px] text-white/50 dark:text-black/50">{statModifier(val)}</div>
-            <div className="absolute hidden group-hover:block z-50 bottom-full left-1/2 -translate-x-1/2 mb-1 bg-black text-white text-[9px] font-mono-ud p-2 border border-white whitespace-nowrap max-w-[200px] normal-case">
-              <span className="font-bold" style={{ color }}>{info.full}</span>
-              <br />
-              {info.desc}
+            <div className="font-mono-ud text-[9px] text-white/50">{statModifier(val)}</div>
+            <div className="absolute hidden group-hover:block z-50 bottom-full left-1/2 -translate-x-1/2 mb-1 bg-black text-white text-[9px] font-mono-ud p-2 border border-white whitespace-nowrap max-w-[200px]">
+              <span className="font-bold" style={{ color }}>{info.full}</span><br />{info.desc}
             </div>
           </div>
         );
@@ -39,57 +38,112 @@ function DnDStatBlock({ stats, color }: { stats: DnDStats; color: string }) {
   );
 }
 
-function PlayerChip({ p }: { p: { nick: string; color: string; img: string; role?: string; favHero?: string; rank?: string; kda?: string; winRate?: string; dndCharacter?: string; dndRace?: string; dndClass?: string; dndLevel?: number; dndCharacterImg?: string } }) {
+function PlayerChip({ p }: { p: any }) {
   return (
-    <div className="border-2 border-black dark:border-white bg-white dark:bg-[#1a1a1a] p-2 flex items-center gap-2">
-      <img src={p.img} alt={p.nick} className="w-10 h-10 object-cover border-2 border-black dark:border-white grayscale" loading="lazy" />
+    <div className="border-2 border-white/20 bg-[#1a1a1a] p-2 flex items-center gap-2">
+      <img src={p.img} alt={p.nick} className="w-10 h-10 object-cover border-2 border-white/40 grayscale" loading="lazy" />
       <div className="flex-1 min-w-0">
         <div className="font-bebas text-lg leading-none" style={{ color: p.color }}>{p.nick}</div>
-        {p.role && <div className="font-mono-ud text-[9px] text-black/60 dark:text-white/60">{p.role} · {p.favHero}</div>}
-        {p.dndCharacter && <div className="font-mono-ud text-[9px] text-black/60 dark:text-white/60">{p.dndCharacter}</div>}
+        {p.role && <div className="font-mono-ud text-[9px] text-white/60">{p.role} · {p.favHero}</div>}
+        {p.dndCharacter && <div className="font-mono-ud text-[9px] text-white/60">{p.dndCharacter}</div>}
       </div>
-      {p.rank && <div className="font-mono-ud text-[9px] font-black text-right"><div className="text-[#d4ff00]">{p.rank}</div><div className="text-black/50 dark:text-white/50">WR: {p.winRate}</div></div>}
+      {p.rank && <div className="font-mono-ud text-[9px] font-black text-right"><div className="text-[#d4ff00]">{p.rank}</div><div className="text-white/50">WR: {p.winRate}</div></div>}
       {p.dndLevel && <div className="font-bebas text-2xl" style={{ color: p.color }}>LVL {p.dndLevel}</div>}
     </div>
   );
 }
 
-export function GameExpander({ gameId, accent }: { gameId: string; accent: string }) {
-  const [open, setOpen] = useState(false);
+export function GameDetailModal({
+  gameId,
+  gameTitle,
+  accent,
+  open,
+  onClose,
+}: {
+  gameId: string;
+  gameTitle: string;
+  accent: string;
+  open: boolean;
+  onClose: () => void;
+}) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, open);
   const { play } = useSfx();
   const detail = GAME_DETAILS[gameId];
+
+  useEffect(() => {
+    if (open) {
+      document.body.classList.add("modal-open");
+    } else {
+      document.body.classList.remove("modal-open");
+    }
+    return () => { document.body.classList.remove("modal-open"); };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        document.body.classList.remove("modal-open");
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
 
   if (!detail) return null;
 
   return (
-    <div>
-      <button
-        onClick={() => { play("click"); setOpen((o) => !o); }}
-        className={cn(
-          "w-full flex items-center justify-center gap-3 px-6 py-4 border-4 font-bebas text-2xl md:text-3xl tracking-widest transition-all no-color-transition shadow-[6px_6px_0_#000]",
-          open
-            ? "bg-black text-white border-white"
-            : "border-white/40 text-white hover:border-white hover:bg-white/10",
-        )}
-        style={{ backgroundColor: open ? accent : "rgba(0,0,0,0.6)" }}
-      >
-        <span>{open ? "CLOSE DETAIL" : "MORE DETAIL"}</span>
-        <ChevronDown className={cn("w-6 h-6 transition-transform", open && "rotate-180")} />
-      </button>
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className="fixed inset-0 z-[85] flex items-center justify-center p-3 md:p-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" onClick={onClose} />
 
-      <AnimatePresence>
-        {open && (
+          {/* Modal */}
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="overflow-hidden"
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ud-game-detail-title"
+            tabIndex={-1}
+            className="relative w-full max-w-4xl max-h-[92vh] overflow-y-auto border-8 border-white bg-[#09090b] shadow-[8px_8px_0_#000] md:shadow-[16px_16px_0_#000] outline-none"
+            initial={{ scale: 0.92, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.92, y: 20 }}
+            transition={{ type: "spring", stiffness: 300, damping: 26 }}
           >
-            <div className="border-4 border-black dark:border-white bg-[#09090b] dark:bg-[#1a1a1a] p-4 mt-2 space-y-4">
+            {/* X Close button */}
+            <button
+              onClick={onClose}
+              className="absolute -top-5 -right-5 z-30 w-12 h-12 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-white shadow-[4px_4px_0_#000] hover:rotate-90 transition-transform no-color-transition"
+              aria-label="Close"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            {/* Header banner */}
+            <div className="p-6 border-b-4 border-white" style={{ backgroundColor: accent }}>
+              <div className="font-mono-ud text-[10px] font-black tracking-[0.3em] uppercase text-black/60 mb-1">
+                ▸ GAME DETAILS
+              </div>
+              <h3 id="ud-game-detail-title" className="font-bebas text-4xl md:text-6xl text-black leading-none">
+                {gameTitle}
+              </h3>
+            </div>
+
+            {/* Body */}
+            <div className="p-4 md:p-6 space-y-6">
               {/* Players */}
               <div>
-                <h4 className="font-bebas text-2xl text-white dark:text-black mb-2 flex items-center gap-2 border-b-2 border-white/20 dark:border-black/20 pb-1">
+                <h4 className="font-bebas text-2xl text-white mb-2 flex items-center gap-2 border-b-2 border-white/20 pb-1">
                   <Users className="w-5 h-5" style={{ color: accent }} /> PLAYERS ({detail.players.length})
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -102,7 +156,7 @@ export function GameExpander({ gameId, accent }: { gameId: string; accent: strin
               {/* ML Pro Player Stats */}
               {gameId === "ml" && detail.teamStats && (
                 <div>
-                  <h4 className="font-bebas text-2xl text-white dark:text-black mb-2 flex items-center gap-2 border-b-2 border-white/20 dark:border-black/20 pb-1">
+                  <h4 className="font-bebas text-2xl text-white mb-2 flex items-center gap-2 border-b-2 border-white/20 pb-1">
                     <Sword className="w-5 h-5" style={{ color: accent }} /> TEAM STATS
                   </h4>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -123,7 +177,6 @@ export function GameExpander({ gameId, accent }: { gameId: string; accent: strin
                       <div className="font-mono-ud text-[9px] text-white/50">FAV COMP</div>
                     </div>
                   </div>
-                  {/* Individual ML stats */}
                   <div className="mt-3 overflow-x-auto">
                     <table className="w-full font-mono-ud text-[10px] text-white border-collapse">
                       <thead>
@@ -153,10 +206,10 @@ export function GameExpander({ gameId, accent }: { gameId: string; accent: strin
                 </div>
               )}
 
-              {/* Moments / Gallery (not for D&D) */}
+              {/* Moments / Gallery */}
               {detail.moments && detail.moments.length > 0 && (
                 <div>
-                  <h4 className="font-bebas text-2xl text-white dark:text-black mb-2 flex items-center gap-2 border-b-2 border-white/20 dark:border-black/20 pb-1">
+                  <h4 className="font-bebas text-2xl text-white mb-2 flex items-center gap-2 border-b-2 border-white/20 pb-1">
                     <ImageIcon className="w-5 h-5" style={{ color: accent }} /> MOMENTS ({detail.moments.length})
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
@@ -176,12 +229,11 @@ export function GameExpander({ gameId, accent }: { gameId: string; accent: strin
                 </div>
               )}
 
-              {/* D&D: Campaigns + Characters + Story + Locations */}
+              {/* D&D: Characters + Campaigns + Story + Locations */}
               {gameId === "dnd" && (
                 <>
-                  {/* D&D Character Cards */}
                   <div>
-                    <h4 className="font-bebas text-2xl text-white dark:text-black mb-2 flex items-center gap-2 border-b-2 border-white/20 dark:border-black/20 pb-1">
+                    <h4 className="font-bebas text-2xl text-white mb-2 flex items-center gap-2 border-b-2 border-white/20 pb-1">
                       <Crown className="w-5 h-5" style={{ color: accent }} /> CHARACTERS
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -197,7 +249,6 @@ export function GameExpander({ gameId, accent }: { gameId: string; accent: strin
                             <div className="font-bebas text-xl" style={{ color: p.color }}>{p.dndCharacter}</div>
                             <div className="font-mono-ud text-[9px] text-white/60">{p.dndRace} · {p.dndClass}</div>
                             <div className="font-bebas text-2xl mt-1" style={{ color: p.color }}>LVL {p.dndLevel}</div>
-                            {/* D&D Stats */}
                             {p.memberId && MEMBER_DND_STATS[p.memberId] && (
                               <div className="mt-2 pt-2 border-t border-white/10">
                                 <DnDStatBlock stats={MEMBER_DND_STATS[p.memberId]} color={p.color} />
@@ -209,10 +260,9 @@ export function GameExpander({ gameId, accent }: { gameId: string; accent: strin
                     </div>
                   </div>
 
-                  {/* D&D Campaigns */}
                   {detail.campaigns && (
                     <div>
-                      <h4 className="font-bebas text-2xl text-white dark:text-black mb-2 flex items-center gap-2 border-b-2 border-white/20 dark:border-black/20 pb-1">
+                      <h4 className="font-bebas text-2xl text-white mb-2 flex items-center gap-2 border-b-2 border-white/20 pb-1">
                         <Shield className="w-5 h-5" style={{ color: accent }} /> CAMPAIGNS ({detail.campaigns.length})
                       </h4>
                       <div className="space-y-3">
@@ -242,10 +292,9 @@ export function GameExpander({ gameId, accent }: { gameId: string; accent: strin
                     </div>
                   )}
 
-                  {/* D&D Story Outline */}
                   {detail.storyOutline && (
                     <div>
-                      <h4 className="font-bebas text-2xl text-white dark:text-black mb-2 flex items-center gap-2 border-b-2 border-white/20 dark:border-black/20 pb-1">
+                      <h4 className="font-bebas text-2xl text-white mb-2 flex items-center gap-2 border-b-2 border-white/20 pb-1">
                         <MapPin className="w-5 h-5" style={{ color: accent }} /> STORY OUTLINE
                       </h4>
                       <div className="border-2 border-white/20 bg-black p-3">
@@ -254,10 +303,9 @@ export function GameExpander({ gameId, accent }: { gameId: string; accent: strin
                     </div>
                   )}
 
-                  {/* D&D Location Photos */}
                   {detail.locationImages && detail.locationImages.length > 0 && (
                     <div>
-                      <h4 className="font-bebas text-2xl text-white dark:text-black mb-2 flex items-center gap-2 border-b-2 border-white/20 dark:border-black/20 pb-1">
+                      <h4 className="font-bebas text-2xl text-white mb-2 flex items-center gap-2 border-b-2 border-white/20 pb-1">
                         <ImageIcon className="w-5 h-5" style={{ color: accent }} /> LOCATION PHOTOS
                       </h4>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -273,8 +321,8 @@ export function GameExpander({ gameId, accent }: { gameId: string; accent: strin
               )}
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

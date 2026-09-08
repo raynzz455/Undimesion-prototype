@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { StarField } from "./star-field";
 import { StarGraphic } from "./primitives";
-import { GameExpander } from "./game-expander";
+import { GameDetailModal } from "./game-expander";
 import { GAMES, type GameSection } from "@/lib/undimension/data";
 import { cn } from "@/lib/utils";
 
@@ -99,8 +99,9 @@ function GameSeparator() {
 
 function GameSectionView({ game }: { game: GameSection }) {
   const isCinzel = game.fontClass === "font-cinzel";
+  const [detailOpen, setDetailOpen] = useState(false);
   return (
-    <section className="relative min-h-screen w-full flex items-center justify-center p-6 md:p-10 pt-32 overflow-hidden bg-black">
+    <section className="relative min-h-screen w-full flex items-center justify-center p-6 pt-32 overflow-hidden bg-black">
       <img
         src={game.bg}
         alt={`${game.title} Background`}
@@ -112,20 +113,19 @@ function GameSectionView({ game }: { game: GameSection }) {
 
       <div
         className={cn(
-          "max-w-7xl mx-auto w-full flex flex-col lg:flex-row items-center gap-10 lg:gap-16 xl:gap-20 relative z-10",
+          "max-w-7xl mx-auto w-full flex flex-col lg:flex-row items-center gap-8 lg:gap-12 relative z-10",
           game.reverse && "lg:flex-row-reverse",
         )}
       >
-        {/* Text column — wider with more breathing room */}
         <div
           className={cn(
-            "w-full lg:w-[40%] xl:w-[42%] flex flex-col relative z-20 mb-8 lg:mb-0 lg:pr-4",
-            game.reverse && "lg:items-end lg:text-right lg:pr-0 lg:pl-4",
+            "w-full lg:w-[35%] flex flex-col relative z-20",
+            game.reverse && "lg:items-end lg:text-right",
           )}
         >
           <div
             className={cn(
-              "inline-block border-4 border-black dark:border-white font-mono-ud font-black px-4 py-2 md:px-6 md:py-2 mb-8 shadow-[6px_6px_0_#000] w-max text-sm md:text-base bg-white dark:bg-black",
+              "inline-block border-4 border-black dark:border-white font-mono-ud font-black px-4 py-2 md:px-6 md:py-2 mb-6 shadow-[6px_6px_0_#000] w-max text-sm md:text-base bg-white dark:bg-black",
               game.reverse ? "rotate-3" : "-rotate-2",
               game.id === "roblox" && "bg-[#ffea00] text-black border-black",
               game.id === "ml" && "bg-[#00e5ff] border-white text-black shadow-[6px_6px_0_#fff]",
@@ -136,11 +136,10 @@ function GameSectionView({ game }: { game: GameSection }) {
           </div>
           <h2
             className={cn(
-              "font-outfit font-black text-4xl sm:text-5xl md:text-[60px] lg:text-[72px] xl:text-[82px] mb-8 uppercase leading-[0.9] relative z-20",
+              "font-outfit font-black text-4xl sm:text-5xl md:text-[60px] lg:text-[72px] xl:text-[82px] mb-6 uppercase leading-[0.9] relative z-20",
               isCinzel && "font-cinzel",
               game.title.includes(" ") && "break-words",
               !game.title.includes(" ") && "whitespace-nowrap",
-              game.reverse && "lg:text-[68px] xl:text-[78px]",
             )}
             style={{
               color: game.accent,
@@ -154,7 +153,7 @@ function GameSectionView({ game }: { game: GameSection }) {
           </h2>
           <div
             className={cn(
-              "border-4 p-6 md:p-8 mb-8",
+              "border-4 p-6 md:p-8 mb-6",
               game.reverse ? "rotate-1" : "-rotate-2",
             )}
             style={{
@@ -170,17 +169,27 @@ function GameSectionView({ game }: { game: GameSection }) {
               {game.description}
             </p>
           </div>
+          {/* MORE DETAIL button — below text, doesn't affect layout */}
+          <button
+            onClick={() => setDetailOpen(true)}
+            className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-3 border-4 border-white/40 font-bebas text-lg md:text-xl tracking-widest text-white hover:border-white hover:bg-white/10 transition-all no-color-transparent"
+          >
+            MORE DETAIL →
+          </button>
         </div>
-        {/* Carousel column — slightly narrower to give text more space */}
-        <div className="w-full lg:w-[55%] xl:w-[53%] flex justify-center lg:mt-0 relative z-20">
+        <div className="w-full lg:w-[65%] flex justify-center mt-12 lg:mt-0 relative z-20">
           <GameCarousel images={game.images} title={game.carouselTitle} />
         </div>
       </div>
 
-      {/* Game Expander — at bottom of section, big button */}
-      <div className="max-w-7xl mx-auto w-full relative z-20 mt-8 pb-8">
-        <GameExpander gameId={game.id} accent={game.accent} />
-      </div>
+      {/* Game Detail Modal */}
+      <GameDetailModal
+        gameId={game.id}
+        gameTitle={game.title}
+        accent={game.accent}
+        open={detailOpen}
+        onClose={() => setDetailOpen(false)}
+      />
     </section>
   );
 }
