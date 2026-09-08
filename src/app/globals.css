@@ -772,6 +772,9 @@ html.chaos::before {
 }
 
 /* Hide navbar when modal is open */
+body.modal-open {
+  overflow: hidden !important;
+}
 body.modal-open nav {
   display: none !important;
 }

@@ -50,7 +50,7 @@ export function MemberDetailModal({
     <AnimatePresence>
       {open && member && (
         <motion.div
-          className="fixed inset-0 z-[85] flex items-center justify-center p-3 md:p-6"
+          className="fixed inset-0 z-[85] flex items-start justify-center p-3 md:p-6 pt-4 md:pt-8"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -62,15 +62,6 @@ export function MemberDetailModal({
             onClick={onClose}
           />
 
-          {/* X Close button — fixed to viewport, floats above modal */}
-          <button
-            onClick={onClose}
-            className="fixed top-4 right-4 z-[90] w-12 h-12 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-white shadow-[4px_4px_0_#000] hover:rotate-90 transition-transform no-color-transition"
-            aria-label="Close"
-          >
-            <X className="w-6 h-6" />
-          </button>
-
           {/* Modal — centered, max height with scroll */}
           <motion.div
             ref={panelRef}
@@ -79,14 +70,27 @@ export function MemberDetailModal({
             aria-labelledby="ud-member-modal-title"
             tabIndex={-1}
             className={cn(
-              "relative w-full max-w-3xl max-h-[92vh] overflow-y-auto border-8 border-black dark:border-white shadow-[8px_8px_0_#000] md:shadow-[16px_16px_0_#000] dark:md:shadow-[16px_16px_0_#d4ff00] outline-none",
+              "relative w-full max-w-3xl max-h-[90vh] overflow-y-auto border-8 border-black dark:border-white shadow-[8px_8px_0_#000] md:shadow-[16px_16px_0_#000] dark:md:shadow-[16px_16px_0_#d4ff00] outline-none",
               member.color,
             )}
             initial={{ scale: 0.92, y: 20, rotate: -1 }}
             animate={{ scale: 1, y: 0, rotate: 0 }}
             exit={{ scale: 0.92, y: 20, rotate: -1 }}
             transition={{ type: "spring", stiffness: 300, damping: 26 }}
+            onAnimationComplete={() => {
+              if (panelRef.current) panelRef.current.scrollTop = 0;
+            }}
           >
+            {/* X Close — zero-height sticky container, absolute button, no empty space */}
+            <div className="sticky top-0 z-30 h-0">
+              <button
+                onClick={onClose}
+                className="absolute -top-4 -right-4 w-10 h-10 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-black dark:border-white shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] hover:rotate-90 transition-transform no-color-transition"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
             {/* Header with image + identity */}
             <div className="relative bg-black dark:bg-[#111] text-white p-6 md:p-8 border-b-8 border-black dark:border-white overflow-hidden">
