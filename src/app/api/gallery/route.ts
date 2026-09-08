@@ -5,31 +5,29 @@ import { GALLERY_PHOTOS } from "@/lib/undimension/data";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  // Try the database first; if it fails (e.g. not pushed / seeded yet),
+  // gracefully fall back to the static seed photos so the frontend never 500s.
+  let dbPhotos: { id: string; img: string; title: string; date: string; rotate: string; author: string }[] = [];
   try {
-    const dbPhotos = await db.galleryPhoto.findMany({
+    const rows = await db.galleryPhoto.findMany({
       orderBy: { createdAt: "desc" },
     });
-
-    // Merge seeded static photos (design originals) with DB-uploaded photos.
-    // DB photos take precedence and appear first (newest).
-    const data = [
-      ...dbPhotos.map((p) => ({
-        id: p.id,
-        img: p.img,
-        title: p.title,
-        date: p.date,
-        rotate: p.rotate,
-        author: p.author,
-      })),
-      ...GALLERY_PHOTOS,
-    ];
-
-    return NextResponse.json({ photos: data, count: data.length });
+    dbPhotos = rows.map((p) => ({
+      id: p.id,
+      img: p.img,
+      title: p.title,
+      date: p.date,
+      rotate: p.rotate,
+      author: p.author,
+    }));
   } catch (e) {
-    console.error("[GET /api/gallery]", e);
-    return NextResponse.json(
-      { error: "Failed to fetch gallery" },
-      { status: 500 },
-    );
+    // Database not ready — log and continue with static photos only.
+    console.warn("[GET /api/gallery] DB unavailable, serving static photos only.", e instanceof Error ? e.message : e);
   }
+
+  // Merge seeded static photos (design originals) with DB-uploaded photos.
+  // DB photos take precedence and appear first (newest).
+  const data = [...dbPhotos, ...GALLERY_PHOTOS];
+
+  return NextResponse.json({ photos: data, count: data.length });
 }

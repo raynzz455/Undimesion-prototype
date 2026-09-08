@@ -15,6 +15,8 @@ const COLORS = [
 ];
 
 export async function GET() {
+  // Try the database; if it fails (e.g. not pushed / seeded yet),
+  // return an empty list so the frontend never 500s.
   try {
     const entries = await db.guestbookEntry.findMany({
       where: { approved: true },
@@ -33,11 +35,8 @@ export async function GET() {
       count: entries.length,
     });
   } catch (e) {
-    console.error("[GET /api/guestbook]", e);
-    return NextResponse.json(
-      { error: "Failed to fetch guestbook" },
-      { status: 500 },
-    );
+    console.warn("[GET /api/guestbook] DB unavailable, returning empty list.", e instanceof Error ? e.message : e);
+    return NextResponse.json({ entries: [], count: 0 });
   }
 }
 

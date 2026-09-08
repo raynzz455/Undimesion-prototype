@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  // Try the database; if it fails (e.g. not pushed / seeded yet),
+  // return an empty list so the frontend never 500s.
   try {
     const articles = await db.newsArticle.findMany({
       orderBy: [{ pinned: "desc" }, { createdAt: "desc" }],
@@ -24,8 +26,8 @@ export async function GET() {
       count: articles.length,
     });
   } catch (e) {
-    console.error("[GET /api/news]", e);
-    return NextResponse.json({ error: "Failed to fetch news" }, { status: 500 });
+    console.warn("[GET /api/news] DB unavailable, returning empty list.", e instanceof Error ? e.message : e);
+    return NextResponse.json({ articles: [], count: 0 });
   }
 }
 

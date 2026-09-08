@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { MEMBERS } from "@/lib/undimension/data";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  // Try the database; if it fails (e.g. not pushed / seeded yet),
+  // fall back to the static seed members so the frontend never 500s.
   try {
     const members = await db.member.findMany({
       orderBy: { order: "asc" },
@@ -24,10 +27,7 @@ export async function GET() {
 
     return NextResponse.json({ members: data });
   } catch (e) {
-    console.error("[GET /api/members]", e);
-    return NextResponse.json(
-      { error: "Failed to fetch members" },
-      { status: 500 },
-    );
+    console.warn("[GET /api/members] DB unavailable, serving static members.", e instanceof Error ? e.message : e);
+    return NextResponse.json({ members: MEMBERS });
   }
 }

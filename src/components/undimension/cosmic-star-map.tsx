@@ -58,8 +58,8 @@ export function CosmicStarMap() {
               {/* Grid overlay */}
               <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20" aria-hidden>
                 <defs>
-                  <pattern id="ud-grid" width="10%" height="10%" patternUnits="userSpaceOnUse">
-                    <path d="M 10% 0 L 0 0 0 10%" fill="none" stroke="#fff" strokeWidth="0.5" />
+                  <pattern id="ud-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#fff" strokeWidth="0.5" />
                   </pattern>
                 </defs>
                 <rect width="100%" height="100%" fill="url(#ud-grid)" />
