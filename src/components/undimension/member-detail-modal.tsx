@@ -78,19 +78,14 @@ export function MemberDetailModal({
             exit={{ scale: 0.92, y: 20, rotate: -1 }}
             transition={{ type: "spring", stiffness: 300, damping: 26 }}
           >
-            {/* Close hint bar (no X button — ESC or click backdrop to close) */}
-            <div className="bg-black dark:bg-white text-white dark:text-black px-4 py-1.5 border-b-4 border-black dark:border-white flex items-center justify-between">
-              <span className="font-mono-ud text-[10px] font-black tracking-[0.2em] uppercase opacity-70">
-                ▸ ENTITY DOSSIER
-              </span>
-              <button
-                onClick={onClose}
-                className="font-mono-ud text-[10px] font-black tracking-wider uppercase hover:text-[#ff4d4d] dark:hover:text-[#ff4d4d] transition-colors no-color-transition"
-                aria-label="Close"
-              >
-                [ ESC ] TUTUP
-              </button>
-            </div>
+            {/* X Close button — sticky so it stays when scrolling */}
+            <button
+              onClick={onClose}
+              className="sticky top-2 float-right mr-2 z-30 w-12 h-12 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-black dark:border-white shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] hover:rotate-90 transition-transform no-color-transition"
+              aria-label="Close"
+            >
+              <X className="w-6 h-6" />
+            </button>
 
             {/* Header with image + identity */}
             <div className="relative bg-black dark:bg-[#111] text-white p-6 md:p-8 border-b-8 border-black dark:border-white overflow-hidden">

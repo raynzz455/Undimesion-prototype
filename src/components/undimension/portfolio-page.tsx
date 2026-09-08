@@ -254,12 +254,21 @@ function AchievementModal({
             aria-modal="true"
             aria-labelledby="ud-achievement-title"
             tabIndex={-1}
-            className="relative w-full max-w-md my-4 md:my-0 border-8 border-black dark:border-white bg-white dark:bg-[#09090b] shadow-[8px_8px_0_#000] md:shadow-[16px_16px_0_#000] dark:md:shadow-[16px_16px_0_#d4ff00] outline-none overflow-hidden"
+            className="relative w-full max-w-md max-h-[92vh] overflow-y-auto border-8 border-black dark:border-white bg-white dark:bg-[#09090b] shadow-[8px_8px_0_#000] md:shadow-[16px_16px_0_#000] dark:md:shadow-[16px_16px_0_#d4ff00] outline-none"
             initial={{ scale: 0.85, y: 30, rotate: -2 }}
             animate={{ scale: 1, y: 0, rotate: 0 }}
             exit={{ scale: 0.85, y: 30, rotate: -2 }}
             transition={{ type: "spring", stiffness: 300, damping: 24 }}
           >
+            {/* X Close button — sticky */}
+            <button
+              onClick={onClose}
+              className="sticky top-2 float-right mr-2 z-30 w-10 h-10 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-black dark:border-white shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] hover:rotate-90 transition-transform no-color-transition"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
             {/* Colored header banner */}
             <div className="p-6 border-b-8 border-black dark:border-white" style={{ backgroundColor: memberColor }}>
               <div className="flex items-center justify-center mb-2">
@@ -292,12 +301,6 @@ function AchievementModal({
               {achievement.images && achievement.images.length > 0 && (
                 <AchievementImageCarousel images={achievement.images} color={memberColor} />
               )}
-              <button
-                onClick={onClose}
-                className="w-full mt-4 bg-black dark:bg-white text-white dark:text-black font-bebas text-2xl py-3 border-4 border-black dark:border-white shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff] hover:-translate-y-1 hover:shadow-[8px_8px_0_#d4ff00] transition-all no-color-transition"
-              >
-                CLOSE
-              </button>
             </div>
           </motion.div>
         </motion.div>

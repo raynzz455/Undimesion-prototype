@@ -27,7 +27,7 @@ function DnDStatBlock({ stats, color }: { stats: DnDStats; color: string }) {
           >
             <div className="font-bebas text-2xl text-white leading-none">{key}</div>
             <div className="font-bebas text-4xl leading-none my-1" style={{ color }}>{val}</div>
-            <div className="font-mono-ud text-[9px] text-white/50">{statModifier(val)}</div>
+            <div className="font-mono-ud text-[11px] text-white/50">{statModifier(val)}</div>
             <div className="absolute hidden group-hover:block z-50 bottom-full left-1/2 -translate-x-1/2 mb-1 bg-black text-white text-[9px] font-mono-ud p-2 border border-white whitespace-nowrap max-w-[200px]">
               <span className="font-bold" style={{ color }}>{info.full}</span><br />{info.desc}
             </div>
@@ -40,15 +40,15 @@ function DnDStatBlock({ stats, color }: { stats: DnDStats; color: string }) {
 
 function PlayerChip({ p }: { p: any }) {
   return (
-    <div className="border-2 border-white/20 bg-[#1a1a1a] p-2 flex items-center gap-2">
-      <img src={p.img} alt={p.nick} className="w-10 h-10 object-cover border-2 border-white/40 grayscale" loading="lazy" />
+    <div className="border-2 border-white/20 bg-[#1a1a1a] p-3 flex items-center gap-3">
+      <img src={p.img} alt={p.nick} className="w-14 h-14 object-cover border-2 border-white/40 grayscale flex-shrink-0" loading="lazy" />
       <div className="flex-1 min-w-0">
-        <div className="font-bebas text-lg leading-none" style={{ color: p.color }}>{p.nick}</div>
-        {p.role && <div className="font-mono-ud text-[9px] text-white/60">{p.role} · {p.favHero}</div>}
-        {p.dndCharacter && <div className="font-mono-ud text-[9px] text-white/60">{p.dndCharacter}</div>}
+        <div className="font-bebas text-xl leading-none" style={{ color: p.color }}>{p.nick}</div>
+        {p.role && <div className="font-mono-ud text-[11px] text-white/60 mt-1">{p.role} · {p.favHero}</div>}
+        {p.dndCharacter && <div className="font-mono-ud text-[11px] text-white/60 mt-1">{p.dndCharacter}</div>}
       </div>
-      {p.rank && <div className="font-mono-ud text-[9px] font-black text-right"><div className="text-[#d4ff00]">{p.rank}</div><div className="text-white/50">WR: {p.winRate}</div></div>}
-      {p.dndLevel && <div className="font-bebas text-2xl" style={{ color: p.color }}>LVL {p.dndLevel}</div>}
+      {p.rank && <div className="font-mono-ud text-[11px] font-black text-right"><div className="text-[#d4ff00]">{p.rank}</div><div className="text-white/50">WR: {p.winRate}</div></div>}
+      {p.dndLevel && <div className="font-bebas text-3xl" style={{ color: p.color }}>LVL {p.dndLevel}</div>}
     </div>
   );
 }
@@ -114,16 +114,16 @@ export function GameDetailModal({
             aria-modal="true"
             aria-labelledby="ud-game-detail-title"
             tabIndex={-1}
-            className="relative w-full max-w-4xl max-h-[92vh] overflow-y-auto border-8 border-white bg-[#09090b] shadow-[8px_8px_0_#000] md:shadow-[16px_16px_0_#000] outline-none"
+            className="relative w-full max-w-5xl max-h-[92vh] overflow-y-auto border-8 border-white bg-[#09090b] shadow-[8px_8px_0_#000] md:shadow-[16px_16px_0_#000] outline-none"
             initial={{ scale: 0.92, y: 20 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.92, y: 20 }}
             transition={{ type: "spring", stiffness: 300, damping: 26 }}
           >
-            {/* X Close button */}
+            {/* X Close button — sticky so it stays when scrolling */}
             <button
               onClick={onClose}
-              className="absolute -top-5 -right-5 z-30 w-12 h-12 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-white shadow-[4px_4px_0_#000] hover:rotate-90 transition-transform no-color-transition"
+              className="sticky top-2 float-right mr-2 z-30 w-12 h-12 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-white shadow-[4px_4px_0_#000] hover:rotate-90 transition-transform no-color-transition"
               aria-label="Close"
             >
               <X className="w-6 h-6" />
@@ -131,7 +131,7 @@ export function GameDetailModal({
 
             {/* Header banner */}
             <div className="p-6 border-b-4 border-white" style={{ backgroundColor: accent }}>
-              <div className="font-mono-ud text-[10px] font-black tracking-[0.3em] uppercase text-black/60 mb-1">
+              <div className="font-mono-ud text-xs font-black tracking-[0.3em] uppercase text-black/60 mb-1">
                 ▸ GAME DETAILS
               </div>
               <h3 id="ud-game-detail-title" className="font-bebas text-4xl md:text-6xl text-black leading-none">
@@ -140,13 +140,13 @@ export function GameDetailModal({
             </div>
 
             {/* Body */}
-            <div className="p-4 md:p-6 space-y-6">
+            <div className="p-4 md:p-8 space-y-8">
               {/* Players */}
               <div>
-                <h4 className="font-bebas text-2xl text-white mb-2 flex items-center gap-2 border-b-2 border-white/20 pb-1">
-                  <Users className="w-5 h-5" style={{ color: accent }} /> PLAYERS ({detail.players.length})
+                <h4 className="font-bebas text-3xl text-white mb-3 flex items-center gap-2 border-b-2 border-white/20 pb-2">
+                  <Users className="w-6 h-6" style={{ color: accent }} /> PLAYERS ({detail.players.length})
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {detail.players.map((p, i) => (
                     <PlayerChip key={i} p={p} />
                   ))}
@@ -156,29 +156,29 @@ export function GameDetailModal({
               {/* ML Pro Player Stats */}
               {gameId === "ml" && detail.teamStats && (
                 <div>
-                  <h4 className="font-bebas text-2xl text-white mb-2 flex items-center gap-2 border-b-2 border-white/20 pb-1">
+                  <h4 className="font-bebas text-3xl text-white mb-3 flex items-center gap-2 border-b-2 border-white/20 pb-1">
                     <Sword className="w-5 h-5" style={{ color: accent }} /> TEAM STATS
                   </h4>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                     <div className="border-2 border-white/30 p-2 text-center">
                       <div className="font-bebas text-3xl" style={{ color: accent }}>{detail.teamStats.rank}</div>
-                      <div className="font-mono-ud text-[9px] text-white/50">RANK</div>
+                      <div className="font-mono-ud text-[11px] text-white/50">RANK</div>
                     </div>
                     <div className="border-2 border-white/30 p-2 text-center">
                       <div className="font-bebas text-3xl" style={{ color: accent }}>{detail.teamStats.winRate}</div>
-                      <div className="font-mono-ud text-[9px] text-white/50">WIN RATE</div>
+                      <div className="font-mono-ud text-[11px] text-white/50">WIN RATE</div>
                     </div>
                     <div className="border-2 border-white/30 p-2 text-center">
                       <div className="font-bebas text-3xl" style={{ color: accent }}>{detail.teamStats.totalMatches}</div>
-                      <div className="font-mono-ud text-[9px] text-white/50">MATCHES</div>
+                      <div className="font-mono-ud text-[11px] text-white/50">MATCHES</div>
                     </div>
                     <div className="border-2 border-white/30 p-2 text-center">
                       <div className="font-bebas text-xl" style={{ color: accent }}>{detail.teamStats.favoriteComp}</div>
-                      <div className="font-mono-ud text-[9px] text-white/50">FAV COMP</div>
+                      <div className="font-mono-ud text-[11px] text-white/50">FAV COMP</div>
                     </div>
                   </div>
                   <div className="mt-3 overflow-x-auto">
-                    <table className="w-full font-mono-ud text-[10px] text-white border-collapse">
+                    <table className="w-full font-mono-ud text-xs text-white border-collapse">
                       <thead>
                         <tr className="border-b-2 border-white/30">
                           <th className="text-left py-1 px-2">PLAYER</th>
@@ -209,10 +209,10 @@ export function GameDetailModal({
               {/* Moments / Gallery */}
               {detail.moments && detail.moments.length > 0 && (
                 <div>
-                  <h4 className="font-bebas text-2xl text-white mb-2 flex items-center gap-2 border-b-2 border-white/20 pb-1">
+                  <h4 className="font-bebas text-3xl text-white mb-3 flex items-center gap-2 border-b-2 border-white/20 pb-1">
                     <ImageIcon className="w-5 h-5" style={{ color: accent }} /> MOMENTS ({detail.moments.length})
                   </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                     {detail.moments.map((m, i) => (
                       <div key={i} className="border-2 border-white/20 overflow-hidden">
                         <div className="relative aspect-video">
@@ -220,8 +220,8 @@ export function GameDetailModal({
                           <div className="absolute inset-0 ud-scanlines opacity-20" />
                         </div>
                         <div className="p-2">
-                          <div className="font-bebas text-lg" style={{ color: accent }}>{m.title}</div>
-                          <div className="font-mono-ud text-[9px] text-white/50">{m.desc}</div>
+                          <div className="font-bebas text-xl" style={{ color: accent }}>{m.title}</div>
+                          <div className="font-mono-ud text-[11px] text-white/50">{m.desc}</div>
                         </div>
                       </div>
                     ))}
@@ -233,7 +233,7 @@ export function GameDetailModal({
               {gameId === "dnd" && (
                 <>
                   <div>
-                    <h4 className="font-bebas text-2xl text-white mb-2 flex items-center gap-2 border-b-2 border-white/20 pb-1">
+                    <h4 className="font-bebas text-3xl text-white mb-3 flex items-center gap-2 border-b-2 border-white/20 pb-1">
                       <Crown className="w-5 h-5" style={{ color: accent }} /> CHARACTERS
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -246,9 +246,9 @@ export function GameDetailModal({
                             </div>
                           )}
                           <div className="p-3 bg-black">
-                            <div className="font-bebas text-xl" style={{ color: p.color }}>{p.dndCharacter}</div>
-                            <div className="font-mono-ud text-[9px] text-white/60">{p.dndRace} · {p.dndClass}</div>
-                            <div className="font-bebas text-2xl mt-1" style={{ color: p.color }}>LVL {p.dndLevel}</div>
+                            <div className="font-bebas text-2xl" style={{ color: p.color }}>{p.dndCharacter}</div>
+                            <div className="font-mono-ud text-[11px] text-white/60">{p.dndRace} · {p.dndClass}</div>
+                            <div className="font-bebas text-3xl mt-1" style={{ color: p.color }}>LVL {p.dndLevel}</div>
                             {p.memberId && MEMBER_DND_STATS[p.memberId] && (
                               <div className="mt-2 pt-2 border-t border-white/10">
                                 <DnDStatBlock stats={MEMBER_DND_STATS[p.memberId]} color={p.color} />
@@ -262,7 +262,7 @@ export function GameDetailModal({
 
                   {detail.campaigns && (
                     <div>
-                      <h4 className="font-bebas text-2xl text-white mb-2 flex items-center gap-2 border-b-2 border-white/20 pb-1">
+                      <h4 className="font-bebas text-3xl text-white mb-3 flex items-center gap-2 border-b-2 border-white/20 pb-1">
                         <Shield className="w-5 h-5" style={{ color: accent }} /> CAMPAIGNS ({detail.campaigns.length})
                       </h4>
                       <div className="space-y-3">
@@ -271,18 +271,18 @@ export function GameDetailModal({
                             <div className="flex items-baseline justify-between gap-2 flex-wrap mb-1">
                               <span className="font-bebas text-xl text-white">{c.name}</span>
                               <span className={cn(
-                                "font-mono-ud text-[9px] font-black px-2 py-0.5 border",
+                                "font-mono-ud text-[11px] font-black px-2 py-0.5 border",
                                 c.status === "ONGOING" ? "text-[#00ff00] border-[#00ff00]" :
                                 c.status === "COMPLETED" ? "text-[#00e5ff] border-[#00e5ff]" :
                                 "text-[#ff8c00] border-[#ff8c00]",
                               )}>{c.status}</span>
                             </div>
-                            <div className="font-mono-ud text-[10px] text-white/50 mb-1">DM: {c.dm} · {c.sessions} sessions</div>
-                            <p className="font-mono-ud text-[10px] text-white/70 leading-relaxed mb-2">{c.description}</p>
+                            <div className="font-mono-ud text-xs text-white/50 mb-1">DM: {c.dm} · {c.sessions} sessions</div>
+                            <p className="font-mono-ud text-xs text-white/70 leading-relaxed mb-2">{c.description}</p>
                             {c.locationImages && c.locationImages.length > 0 && (
                               <div className="flex gap-1">
                                 {c.locationImages.map((img, i) => (
-                                  <img key={i} src={img} alt={`Location ${i+1}`} className="w-16 h-16 object-cover border border-white/20" loading="lazy" />
+                                  <img key={i} src={img} alt={`Location ${i+1}`} className="w-24 h-24 object-cover border border-white/20" loading="lazy" />
                                 ))}
                               </div>
                             )}
@@ -294,7 +294,7 @@ export function GameDetailModal({
 
                   {detail.storyOutline && (
                     <div>
-                      <h4 className="font-bebas text-2xl text-white mb-2 flex items-center gap-2 border-b-2 border-white/20 pb-1">
+                      <h4 className="font-bebas text-3xl text-white mb-3 flex items-center gap-2 border-b-2 border-white/20 pb-1">
                         <MapPin className="w-5 h-5" style={{ color: accent }} /> STORY OUTLINE
                       </h4>
                       <div className="border-2 border-white/20 bg-black p-3">
@@ -305,7 +305,7 @@ export function GameDetailModal({
 
                   {detail.locationImages && detail.locationImages.length > 0 && (
                     <div>
-                      <h4 className="font-bebas text-2xl text-white mb-2 flex items-center gap-2 border-b-2 border-white/20 pb-1">
+                      <h4 className="font-bebas text-3xl text-white mb-3 flex items-center gap-2 border-b-2 border-white/20 pb-1">
                         <ImageIcon className="w-5 h-5" style={{ color: accent }} /> LOCATION PHOTOS
                       </h4>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">

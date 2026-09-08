@@ -81,7 +81,7 @@ export function PhotoLightbox({
             aria-labelledby="ud-lightbox-title"
             tabIndex={-1}
             key={photo.id}
-            className="relative w-full max-w-3xl bg-white dark:bg-[#1a1a1a] border-4 border-black dark:border-white shadow-[8px_8px_0_#000] md:shadow-[12px_12px_0_#000] dark:md:shadow-[12px_12px_0_#d4ff00] p-3 md:p-4 my-4 md:my-0 outline-none"
+            className="relative w-full max-w-3xl bg-white dark:bg-[#1a1a1a] border-4 border-black dark:border-white shadow-[8px_8px_0_#000] md:shadow-[12px_12px_0_#000] dark:md:shadow-[12px_12px_0_#d4ff00] p-3 md:p-4 outline-none"
             initial={{ scale: 0.85, rotate: -3, y: 30 }}
             animate={{ scale: 1, rotate: 0, y: 0 }}
             exit={{ scale: 0.85, rotate: 3, y: 30 }}
@@ -89,7 +89,7 @@ export function PhotoLightbox({
           >
             <button
               onClick={onClose}
-              className="absolute -top-5 -right-5 z-30 w-10 h-10 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-black dark:border-white shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] hover:rotate-90 transition-transform no-color-transition"
+              className="sticky top-1 float-right mb-1 z-30 w-10 h-10 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-black dark:border-white shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] hover:rotate-90 transition-transform no-color-transition"
               aria-label="Close"
             >
               <X className="w-5 h-5" />
