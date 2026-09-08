@@ -260,16 +260,14 @@ function AchievementModal({
             exit={{ scale: 0.85, y: 30, rotate: -2 }}
             transition={{ type: "spring", stiffness: 300, damping: 24 }}
           >
-            {/* X Close button — sticky wrapper */}
-            <div className="sticky top-0 z-30 flex justify-end p-2 bg-black/50 backdrop-blur-sm">
-              <button
-                onClick={onClose}
-                className="w-10 h-10 flex items-center justify-center bg-[#ff4d4d] text-white border-2 border-black dark:border-white shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] hover:rotate-90 transition-transform no-color-transition"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+            {/* X Close button — sticky, no wrapper */}
+            <button
+              onClick={onClose}
+              className="sticky top-1 z-30 ml-auto mr-2 mt-2 block w-10 h-10 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-black dark:border-white shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] hover:rotate-90 transition-transform no-color-transition"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
 
             {/* Colored header banner */}
             <div className="p-6 border-b-8 border-black dark:border-white" style={{ backgroundColor: memberColor }}>
