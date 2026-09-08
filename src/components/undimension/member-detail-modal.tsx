@@ -62,35 +62,36 @@ export function MemberDetailModal({
             onClick={onClose}
           />
 
-          {/* Modal — centered, max height with scroll */}
-          <motion.div
-            ref={panelRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="ud-member-modal-title"
-            tabIndex={-1}
-            className={cn(
-              "relative w-full max-w-3xl max-h-[90vh] overflow-y-auto border-8 border-black dark:border-white shadow-[8px_8px_0_#000] md:shadow-[16px_16px_0_#000] dark:md:shadow-[16px_16px_0_#d4ff00] outline-none",
-              member.color,
-            )}
-            initial={{ scale: 0.92, y: 20, rotate: -1 }}
-            animate={{ scale: 1, y: 0, rotate: 0 }}
-            exit={{ scale: 0.92, y: 20, rotate: -1 }}
-            transition={{ type: "spring", stiffness: 300, damping: 26 }}
-            onAnimationComplete={() => {
-              if (panelRef.current) panelRef.current.scrollTop = 0;
-            }}
-          >
-            {/* X Close — zero-height sticky container, absolute button, no empty space */}
-            <div className="sticky top-0 z-30 h-0">
-              <button
-                onClick={onClose}
-                className="absolute -top-4 -right-4 w-10 h-10 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-black dark:border-white shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] hover:rotate-90 transition-transform no-color-transition"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+          {/* Relative wrapper — X button anchors to this */}
+          <div className="relative w-full max-w-3xl">
+            {/* X Close — absolute to wrapper, top-right corner of modal */}
+            <button
+              onClick={onClose}
+              className="absolute -top-4 -right-4 z-30 w-10 h-10 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-black dark:border-white shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] hover:rotate-90 transition-transform no-color-transition"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Modal panel */}
+            <motion.div
+              ref={panelRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="ud-member-modal-title"
+              tabIndex={-1}
+              className={cn(
+                "relative w-full max-h-[90vh] overflow-y-auto border-8 border-black dark:border-white shadow-[8px_8px_0_#000] md:shadow-[16px_16px_0_#000] dark:md:shadow-[16px_16px_0_#d4ff00] outline-none",
+                member.color,
+              )}
+              initial={{ scale: 0.92, y: 20, rotate: -1 }}
+              animate={{ scale: 1, y: 0, rotate: 0 }}
+              exit={{ scale: 0.92, y: 20, rotate: -1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 26 }}
+              onAnimationComplete={() => {
+                if (panelRef.current) panelRef.current.scrollTop = 0;
+              }}
+            >
 
             {/* Header with image + identity */}
             <div className="relative bg-black dark:bg-[#111] text-white p-6 md:p-8 border-b-8 border-black dark:border-white overflow-hidden">
@@ -229,6 +230,7 @@ export function MemberDetailModal({
               </div>
             </div>
           </motion.div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

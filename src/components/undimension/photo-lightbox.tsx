@@ -61,6 +61,17 @@ export function PhotoLightbox({
             onClick={onClose}
           />
 
+          {/* Relative wrapper */}
+          <div className="relative w-full max-w-3xl">
+            {/* X Close */}
+            <button
+              onClick={onClose}
+              className="absolute -top-4 -right-4 z-30 w-10 h-10 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-black dark:border-white shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] hover:rotate-90 transition-transform no-color-transition"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
           {/* Nav prev */}
           {photos.length > 1 && (
             <button
@@ -86,17 +97,6 @@ export function PhotoLightbox({
             exit={{ scale: 0.85, rotate: 3, y: 30 }}
             transition={{ type: "spring", stiffness: 300, damping: 26 }}
           >
-            {/* X Close — zero-height sticky, absolute button */}
-            <div className="sticky top-0 z-30 h-0">
-              <button
-                onClick={onClose}
-                className="absolute -top-4 -right-4 w-10 h-10 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-black dark:border-white shadow-[4px_4px_0_#000] dark:shadow-[4px_4px_0_#fff] hover:rotate-90 transition-transform no-color-transition"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
             <div className="border-4 border-black dark:border-white bg-black overflow-hidden mb-3 relative">
               <img
                 src={photo.img}
@@ -145,6 +145,7 @@ export function PhotoLightbox({
               <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
             </button>
           )}
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
