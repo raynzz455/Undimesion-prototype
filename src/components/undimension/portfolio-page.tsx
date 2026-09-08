@@ -155,6 +155,65 @@ function ProjectMini({ p }: { p: PortfolioProject }) {
   );
 }
 
+function AchievementImageCarousel({ images, color }: { images: string[]; color: string }) {
+  const [idx, setIdx] = useState(0);
+
+  const next = () => setIdx((p) => (p + 1) % images.length);
+  const prev = () => setIdx((p) => (p - 1 + images.length) % images.length);
+
+  return (
+    <div className="mb-4 border-4 border-black dark:border-white bg-black overflow-hidden relative">
+      <div className="font-mono-ud text-[10px] font-black tracking-[0.2em] uppercase text-white/60 px-3 py-1 border-b-2 border-white/20 flex items-center justify-between">
+        <span>▸ EVIDENCE / CERTIFICATE</span>
+        <span>{idx + 1}/{images.length}</span>
+      </div>
+      <div className="relative aspect-[4/3] overflow-hidden">
+        <img
+          src={images[idx]}
+          alt={`Achievement evidence ${idx + 1}`}
+          className="w-full h-full object-cover"
+          key={idx}
+        />
+        <div className="absolute inset-0 ud-scanlines opacity-20 pointer-events-none" />
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={prev}
+              className="absolute left-1 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/70 border-2 border-white text-white hover:bg-white hover:text-black transition-colors"
+              aria-label="Previous image"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={next}
+              className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/70 border-2 border-white text-white hover:bg-white hover:text-black transition-colors"
+              aria-label="Next image"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </>
+        )}
+      </div>
+      {/* Dots */}
+      {images.length > 1 && (
+        <div className="flex justify-center gap-1 py-1.5 bg-black">
+          {images.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setIdx(i)}
+              className={cn(
+                "w-2 h-2 border border-white transition-colors",
+                i === idx ? "bg-white" : "bg-transparent",
+              )}
+              aria-label={`Go to image ${i + 1}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AchievementModal({
   achievement,
   memberColor,
@@ -224,11 +283,15 @@ function AchievementModal({
               <div className="font-mono-ud text-xs font-black text-black/50 dark:text-white/50 tracking-widest mb-4 text-center">
                 ◆ {achievement.year} ◆
               </div>
-              <div className="border-4 border-black dark:border-white bg-black dark:bg-white p-4">
+              <div className="border-4 border-black dark:border-white bg-black dark:bg-white p-4 mb-4">
                 <p className="font-mono-ud text-sm text-white dark:text-black leading-relaxed text-center">
                   {achievement.description}
                 </p>
               </div>
+              {/* Achievement photo carousel (sertifikat, medali, foto kemenangan) */}
+              {achievement.images && achievement.images.length > 0 && (
+                <AchievementImageCarousel images={achievement.images} color={memberColor} />
+              )}
               <button
                 onClick={onClose}
                 className="w-full mt-4 bg-black dark:bg-white text-white dark:text-black font-bebas text-2xl py-3 border-4 border-black dark:border-white shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff] hover:-translate-y-1 hover:shadow-[8px_8px_0_#d4ff00] transition-all no-color-transition"
@@ -408,7 +471,14 @@ function MemberPortfolio({ member }: { member: Member }) {
               >
                 <div className="flex items-start justify-between gap-1 mb-1">
                   <div className="font-bebas text-2xl text-black dark:text-white leading-none">{a.title}</div>
-                  <Trophy className="w-4 h-4 opacity-30 group-hover:opacity-100 transition-opacity" style={{ color: memberColor }} />
+                  <div className="flex items-center gap-1">
+                    {a.images && a.images.length > 0 && (
+                      <span className="font-mono-ud text-[9px] font-black px-1 border border-black dark:border-white bg-[#d4ff00] text-black" title="Has photos">
+                        📷 {a.images.length}
+                      </span>
+                    )}
+                    <Trophy className="w-4 h-4 opacity-30 group-hover:opacity-100 transition-opacity" style={{ color: memberColor }} />
+                  </div>
                 </div>
                 <div className="font-mono-ud text-[10px] text-black/50 dark:text-white/50 mb-1">{a.year}</div>
                 <p className="font-mono-ud text-[10px] text-black/70 dark:text-white/70 leading-relaxed line-clamp-2">{a.description}</p>

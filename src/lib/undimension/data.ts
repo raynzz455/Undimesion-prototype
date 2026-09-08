@@ -24,6 +24,7 @@ export type Achievement = {
   year: string;
   description: string;
   icon?: string;
+  images?: string[]; // Sertifikat, medali, foto kemenangan (carousel)
 };
 
 export type Member = {

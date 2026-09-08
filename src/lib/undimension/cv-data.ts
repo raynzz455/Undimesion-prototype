@@ -38,7 +38,7 @@ export const MEMBER_CV: Record<string, MemberCV> = {
       { name: "Communication", level: 82, category: "SOFT" },
     ],
     achievements: [
-      { title: "Best Student Project", year: "2022", description: "Juara 1 lomba project SMK se-Jakarta dengan app inventory" },
+      { title: "Best Student Project", year: "2022", description: "Juara 1 lomba project SMK se-Jakarta dengan app inventory", images: ["/gallery/harapan-mimpi.webp", "/gallery/gallery-1.webp"] },
       { title: "Undimension Founder", year: "2020", description: "Mendirikan circle collective yang bertahan 6+ tahun" },
       { title: "Hackathon Finalist", year: "2023", description: "Top 10 Hackathon ID dengan project EdTech" },
     ],
@@ -71,7 +71,7 @@ export const MEMBER_CV: Record<string, MemberCV> = {
       { name: "Problem Solving", level: 88, category: "SOFT" },
     ],
     achievements: [
-      { title: "AWS Certified", year: "2024", description: "AWS Solutions Architect Associate" },
+      { title: "AWS Certified", year: "2024", description: "AWS Solutions Architect Associate", images: ["/gallery/harapan-negeri.webp", "/gallery/gallery-2.webp"] },
       { title: "Screenshot Archiver", year: "2023", description: "CLI tool untuk organize 4000+ screenshot" },
       { title: "Open Source Contributor", year: "2024", description: "10+ merged PR di berbagai repo Go" },
     ],
@@ -104,7 +104,7 @@ export const MEMBER_CV: Record<string, MemberCV> = {
       { name: "Analytical Thinking", level: 92, category: "SOFT" },
     ],
     achievements: [
-      { title: "Kaggle Competition", year: "2024", description: "Top 5% di tabular playground series" },
+      { title: "Kaggle Competition", year: "2024", description: "Top 5% di tabular playground series", images: ["/gallery/harapan-kota.webp", "/gallery/gallery-3.webp"] },
       { title: "ML Draft Analyzer", year: "2023", description: "Tool analisis draft game Mobile Legends" },
       { title: "Research Assistant", year: "2024", description: "Asisten dosen untuk penelitian NLP" },
     ],
@@ -137,7 +137,7 @@ export const MEMBER_CV: Record<string, MemberCV> = {
       { name: "UI/UX Design", level: 80, category: "SOFT" },
     ],
     achievements: [
-      { title: "Play Store Launch", year: "2024", description: "Publish 3 app ke Play Store, 50K+ downloads" },
+      { title: "Play Store Launch", year: "2024", description: "Publish 3 app ke Play Store, 50K+ downloads", images: ["/gallery/harapan-depan.webp", "/gallery/gallery-1.webp"] },
       { title: "D&D Dice PWA", year: "2024", description: "PWA untuk D&D player, installable di HP" },
       { title: "Mobile Design Award", year: "2023", description: "Juara 2 lomba UI/UX mobile app" },
     ],
@@ -170,7 +170,7 @@ export const MEMBER_CV: Record<string, MemberCV> = {
       { name: "Creativity", level: 95, category: "SOFT" },
     ],
     achievements: [
-      { title: "Game Jam Winner", year: "2023", description: "Juara 1 Ludum Dare local dengan game puzzle" },
+      { title: "Game Jam Winner", year: "2023", description: "Juara 1 Ludum Dare local dengan game puzzle", images: ["/gallery/gallery-2.webp", "/gallery/gallery-3.webp"] },
       { title: "Twitch Affiliate", year: "2024", description: "Capai affiliate status dengan 500+ followers" },
       { title: "Itch.io Releases", year: "2024", description: "Publish 5 game di itch.io, 2K+ downloads total" },
     ],

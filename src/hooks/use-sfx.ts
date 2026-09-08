@@ -82,22 +82,20 @@ export function useSfx(enabled: boolean = true) {
 
 /**
  * Konami code easter egg hook.
- * ↑ ↑ ↓ ↓ ← → ← → B A
+ * ↑ ↓ ← → ← ← ↑ (arrow keys only, 7 keys)
  * Triggers callback when the sequence is entered.
+ * Must use Arrow keys on keyboard.
  */
 export function useKonamiCode(onTrigger: () => void) {
   const seq = useRef<string[]>([]);
   const target = [
     "ArrowUp",
+    "ArrowDown",
+    "ArrowLeft",
+    "ArrowRight",
+    "ArrowLeft",
+    "ArrowLeft",
     "ArrowUp",
-    "ArrowDown",
-    "ArrowDown",
-    "ArrowLeft",
-    "ArrowRight",
-    "ArrowLeft",
-    "ArrowRight",
-    "b",
-    "a",
   ];
 
   useEffect(() => {

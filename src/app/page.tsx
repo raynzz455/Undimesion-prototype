@@ -38,7 +38,7 @@ function KonamiOverlay({ show, godUnlocked }: { show: boolean; godUnlocked?: boo
   return (
     <div className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center">
       <div className="bg-[#ff00ff] text-white font-bebas text-6xl md:text-9xl px-12 py-8 border-8 border-black dark:border-white shadow-[16px_16px_0_#000] dark:shadow-[16px_16px_0_#d4ff00] rotate-3 animate-pulse text-center">
-        ↑↑↓↓←→←→BA
+        ↑↓←→←←↑
         <p className="font-mono-ud text-base mt-2">
           {godUnlocked
             ? "// GOD MODE UNLOCKED — CHAOS MODE BUTTON APPEARED //"
