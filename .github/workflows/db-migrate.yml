@@ -1,20 +1,21 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Database Migration — Run Prisma migrations on Render PostgreSQL
+# Database Setup — Push Prisma schema + seed Supabase PostgreSQL
 # Triggers when prisma/schema.prisma changes or manually
 #
 # Setup:
-#   1. Set RENDER_API_KEY secret (from Render Account Settings → API Keys)
-#   2. Set RENDER_SERVICE_ID secret (from the web service URL or dashboard)
-# ─────────────────────────────────────────────────────────────────────────────
+#   1. Set DATABASE_URL secret in GitHub
+#      (Same Supabase connection string as in your .env.local)
+#   2. This workflow pushes the schema + seeds initial data to Supabase
+# ═══════════════────────────────────────────────────────────────────────────
 
-name: Database Migration
+name: Database Setup
 
 on:
   push:
     branches: [main]
     paths:
       - "prisma/schema.prisma"
-      - "prisma/migrations/**"
+      - "scripts/seed*.ts"
   workflow_dispatch:
 
 jobs:
@@ -33,22 +34,23 @@ jobs:
       - name: Generate Prisma Client
         run: bun run db:generate
 
-      - name: Run Migration (if DATABASE_URL available)
+      - name: Push schema to Supabase
         env:
-          DATABASE_URL: ${{ secrets.RENDER_DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           if [ -z "$DATABASE_URL" ]; then
-            echo "⚠ RENDER_DATABASE_URL not set. Skipping migration."
-            echo "Set it in GitHub repo Settings → Secrets → Actions"
+            echo "⚠ DATABASE_URL secret not set. Skipping."
+            echo "Set it in GitHub repo Settings → Secrets and variables → Actions"
+            echo "Value = your Supabase PostgreSQL connection string"
             exit 0
           fi
-          echo "Running Prisma db push..."
+          echo "Pushing Prisma schema to Supabase PostgreSQL..."
           bun run db:push
-          echo "✅ Migration complete"
+          echo "✅ Schema pushed"
 
-      - name: Run Seed
+      - name: Seed database
         env:
-          DATABASE_URL: ${{ secrets.RENDER_DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           if [ -z "$DATABASE_URL" ]; then
             echo "Skipping seed (no DATABASE_URL)"

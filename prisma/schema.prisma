@@ -1,15 +1,14 @@
 // UNDIMENSION — Prisma Schema (Complete — 15 tables)
-// Supports SQLite (dev) and PostgreSQL (production)
-// For production: change provider to "postgresql"
+// Uses Supabase PostgreSQL for both local dev and production.
+// Same database, same data — no more SQLite/PostgreSQL split.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
-  // Production: provider = "postgresql"
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

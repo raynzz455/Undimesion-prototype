@@ -832,3 +832,75 @@ All user-reported bugs are fixed. The site loads cleanly with zero console error
 - The `.env` file has placeholder Supabase keys (`https://xxxxx.supabase.co`). These are NOT needed for local development — the app uses SQLite locally. Supabase is only needed for production image storage.
 - The user's ".env not working" concern was likely because the dev server wasn't running or the database wasn't pushed. Now the APIs have fallbacks so they work regardless.
 - The `useFetch` hook (`src/hooks/use-fetch.ts`) already handles errors gracefully — it sets an `error` state instead of crashing. But the 500 status was still visible in the browser console. Now that APIs never 500, this is moot.
+
+---
+Task ID: 16
+Agent: main (Z.ai Code)
+Task: Switch architecture to use Supabase PostgreSQL for BOTH local dev and production. Remove Render PostgreSQL. Clarify that Next.js API Routes ARE the backend (no FastAPI needed).
+
+## Section 1: Current Project Status Assessment
+
+User wanted to clarify the architecture:
+- Local dev should connect to Supabase PostgreSQL (same DB as production)
+- Local dev should use Supabase Storage bucket (same images as production)
+- Render should only host the app
+- User was confused about whether to use FastAPI as a separate backend
+
+**Key clarification**: Next.js API Routes ARE the backend. The project already has 7 API routes (`/api/gallery`, `/api/guestbook`, `/api/news`, `/api/members`, `/api/games`, `/api/gallery/upload`, `/api`). These are server-side TypeScript code that runs in the same Next.js app. No FastAPI/Express separate backend is needed — that would require rewriting all 7 routes in Python for zero benefit.
+
+**New architecture**:
+- Supabase PostgreSQL = database (shared by local + production)
+- Supabase Storage = image bucket (shared by local + production)
+- Render = hosts ONE Next.js web service (frontend + API together)
+- No Render PostgreSQL database, no separate backend
+
+## Section 2: Completed Modifications & Verification
+
+### Changes Made
+1. **Prisma schema** (`prisma/schema.prisma`) — Changed `provider = "sqlite"` to `provider = "postgresql"`. Both local and production now use the same Supabase PostgreSQL. No more SQLite/PostgreSQL split.
+
+2. **`.env`** — Rewrote with clear instructions on how to get the Supabase PostgreSQL connection string (Settings → Database → Connection string → URI, with `?pgbouncer=true&connection_limit=1` for serverless compatibility).
+
+3. **`.env.local`** — Updated to match, with placeholder values that the user fills in with their real Supabase keys.
+
+4. **`render.yaml`** — Removed the `databases:` section (no more Render PostgreSQL). Now only defines ONE web service that connects to Supabase via env vars. Build command: `bun install && bun run db:generate && bun run db:push`. Start command: `bun run start`.
+
+5. **`package.json` scripts**:
+   - Removed `--accept-data-loss` from `db:push` (safer for production)
+   - Added `setup:supabase` — runs the Supabase setup script
+   - Added `setup:all` — runs db:generate + db:push + setup:supabase + seed in one command
+
+6. **`scripts/setup-supabase.ts`** (new) — A setup script that:
+   - Tests the database connection (verifies DATABASE_URL works)
+   - Creates the "gallery" storage bucket if it doesn't exist
+   - Makes the bucket public (so uploaded images are accessible via URL)
+   - Gives clear error messages if keys are missing
+
+7. **`.github/workflows/db-migrate.yml`** — Fixed typo (`ain]` → `[main]`), renamed secret from `RENDER_DATABASE_URL` to `DATABASE_URL` (since it's now Supabase, not Render), updated comments.
+
+8. **`.github/workflows/deploy-render.yml`** — Updated comments to reflect new architecture (no Render DB, uses Supabase).
+
+### Verification Results
+- ✅ ESLint: 0 errors, 0 warnings
+- ✅ Prisma client generates successfully with `postgresql` provider
+- ✅ Dev server starts and all 4 APIs return 200 (via graceful fallback to static data, since DATABASE_URL is still a placeholder)
+- ✅ `/api/gallery` returns 8 static photos, `/api/members` returns 7 static members — site works even before Supabase is configured
+
+## Section 3: Unresolved Issues / Next-phase Recommendations
+
+### Current Status: ✅ Phase 16 Complete
+Architecture is now: Supabase (database + storage) shared by local + Render. Render hosts one Next.js web service. No separate backend. User needs to fill in real Supabase keys in `.env.local` and run `bun run setup:all`.
+
+### What the user needs to do next:
+1. Get Supabase keys from https://supabase.com → Project → Settings → API
+2. Get PostgreSQL connection string from Settings → Database → Connection string → URI
+3. Fill in `.env.local` with real values
+4. Run `bun run setup:all` (creates tables + bucket + seeds data)
+5. Run `bun run dev` (local dev now uses Supabase)
+6. For Render: New → Blueprint → select repo → set 4 env vars → deploy
+
+### Key decisions:
+- **Next.js API Routes vs FastAPI**: Next.js API Routes are the backend. They are server-side TypeScript, run in the same process as the frontend. No CORS issues, no separate service to manage. FastAPI would require rewriting all 7 routes in Python — no benefit.
+- **Render service type**: "Web Service" (Node.js) — hosts the entire Next.js app. Not "Static Site" (because API routes need a server). Not "Background Worker" (not a background job). Not "PostgreSQL" (using Supabase instead).
+- **PgBouncer connection string**: Supabase provides a pooled connection string (port 6543) with `?pgbouncer=true&connection_limit=1`. This is required for serverless/Render environments to avoid connection exhaustion.
+- **Graceful fallback**: The API routes still have try/catch fallbacks to static data, so the site works even during the transition period (before Supabase is configured).

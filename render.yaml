@@ -1,38 +1,40 @@
-# Render Blueprint — UNDIMENSION Backend
-# https://render.com/docs/blueprint-spec
+# ═══════════════════════════════════════════════════════════════════════════
+# Render Blueprint — UNDIMENSION
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Architecture:
+#   - Render hosts the Next.js app (frontend + API routes in ONE service)
+#   - Supabase provides PostgreSQL database + Storage bucket (shared with local dev)
+#   - No separate backend needed — Next.js API Routes ARE the backend
 #
 # Setup:
-#   1. Push this repo to GitHub
+#   1. Push this repo to GitHub (already done: raynzz455/Undimesion-prototype)
 #   2. Go to render.com → New → Blueprint
 #   3. Select this repo → render.yaml will be auto-detected
-#   4. Set these env vars manually in Render dashboard:
-#      - NEXT_PUBLIC_SUPABASE_URL (from Supabase → Settings → API → Project URL)
-#      - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (sb_publishable_xxx)
-#      - SUPABASE_SERVICE_KEY (service_role key — SECRET, server-only)
-#   5. DATABASE_URL is auto-set by Render PostgreSQL
-#   6. Deploy!
-
-databases:
-  - name: undimension-db
-    databaseName: undimension
-    user: undimension
-    plan: free
+#   4. Set these env vars in Render dashboard (Environment tab):
+#        DATABASE_URL                        ← Supabase PostgreSQL connection string
+#        NEXT_PUBLIC_SUPABASE_URL            ← Supabase project URL
+#        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ← sb_publishable_xxx
+#        SUPABASE_SERVICE_KEY                ← service_role key (SECRET)
+#   5. Deploy! The build will run prisma generate + db push automatically.
+#
+# NOTE: We do NOT create a Render PostgreSQL database — we use Supabase instead,
+#       so local dev and production share the SAME database and storage.
+# ═══════════════════════════════════════════════════════════════════════════
 
 services:
   - type: web
-    name: undimension-api
+    name: undimension
     runtime: node
     plan: free
     buildCommand: bun install && bun run db:generate && bun run db:push
     startCommand: bun run start
     healthCheckPath: /api
     envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: undimension-db
-          property: connectionString
       - key: NODE_ENV
         value: production
+      - key: DATABASE_URL
+        sync: false
       - key: NEXT_PUBLIC_SUPABASE_URL
         sync: false
       - key: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
