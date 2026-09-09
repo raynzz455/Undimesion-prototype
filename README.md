@@ -4,6 +4,8 @@
 
 UNDIMENSION adalah web profile kolektif untuk 7 orang teman SMK. Dibangun dengan Next.js 16, TypeScript, Tailwind CSS 4, dan Prisma. Website ini menampilkan profil setiap member, gallery foto, halaman games, portfolio project, serta sistem guestbook dan news portal yang terhubung ke database.
 
+![UNDIMENSION](public/og-image.png)
+
 ---
 
 ## Halaman
@@ -18,22 +20,21 @@ UNDIMENSION adalah web profile kolektif untuk 7 orang teman SMK. Dibangun dengan
 
 ---
 
-## Fitur Utama
+## Fitur
 
-- **Member Detail Modal** — Klik member untuk lihat profil lengkap (bio, stats RPG, fun facts, socials)
-- **Photo Lightbox** — Klik foto gallery untuk fullscreen viewer dengan navigasi
-- **Gallery Upload** — Upload foto langsung dari chaos mode, tersimpan ke Supabase Storage
-- **News Portal** — Publikasi artikel dengan kategori (UPDATE, EVENT, CHAOS, MILESTONE, NOTICE)
-- **Guestbook** — Pengunjung bisa meninggalkan pesan
-- **Portfolio CRUD** — Kelola projects dan achievements dengan upload foto sertifikat/medali
-- **Quotes (Transmission)** — Quote rotator yang bisa di-edit via chaos mode
-- **Chaos Mode** — Hidden member-only area untuk manage semua konten (CRUD)
-- **Dark/Light Theme** — Toggle tema dengan localStorage persistence
-- **Sound Effects** — Synthesized SFX via Web Audio API
-- **Keyboard Navigation** — Shortcuts: `?` bantuan, `G`/`S`/`A`/`P` navigasi halaman
-- **Mobile Support** — Swipe gesture untuk akses chaos mode di HP
-- **Rate Limiting** — Spam protection untuk public POST endpoints
-- **Responsive** — Mobile-first design dengan breakpoint sm/md/lg/xl
+- Member detail modal dengan profil lengkap (bio, stats, fun facts, socials)
+- Photo lightbox dengan navigasi keyboard
+- Gallery upload dengan penyimpanan cloud
+- News portal dengan kategori artikel
+- Guestbook untuk pengunjung
+- Portfolio dengan projects dan achievements
+- Quote rotator (Transmission from the Collective)
+- Dark/light theme toggle
+- Synthesized sound effects (Web Audio API)
+- Keyboard navigation shortcuts
+- Mobile support dengan swipe gesture
+- Rate limiting untuk spam protection
+- Responsive design (mobile-first)
 
 ---
 
@@ -55,13 +56,13 @@ UNDIMENSION adalah web profile kolektif untuk 7 orang teman SMK. Dibangun dengan
 
 ---
 
-## Cara Menjalankan
+## Menjalankan Project
 
 ### Prasyarat
 
 - Node.js 22 atau lebih baru
 - npm
-- Supabase project (untuk database + storage)
+- Supabase project
 
 ### Instalasi
 
@@ -73,7 +74,7 @@ npm install
 
 ### Environment Variables
 
-Buat file `.env.local` di root project:
+Buat file `.env.local`:
 
 ```env
 DATABASE_URL=postgresql://postgres.xxxx:PASSWORD@aws-0-region.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1
@@ -82,29 +83,13 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxx
 SUPABASE_SERVICE_KEY=eyJxxx
 ```
 
-### Setup Database
-
-Jalankan SQL migration di Supabase SQL Editor. File tersedia di `prisma/migrations/`.
-
-Atau jalankan via CLI:
+### Setup
 
 ```bash
-npm run db:push
-npm run seed
-```
-
-### Setup Storage
-
-```bash
-npm run setup:storage
-```
-
-Script ini membuat bucket `gallery` di Supabase dengan folder `uploads/`, `members/`, dan `achievements/`.
-
-### Jalankan Dev Server
-
-```bash
-npm run dev
+npm run db:push       # Push schema ke database
+npm run seed          # Seed data awal
+npm run setup:storage # Buat storage bucket
+npm run dev           # Start dev server
 ```
 
 Buka `http://localhost:3000`.
@@ -114,118 +99,33 @@ Buka `http://localhost:3000`.
 ## Scripts
 
 ```bash
-npm run dev              # Start dev server (port 3000)
+npm run dev              # Dev server (port 3000)
 npm run build            # Production build
-npm run start            # Start production server
+npm run start            # Production server
 npm run lint             # ESLint
-npm run db:push          # Push Prisma schema ke database
+npm run db:push          # Push Prisma schema
 npm run db:generate      # Generate Prisma client
-npm run seed             # Seed data awal (members, guestbook, news, quotes)
-npm run setup:storage    # Buat Supabase storage bucket
+npm run seed             # Seed data
+npm run setup:storage    # Setup storage bucket
 npm run test:connection  # Test koneksi database + storage
-npm run setup:all        # Full setup: generate + push + storage + seed
+npm run setup:all        # Full setup
 ```
-
----
-
-## Struktur Project
-
-```
-src/
-├── app/
-│   ├── api/                         # API routes (17 endpoints)
-│   │   ├── achievements/            # GET/POST/DELETE + upload
-│   │   ├── chaos-token/             # GET (issue token)
-│   │   ├── gallery/                 # GET/POST/PUT/DELETE + upload
-│   │   ├── guestbook/               # GET/POST/PUT/DELETE
-│   │   ├── health/                  # GET (diagnostics)
-│   │   ├── members/                 # GET + [slug]/GET/PUT + upload
-│   │   ├── news/                    # GET/POST/PUT/DELETE
-│   │   ├── portfolio/               # GET/POST/DELETE
-│   │   └── quotes/                  # GET/POST/DELETE
-│   ├── globals.css                  # Neo-brutalism CSS system
-│   ├── layout.tsx                   # Root layout (fonts, providers, metadata)
-│   └── page.tsx                     # Main page (opening + navigation)
-├── components/
-│   └── undimension/                 # Semua komponen UI
-├── hooks/
-│   ├── use-fetch.ts                 # Lightweight fetch hook
-│   ├── use-chaos-fetch.ts           # Authenticated fetch (with token)
-│   └── use-sfx.ts                   # Web Audio SFX + konami code
-├── lib/
-│   ├── chaos-auth.ts                # Chaos mode authentication
-│   ├── db.ts                        # Prisma client
-│   ├── rate-limit.ts                # Rate limiting + input sanitization
-│   └── undimension/data.ts          # Static seed data
-└── prisma/
-    └── schema.prisma                # 16 models (PostgreSQL)
-```
-
----
-
-## Chaos Mode
-
-Chaos mode adalah area member-only untuk mengelola semua konten website.
-
-### Cara Akses
-
-1. Klik tombol **Shuffle** di navbar untuk aktifkan chaos mode
-2. Masukkan sequence: `up down left right left left up`
-   - Desktop: Arrow keys
-   - Mobile: Swipe gesture
-3. Tombol **CHAOS MODE** muncul — klik untuk masuk
-4. Akses expired setelah 10 menit tidak ada aktivitas
-
-### Yang Bisa Dikelola
-
-| Tab | Konten |
-|-----|--------|
-| ABOUT | Member profiles (foto, bio, stats, socials, CV, work history, education, skills) + Quotes |
-| GALLERY | Upload foto, edit, delete |
-| NEWS | Create, edit, pin, delete artikel |
-| GUESTBOOK | Create, delete pesan |
-| PORTFOLIO | Projects CRUD + Achievements CRUD dengan upload foto |
 
 ---
 
 ## Deployment
 
-Website ini dideploy ke **Vercel**. Vercel auto-deploy setiap push ke branch `main`.
+Website dideploy ke Vercel. Setiap push ke `main` trigger auto-deploy.
 
-### Setup Vercel
-
-1. Buka [vercel.com](https://vercel.com) — login dengan GitHub
-2. Import repo `raynzz455/Undimesion-prototype`
-3. Set 4 environment variables (sama dengan `.env.local`)
-4. Deploy
-
-Node.js version diatur via file `.nvmrc` (versi 22).
-
-### GitHub Actions
-
-| Workflow | Fungsi |
-|----------|--------|
-| `db-migrate.yml` | Sync Prisma schema + seed data ke Supabase |
-| `supabase-keepalive.yml` | Ping Supabase setiap 5 menit (prevent free-tier pause) |
-| `webp-guardian.yml` | Convert non-WebP images ke WebP |
+1. Buka vercel.com, import repo ini
+2. Set 4 environment variables (sama dengan .env.local)
+3. Deploy
 
 ---
 
-## Database Schema
+## Database
 
-16 tabel PostgreSQL:
-
-```
-ABOUT:     Member, GuestbookEntry, NewsArticle, Quote
-GALLERY:   GalleryPhoto
-GAMES:     Game, GameMoment, GamePlayerStat, GameCompatibility,
-           DnDCharacter, DnDCampaign, DnDCampaignImage
-PORTFOLIO: PortfolioProject, PortfolioProjectImage,
-           Achievement, AchievementImage
-```
-
-Schema lengkap: `prisma/schema.prisma`
-SQL migration: `prisma/migrations/`
+16 tabel PostgreSQL. Schema lengkap di `prisma/schema.prisma`.
 
 ---
 
@@ -245,7 +145,7 @@ SQL migration: `prisma/migrations/`
 
 ## License
 
-Personal project untuk collective Undimension. Not for commercial use.
+Personal project. Not for commercial use.
 
 ---
 

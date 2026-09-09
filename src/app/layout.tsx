@@ -41,16 +41,12 @@ const chakra = Chakra_Petch({
   display: "swap",
 });
 
-// Vercel automatically sets VERCEL_URL for each deployment (e.g. "undimension.vercel.app"
-// or "undimension-abc123-vercel.app"). We build an absolute https:// URL from it so
-// OG image URLs resolve correctly when scraped by social platforms (Facebook, Twitter,
-// WhatsApp, Discord, etc.) which require ABSOLUTE URLs — relative "/og-image.png" won't work.
-//
-// Priority: VERCEL_URL → NEXT_PUBLIC_SITE_URL (custom domain) → fallback to the
-// production domain so metadata is always valid even in `next build` without env.
-const siteUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : process.env.NEXT_PUBLIC_SITE_URL || "https://undimension.vercel.app";
+// For OG image, we need a URL available at BUILD time (static page generation).
+// VERCEL_URL is runtime-only, so prioritize NEXT_PUBLIC_SITE_URL (build-time).
+// Set NEXT_PUBLIC_SITE_URL in Vercel dashboard to your deployment URL.
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
+  || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
+  || "https://undimension.vercel.app";
 
 // Absolute OG image URL — social scrapers need this to be a full https:// URL.
 const ogImageUrl = `${siteUrl}/og-image.png`;
