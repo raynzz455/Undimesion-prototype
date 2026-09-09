@@ -244,8 +244,9 @@ export default function Home() {
       >
         SKIP TO CONTENT →
       </a>
-      <ScrollProgress />
-      <NavBar current={page} setPage={setPage} />
+      {/* Hide NavBar, ScrollProgress, Footer, and floating buttons when in chaos mode */}
+      {page !== "chaosmode" && <ScrollProgress />}
+      {page !== "chaosmode" && <NavBar current={page} setPage={setPage} />}
       <main id="main" className="flex-1 relative z-10">
         {page === "about" && <AboutPage />}
         {page === "memories" && <MemoriesPage />}
@@ -253,23 +254,27 @@ export default function Home() {
         {page === "portfolio" && <PortfolioPage />}
         {page === "chaosmode" && godMode && <ChaosModePage onExit={() => setPage("about")} />}
       </main>
-      <Footer setPage={setPage} />
-      <SoundToggle
-        enabled={soundOn}
-        onToggle={() => {
-          setSoundOn((s) => !s);
-          if (!soundOn) play("click");
-        }}
-      />
-      <BackToTop />
-      <button
-        onClick={() => { play("click"); setShortcutsOpen(true); }}
-        className="fixed bottom-6 right-6 z-[55] w-12 h-12 flex items-center justify-center bg-black dark:bg-white text-white dark:text-black border-4 border-white dark:border-black shadow-[6px_6px_0_#d4ff00] dark:shadow-[6px_6px_0_#ff00ff] hover:-translate-y-1 transition-transform no-color-transition font-bebas text-2xl"
-        aria-label="Show keyboard shortcuts (?)"
-        title="Keyboard shortcuts (?)"
-      >
-        ?
-      </button>
+      {page !== "chaosmode" && <Footer setPage={setPage} />}
+      {page !== "chaosmode" && (
+        <SoundToggle
+          enabled={soundOn}
+          onToggle={() => {
+            setSoundOn((s) => !s);
+            if (!soundOn) play("click");
+          }}
+        />
+      )}
+      {page !== "chaosmode" && <BackToTop />}
+      {page !== "chaosmode" && (
+        <button
+          onClick={() => { play("click"); setShortcutsOpen(true); }}
+          className="fixed bottom-6 right-6 z-[55] w-12 h-12 flex items-center justify-center bg-black dark:bg-white text-white dark:text-black border-4 border-white dark:border-black shadow-[6px_6px_0_#d4ff00] dark:shadow-[6px_6px_0_#ff00ff] hover:-translate-y-1 transition-transform no-color-transition font-bebas text-2xl"
+          aria-label="Show keyboard shortcuts (?)"
+          title="Keyboard shortcuts (?)"
+        >
+          ?
+        </button>
+      )}
       <Soundboard
         open={soundboardOpen}
         onOpen={() => setSoundboardOpen(true)}

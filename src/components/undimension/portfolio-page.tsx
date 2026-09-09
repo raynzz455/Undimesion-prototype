@@ -572,18 +572,21 @@ function MemberPortfolio({ member }: { member: Member }) {
 }
 
 export function PortfolioPage() {
-  const [selectedId, setSelectedId] = useState(MEMBERS[0].id);
+  // Fetch members from API (DB-backed) with static fallback
+  const { data: membersData } = useFetch<{ members: Member[] }>("/api/members");
+  const members = membersData?.members ?? MEMBERS;
+  const [selectedId, setSelectedId] = useState("aldi");
   useScrollReveal();
 
-  const selected = useMemo(() => MEMBERS.find((m) => m.id === selectedId)!, [selectedId]);
+  const selected = useMemo(() => members.find((m) => m.id === selectedId) ?? members[0] ?? MEMBERS[0]!, [selectedId, members]);
 
   const goPrev = () => {
-    const idx = MEMBERS.findIndex((m) => m.id === selectedId);
-    setSelectedId(MEMBERS[(idx - 1 + MEMBERS.length) % MEMBERS.length].id);
+    const idx = members.findIndex((m) => m.id === selectedId);
+    setSelectedId(members[(idx - 1 + members.length) % members.length].id);
   };
   const goNext = () => {
-    const idx = MEMBERS.findIndex((m) => m.id === selectedId);
-    setSelectedId(MEMBERS[(idx + 1) % MEMBERS.length].id);
+    const idx = members.findIndex((m) => m.id === selectedId);
+    setSelectedId(members[(idx + 1) % members.length].id);
   };
 
   return (
