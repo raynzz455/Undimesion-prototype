@@ -116,34 +116,28 @@ function MemberCard({ m, i, onOpen }: { m: Member; i: number; onOpen: () => void
           isEven ? "md:flex-row" : "md:flex-row-reverse",
         )}
       >
-        {/* Image Container — bigger on desktop, with extra top padding on
-            mobile so the tape sticker (positioned -top-8) has room to breathe
-            without being clipped by the card's rotated bounds. */}
+        {/* Image Container — bigger on desktop, with extra top padding so
+            the tape sticker (positioned -top-8) has room without being clipped. */}
         <div
           className={cn(
-            "w-full md:w-[50%] lg:w-[48%] relative transition-transform duration-300 ease-out z-30 group-hover:rotate-0 px-2 md:px-6 pt-12 md:pt-10",
+            "w-full md:w-[60%] lg:w-[62%] relative transition-transform duration-300 ease-out z-30 group-hover:rotate-0 px-2 md:px-6 pt-16 md:pt-14 pb-10",
             isEven
-              ? "rotate-6 md:-translate-x-4 md:-translate-y-12"
-              : "-rotate-6 md:translate-x-4 md:-translate-y-12",
+              ? "rotate-6 md:-translate-x-4 md:-translate-y-8"
+              : "-rotate-6 md:translate-x-4 md:-translate-y-8",
           )}
         >
-          <div className="border-8 border-black dark:border-white bg-black p-3 shadow-[16px_16px_0_#000] dark:shadow-[16px_16px_0_#fff]">
+          <div className="border-8 border-black dark:border-white bg-black p-3 shadow-[16px_16px_0_#000] dark:shadow-[16px_16px_0_#fff] relative">
             <div className="relative overflow-hidden group-hover:scale-[1.02] transition-transform duration-300 ease-out cursor-pointer" onClick={onOpen} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") onOpen(); }}>
               <img
                 src={m.img}
                 alt={m.nick}
-                // Mobile keeps 4:5 portrait (compact for stacked layout).
-                // Desktop uses 9:16 (true portrait) — better for vertical
-                // member photos that were getting cropped too short.
                 className="w-full aspect-[4/5] md:aspect-[9/16] object-cover grayscale contrast-[1.4] group-hover:grayscale-0 transition-all duration-300 ud-wobble-hover"
                 loading="lazy"
               />
               <div className="absolute inset-0 ud-scanlines pointer-events-none" />
             </div>
-            {/* Tape Sticker — compact on mobile (smaller text + tighter
-                padding) so the nickname isn't clipped by the card edges.
-                whitespace-nowrap prevents wrapping for long nicknames. */}
-            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#ffea00] border-4 border-black px-4 py-1.5 md:px-10 md:py-3 font-mono-ud font-black text-black text-xl md:text-4xl shadow-[6px_6px_0_#000] -rotate-3 z-40 whitespace-nowrap">
+            {/* Tape Sticker — original size (text-3xl md:text-4xl, px-10 py-3) */}
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#ffea00] border-4 border-black px-10 py-3 font-mono-ud font-black text-black text-3xl md:text-4xl shadow-[6px_6px_0_#000] -rotate-3 z-40 whitespace-nowrap">
               &ldquo;{m.nick.toUpperCase()}&rdquo;
             </div>
             <div className="absolute -bottom-6 right-0 bg-white border-4 border-black px-4 py-2 font-bebas text-3xl shadow-[4px_4px_0_#000] rotate-6 z-40">
@@ -155,8 +149,8 @@ function MemberCard({ m, i, onOpen }: { m: Member; i: number; onOpen: () => void
         {/* Info Container */}
         <div
           className={cn(
-            "w-full md:w-[55%] flex flex-col z-20",
-            isEven ? "md:pl-16" : "md:pr-16",
+            "w-full md:w-[40%] lg:w-[38%] flex flex-col z-20",
+            isEven ? "md:pl-12" : "md:pr-12",
           )}
         >
           {/* Full Name Barcode Tag */}
