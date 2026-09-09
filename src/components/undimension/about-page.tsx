@@ -136,8 +136,8 @@ function MemberCard({ m, i, onOpen }: { m: Member; i: number; onOpen: () => void
               />
               <div className="absolute inset-0 ud-scanlines pointer-events-none" />
             </div>
-            {/* Tape Sticker — original size (text-3xl md:text-4xl, px-10 py-3) */}
-            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#ffea00] border-4 border-black px-10 py-3 font-mono-ud font-black text-black text-3xl md:text-4xl shadow-[6px_6px_0_#000] -rotate-3 z-40 whitespace-nowrap">
+            {/* Tape Sticker — smaller on mobile to avoid clipping */}
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#ffea00] border-4 border-black px-6 py-2 md:px-10 md:py-3 font-mono-ud font-black text-black text-xl md:text-4xl shadow-[6px_6px_0_#000] -rotate-3 z-40 whitespace-nowrap">
               &ldquo;{m.nick.toUpperCase()}&rdquo;
             </div>
             <div className="absolute -bottom-6 right-0 bg-white border-4 border-black px-4 py-2 font-bebas text-3xl shadow-[4px_4px_0_#000] rotate-6 z-40">
