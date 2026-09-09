@@ -904,3 +904,75 @@ Architecture is now: Supabase (database + storage) shared by local + Render. Ren
 - **Render service type**: "Web Service" (Node.js) — hosts the entire Next.js app. Not "Static Site" (because API routes need a server). Not "Background Worker" (not a background job). Not "PostgreSQL" (using Supabase instead).
 - **PgBouncer connection string**: Supabase provides a pooled connection string (port 6543) with `?pgbouncer=true&connection_limit=1`. This is required for serverless/Render environments to avoid connection exhaustion.
 - **Graceful fallback**: The API routes still have try/catch fallbacks to static data, so the site works even during the transition period (before Supabase is configured).
+
+---
+Task ID: 28
+Agent: main (Z.ai Code)
+Task: Fix 5 user-reported issues — achievement photo prominence, dark mode readability, rate limiting, OG image, member card issues.
+
+## Section 1: Files Modified (15 files, +363/-135 lines)
+
+### New file
+- `src/lib/rate-limit.ts` — In-memory rate limiter (5 req/60s/IP), client IP extractor, HTML-tag stripper. Periodic stale-entry purge.
+
+### Issue 1 — Achievement photo upload prominence
+- `src/components/undimension/chaos-mode-page.tsx` — AchievementsTab: Added prominent "+ ADD PHOTO" button visible on every card without expanding. Added pulsing "📷 NO PHOTOS — ADD BELOW" hint badge. Added photo count badge. Fixed broken `handleDeleteImageByIndex` call (function didn't exist) — wired up `handleDeleteImage(img.id)` properly.
+- `src/app/api/achievements/route.ts` — GET now returns `images: {id, img}[]` instead of `string[]` so frontend can delete by image ID.
+- `src/components/undimension/portfolio-page.tsx` — Updated consumer to flatten `{id, img}[]` → `string[]` for the legacy Achievement type.
+
+### Issue 2 — Dark mode readability
+- `src/components/undimension/games-page.tsx` — Hardcoded `bg-[#09090b]` was paired with `text-black dark:text-white` → BLACK text on DARK bg in light mode = invisible. Fixed to `text-white` (always).
+- `src/components/undimension/star-field.tsx` — Adaptive variant was broken (both `ud-starfield` and `ud-starfield--light` always applied → last def wins = always black stars, invisible on dark bg in dark mode). Rewrote to read `resolvedTheme` from next-themes. Uses deferred `Promise.resolve().then(setMounted)` to satisfy react-hooks/set-state-in-effect linter.
+- Made 3 previously-inverted sections CONSISTENTLY DARK in both themes:
+  - `src/components/undimension/quote-widget.tsx` — always `bg-black` + white text
+  - `src/components/undimension/manifesto-section.tsx` — always `bg-black` + white text
+  - `src/components/undimension/mission-control.tsx` — always `bg-[#09090b]`; StatCell cards always white-on-black; LiveClock always black bg + lime digits
+- `src/components/undimension/chaos-dice.tsx` — paired with about-page wrapper that was also inverted. Now consistently dark.
+- `src/components/undimension/about-page.tsx` — ChaosDice wrapper was `bg-[#09090b] dark:bg-white` → fixed to `bg-[#09090b]` (always dark).
+- `src/components/undimension/nav-bar.tsx` — Theme toggle button was just `[LIGHT]`/`[DARK]` (action label, confused users). Added Sun/Moon icon + `→ LIGHT`/`→ DARK` arrow + descriptive title/aria-label.
+
+### Issue 3 — Rate limiting & input sanitization
+- `src/app/api/guestbook/route.ts` — POST now rate-limited (5 req/60s/IP → 429 with Retry-After). All user text passes through `sanitizeText()`.
+- `src/app/api/news/route.ts` — Same rate limiting + sanitization.
+
+### Issue 4 — OpenGraph social media preview
+- `src/app/layout.tsx` — OG image URL was relative `/og-image.png` which social scrapers (Facebook, Twitter, WhatsApp, Discord) can't resolve. Built `ogImageUrl = \`${siteUrl}/og-image.png\`` and used it for openGraph.images, twitter.images, icons.apple.
+
+### Issue 5 — Member card issues (about-page.tsx)
+- Hover: `hover:scale-105` → `hover:scale-[1.02]` + `transition-transform duration-300 ease-out`. Applied to HarapanCardItem + HeroSection.
+- Aspect: `aspect-[4/5]` → `aspect-[4/5] md:aspect-[9/16]` (taller portrait on desktop).
+- Tape sticker clipping: added `pt-12 md:pt-10` to image container outer div.
+- Tape sticker font: `text-3xl md:text-4xl` → `text-xl md:text-4xl` (smaller on mobile).
+- Tape sticker padding: `px-10 py-3` → `px-4 py-1.5 md:px-10 md:py-3` (compact on mobile).
+
+## Section 2: Verification
+
+- ✅ `npm run lint`: 0 errors, 0 warnings
+- ✅ `npm run build`: succeeded (16 routes, 4 static pages, 12 dynamic API)
+- ✅ Dev server: HTTP 200 on `/`, OG meta tag verified (`<meta property="og:image" content="https://undimension.vercel.app/og-image.png"/>`)
+- ✅ Rate limit verified: 5× POST /api/guestbook = 200, 6th+ = 429 with Retry-After header
+- ✅ GET endpoints unaffected by rate limit
+- ✅ Committed as `bda8a47` on `main`, pushed to `origin/main` (GitHub: raynzz455/Undimesion-prototype)
+
+## Section 3: Key Decisions
+
+1. **Achievement images API shape change** — Switched from `images: string[]` to `images: {id, img}[]` because the frontend's per-image delete button needs an ID. Previously the code was calling a non-existent `handleDeleteImageByIndex` function (runtime error). Updated portfolio-page consumer to flatten the array back to `string[]` for the legacy Achievement type.
+
+2. **Inverted sections → always dark** — Three sections (QuoteWidget, ManifestoSection, MissionControl) previously inverted their bg in dark mode (dark bg in light mode → light bg in dark mode). The user complained that text was unreadable. Even though all text colors had proper `dark:` variants (so technically readable), the alternating light/dark sections in dark mode created a confusing visual mix. Made them consistently dark in both themes.
+
+3. **StarField adaptive variant** — Tailwind's `dark:` variant can only ADD classes, not REPLACE them. So `ud-starfield ud-starfield--light dark:ud-starfield--light` ended up with both classes always applied, and `ud-starfield--light` (defined later in CSS) always won = always black stars = invisible on dark bg in dark mode. Fix: read `resolvedTheme` from next-themes and conditionally apply the right class. Used `Promise.resolve().then(setMounted(true))` to defer setState and satisfy the react-hooks/set-state-in-effect linter rule (same pattern as chaos-provider.tsx).
+
+4. **Rate limiter scope** — Applied only to PUBLIC POST endpoints (guestbook, news). Chaos-mode-only endpoints (achievements, achievements/upload, gallery upload) are protected by `requireChaosMode()` token auth, so they don't need additional rate limiting.
+
+5. **OG image absolute URL** — `metadataBase` already resolves relative URLs to absolute, but some scrapers (notably WhatsApp) don't follow `metadataBase` and require absolute URLs in the `images` array directly. Building `ogImageUrl` explicitly is the safest approach.
+
+6. **Member card aspect ratio** — Used `aspect-[4/5] md:aspect-[9/16]` (responsive) rather than `aspect-[9/16]` (always) because 9:16 is too tall for mobile stacked layout — would push the info section too far down. 4:5 on mobile keeps things compact; 9:16 on desktop gives the taller portrait crop the user asked for.
+
+## Section 4: Next-phase Recommendations
+
+1. **Replace in-memory rate limiter with Upstash Redis** when deploying to Vercel serverless — each function instance has its own Map, so the limit is approximate. Upstash's `@upstash/ratelimit` is the standard solution.
+2. **Add admin moderation UI** for guestbook entries — currently they're auto-approved on POST. The schema has an `approved` boolean but no admin UI to toggle it.
+3. **Audit remaining `dark:` variants** in components I didn't touch (memories-page, portfolio-page, member-detail-modal) — they should be fine but worth a visual pass in both themes.
+4. **next/image optimization** — Still using raw `<img>` for member photos and achievement images. Should switch to `next/image` for automatic WebP/AVIF conversion and responsive srcsets.
+
+Full work record: `/agent-ctx/28-main-z-ai-code.md`
