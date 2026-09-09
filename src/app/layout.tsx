@@ -41,15 +41,11 @@ const chakra = Chakra_Petch({
   display: "swap",
 });
 
-// For OG image, we need a URL available at BUILD time (static page generation).
-// VERCEL_URL is runtime-only, so prioritize NEXT_PUBLIC_SITE_URL (build-time).
-// Set NEXT_PUBLIC_SITE_URL in Vercel dashboard to your deployment URL.
+// For canonical URL resolution. Set NEXT_PUBLIC_SITE_URL in Vercel dashboard
+// to your actual deployment URL.
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
   || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
   || "https://undimension.vercel.app";
-
-// Absolute OG image URL — social scrapers need this to be a full https:// URL.
-const ogImageUrl = `${siteUrl}/og-image.png`;
 
 export const metadata: Metadata = {
   title: "UNDIMENSION — Circle Beyond Space & Time",
@@ -73,7 +69,6 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/logo.svg",
-    apple: ogImageUrl,
   },
   openGraph: {
     title: "UNDIMENSION — Circle Beyond Space & Time",
@@ -81,15 +76,6 @@ export const metadata: Metadata = {
       "Sebuah circle teman lama yang tak terikat ruang maupun waktu. Datang dari mimpi yang berbeda, namun melangkah di orbit yang sama. Est. 2020.",
     url: siteUrl,
     siteName: "UNDIMENSION",
-    images: [
-      {
-        url: ogImageUrl,
-        width: 1344,
-        height: 768,
-        alt: "UNDIMENSION — Circle Beyond Space & Time",
-        type: "image/png",
-      },
-    ],
     locale: "id_ID",
     type: "website",
   },
@@ -98,8 +84,6 @@ export const metadata: Metadata = {
     title: "UNDIMENSION — Circle Beyond Space & Time",
     description:
       "Sebuah circle teman lama yang tak terikat ruang maupun waktu. Est. 2020.",
-    images: [ogImageUrl],
-    creator: "@undimension",
   },
   robots: {
     index: true,
