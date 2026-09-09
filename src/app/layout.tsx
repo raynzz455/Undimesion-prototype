@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Bebas_Neue, Outfit, Space_Mono, Cinzel, Chakra_Petch } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
@@ -51,17 +51,62 @@ export const metadata: Metadata = {
     "SMK",
     "neo-brutalism",
     "friend group profile",
+    "collective",
   ],
   authors: [{ name: "The Undimension Collective" }],
+  creator: "The Undimension Collective",
+  publisher: "The Undimension Collective",
+  metadataBase: new URL("https://undimension.vercel.app"),
+  alternates: {
+    canonical: "/",
+  },
   icons: {
     icon: "/logo.svg",
+    apple: "/og-image.png",
   },
   openGraph: {
     title: "UNDIMENSION — Circle Beyond Space & Time",
     description:
-      "Sebuah circle teman lama yang tak terikat ruang maupun waktu.",
+      "Sebuah circle teman lama yang tak terikat ruang maupun waktu. Datang dari mimpi yang berbeda, namun melangkah di orbit yang sama. Est. 2020.",
+    url: "https://undimension.vercel.app",
+    siteName: "UNDIMENSION",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1344,
+        height: 768,
+        alt: "UNDIMENSION — Circle Beyond Space & Time",
+      },
+    ],
+    locale: "id_ID",
     type: "website",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "UNDIMENSION — Circle Beyond Space & Time",
+    description:
+      "Sebuah circle teman lama yang tak terikat ruang maupun waktu. Est. 2020.",
+    images: ["/og-image.png"],
+    creator: "@undimension",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  themeColor: "#09090b",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#09090b",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({

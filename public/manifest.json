@@ -1,0 +1,24 @@
+{
+  "name": "UNDIMENSION — Circle Beyond Space & Time",
+  "short_name": "UNDIMENSION",
+  "description": "Sebuah circle teman lama yang tak terikat ruang maupun waktu. Est. 2020.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/og-image.png",
+      "sizes": "1344x768",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
