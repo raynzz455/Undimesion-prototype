@@ -560,6 +560,11 @@ function EditPhotoModal({ photo, onClose, onSaved }: { photo: GalleryPhoto; onCl
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    document.body.classList.add("modal-open");
+    return () => { document.body.classList.remove("modal-open"); };
+  }, []);
+
   const handleSave = async () => {
     if (!title.trim()) { setError("Judul wajib diisi."); return; }
     setSaving(true); setError(null);
@@ -572,20 +577,23 @@ function EditPhotoModal({ photo, onClose, onSaved }: { photo: GalleryPhoto; onCl
   };
 
   return (
-    <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-start justify-center p-3 md:p-6 pt-4 md:pt-8 overflow-y-auto" onClick={onClose}>
-      <div className="relative w-full max-w-md my-auto">
-        <button onClick={onClose} className="absolute -top-4 -right-4 z-30 w-10 h-10 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-white shadow-[4px_4px_0_#000] hover:rotate-90 transition-transform no-color-transition" aria-label="Close"><X className="w-5 h-5" /></button>
-        <div className="bg-[#1a1a1a] border-4 border-[#00e5ff] p-6 shadow-[8px_8px_0_#00e5ff] max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-          <h3 className="font-bebas text-3xl text-[#00e5ff] mb-4 flex items-center gap-2"><Edit3 className="w-6 h-6" /> EDIT PHOTO</h3>
-          <img src={photo.img} alt={photo.title} className="w-full max-h-48 object-contain mb-4 border-2 border-white/20" />
-          <div className="space-y-3">
-            <label className="block"><span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">JUDUL</span><input value={title} onChange={(e) => setTitle(e.target.value.slice(0, 40))} className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-black text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" /></label>
-            <label className="block"><span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">OLEH</span><input value={author} onChange={(e) => setAuthor(e.target.value.slice(0, 30))} className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-black text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" /></label>
-            <label className="block"><span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">TAHUN</span><input value={date} onChange={(e) => setDate(e.target.value)} className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-black text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" /></label>
-            {error && <div className="bg-[#ff4d4d] text-white px-3 py-2 border-2 border-white font-mono-ud text-xs font-bold">! {error}</div>}
-            <div className="flex gap-2 pt-2">
-              <button onClick={onClose} className="flex-1 bg-transparent text-white font-bebas text-xl py-3 border-2 border-white/30 hover:border-white hover:bg-white/5 transition-colors no-color-transition">CANCEL</button>
-              <button onClick={handleSave} disabled={saving} className="flex-1 bg-[#00e5ff] text-black font-bebas text-xl py-3 border-2 border-[#00e5ff] hover:bg-[#00b8cc] disabled:opacity-50 transition-colors no-color-transition flex items-center justify-center gap-2">{saving ? <><Loader2 className="w-5 h-5 animate-spin" /> SAVING...</> : <>✓ SAVE</>}</button>
+    <div className="fixed inset-0 z-[200] overflow-y-auto" onClick={onClose}>
+      <div className="flex min-h-full items-center justify-center p-3 md:p-6 py-8">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" />
+        <div className="relative w-full max-w-md">
+          <button onClick={onClose} className="absolute -top-4 -right-4 z-30 w-10 h-10 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-white shadow-[4px_4px_0_#000] hover:rotate-90 transition-transform no-color-transition" aria-label="Close"><X className="w-5 h-5" /></button>
+          <div className="relative bg-[#1a1a1a] border-4 border-[#00e5ff] p-6 shadow-[8px_8px_0_#00e5ff] max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-bebas text-3xl text-[#00e5ff] mb-4 flex items-center gap-2"><Edit3 className="w-6 h-6" /> EDIT PHOTO</h3>
+            <img src={photo.img} alt={photo.title} className="w-full max-h-48 object-contain mb-4 border-2 border-white/20" />
+            <div className="space-y-3">
+              <label className="block"><span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">JUDUL</span><input value={title} onChange={(e) => setTitle(e.target.value.slice(0, 40))} className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-black text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" /></label>
+              <label className="block"><span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">OLEH</span><input value={author} onChange={(e) => setAuthor(e.target.value.slice(0, 30))} className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-black text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" /></label>
+              <label className="block"><span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">TAHUN</span><input value={date} onChange={(e) => setDate(e.target.value)} className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-black text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" /></label>
+              {error && <div className="bg-[#ff4d4d] text-white px-3 py-2 border-2 border-white font-mono-ud text-xs font-bold">! {error}</div>}
+              <div className="flex gap-2 pt-2">
+                <button onClick={onClose} className="flex-1 bg-transparent text-white font-bebas text-xl py-3 border-2 border-white/30 hover:border-white hover:bg-white/5 transition-colors no-color-transition">CANCEL</button>
+                <button onClick={handleSave} disabled={saving} className="flex-1 bg-[#00e5ff] text-black font-bebas text-xl py-3 border-2 border-[#00e5ff] hover:bg-[#00b8cc] disabled:opacity-50 transition-colors no-color-transition flex items-center justify-center gap-2">{saving ? <><Loader2 className="w-5 h-5 animate-spin" /> SAVING...</> : <>✓ SAVE</>}</button>
+              </div>
             </div>
           </div>
         </div>
