@@ -351,9 +351,16 @@ function InfoTab() {
           <h3 className="font-bebas text-2xl text-[#00e5ff] mb-2 border-b-2 border-[#00e5ff]/30 pb-1">▸ CHAOS MODE ACCESS</h3>
           <div className="space-y-1 text-[11px]">
             <div>1. Activate <span className="text-[#ff00ff]">Chaos Mode</span> (Shuffle button in navbar)</div>
-            <div>2. Enter key sequence: <span className="text-[#d4ff00]">↑ ↓ ← → ← ← ↑</span> (arrow keys only)</div>
+            <div>2. Enter sequence: <span className="text-[#d4ff00]">↑ ↓ ← → ← ← ↑</span></div>
+            <div className="pl-4 text-white/50">
+              📱 <span className="text-[#00e5ff]">Mobile:</span> Swipe gesture (up, down, left, right, left, left, up)
+            </div>
+            <div className="pl-4 text-white/50">
+              ⌨️ <span className="text-[#00e5ff]">Desktop:</span> Arrow keys on keyboard
+            </div>
             <div>3. God Mode unlocks → CHAOS MODE button appears</div>
-            <div>4. Click button → access member-only upload + management</div>
+            <div>4. Tap button → access member-only CRUD management</div>
+            <div>5. God Mode expires after 1hr 30min inactivity (auto-reset)</div>
           </div>
         </div>
       </div>

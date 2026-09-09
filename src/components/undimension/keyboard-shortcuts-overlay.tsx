@@ -17,7 +17,7 @@ const SHORTCUTS = [
   { keys: ["Shift", "Tab"], desc: "Navigasi fokus sebelumnya" },
   { keys: ["Enter"], desc: "Aktifkan elemen fokus" },
   { keys: ["←", "→"], desc: "Navigasi foto di lightbox" },
-  { keys: ["↑", "↓", "←", "→", "←", "←", "↑"], desc: "🔥 CHAOS MODE UNLOCKED" },
+  { keys: ["↑", "↓", "←", "→", "←", "←", "↑"], desc: "🔥 CHAOS MODE UNLOCKED (Desktop: arrow keys · Mobile: swipe gesture)" },
 ];
 
 export function KeyboardShortcutsOverlay({

@@ -84,7 +84,14 @@ export function useSfx(enabled: boolean = true) {
  * Konami code easter egg hook.
  * ↑ ↓ ← → ← ← ↑ (arrow keys only, 7 keys)
  * Triggers callback when the sequence is entered.
- * Must use Arrow keys on keyboard.
+ *
+ * Supports BOTH:
+ *   - Desktop: Arrow keys on keyboard
+ *   - Mobile: Swipe gestures (up/down/left/right)
+ *     Sequence: swipe up, down, left, right, left, left, up
+ *
+ * Mobile detection: uses touchstart/touchend events.
+ * Minimum swipe distance: 30px (to avoid accidental triggers).
  */
 export function useKonamiCode(onTrigger: () => void) {
   const seq = useRef<string[]>([]);
@@ -99,6 +106,7 @@ export function useKonamiCode(onTrigger: () => void) {
   ];
 
   useEffect(() => {
+    // ── Desktop: keyboard arrow keys ──
     const handler = (e: KeyboardEvent) => {
       const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
       seq.current.push(key);
@@ -114,6 +122,57 @@ export function useKonamiCode(onTrigger: () => void) {
       }
     };
     window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+
+    // ── Mobile: touch swipe gestures ──
+    let touchStartX = 0;
+    let touchStartY = 0;
+    const MIN_SWIPE = 30; // px — minimum distance to count as swipe
+
+    const onTouchStart = (e: TouchEvent) => {
+      const t = e.touches[0];
+      touchStartX = t.clientX;
+      touchStartY = t.clientY;
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      const t = e.changedTouches[0];
+      const dx = t.clientX - touchStartX;
+      const dy = t.clientY - touchStartY;
+      const absDx = Math.abs(dx);
+      const absDy = Math.abs(dy);
+
+      // Ignore if swipe too short
+      if (absDx < MIN_SWIPE && absDy < MIN_SWIPE) return;
+
+      let direction: string;
+      if (absDx > absDy) {
+        // Horizontal swipe
+        direction = dx > 0 ? "ArrowRight" : "ArrowLeft";
+      } else {
+        // Vertical swipe
+        direction = dy > 0 ? "ArrowDown" : "ArrowUp";
+      }
+
+      seq.current.push(direction);
+      if (seq.current.length > target.length) {
+        seq.current = seq.current.slice(-target.length);
+      }
+      if (
+        seq.current.length === target.length &&
+        target.every((k, i) => seq.current[i] === k)
+      ) {
+        onTrigger();
+        seq.current = [];
+      }
+    };
+
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
+
+    return () => {
+      window.removeEventListener("keydown", handler);
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchend", onTouchEnd);
+    };
   }, [onTrigger]);
 }
