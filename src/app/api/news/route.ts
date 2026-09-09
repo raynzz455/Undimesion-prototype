@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireChaosMode } from "@/lib/chaos-auth";
 import { db, isDbConfigured } from "@/lib/db";
 import { rateLimit, getClientIP, sanitizeText } from "@/lib/rate-limit";
 
@@ -86,4 +87,35 @@ export async function POST(req: NextRequest) {
     console.error("[POST /api/news]", e);
     return NextResponse.json({ error: "Gagal membuat artikel." }, { status: 500 });
   }
+}
+
+export async function PUT(req: NextRequest) {
+  const auth = await requireChaosMode();
+  if (!auth.authorized) return NextResponse.json({ error: "CHAOS MODE REQUIRED" }, { status: 403 });
+  try {
+    const body = await req.json();
+    const { id, title, body: text, category, author, img, pinned } = body as { id?: string; title?: string; body?: string; category?: string; author?: string; img?: string | null; pinned?: boolean };
+    if (!id) return NextResponse.json({ error: "ID wajib diisi." }, { status: 400 });
+    const data: Record<string, unknown> = {};
+    if (title !== undefined) data.title = sanitizeText(String(title)).slice(0, 80);
+    if (text !== undefined) data.body = sanitizeText(String(text)).slice(0, 500);
+    if (category !== undefined) data.category = String(category).trim().slice(0, 20).toUpperCase();
+    if (author !== undefined) data.author = String(author).trim().slice(0, 30).toUpperCase();
+    if (img !== undefined) data.img = img ? String(img).slice(0, 500) : null;
+    if (pinned !== undefined) data.pinned = Boolean(pinned);
+    const updated = await db.newsArticle.update({ where: { id }, data });
+    return NextResponse.json({ id: updated.id, title: updated.title, body: updated.body, category: updated.category, author: updated.author, img: updated.img, pinned: updated.pinned, createdAt: updated.createdAt.toISOString() });
+  } catch (e) { return NextResponse.json({ error: "Gagal update artikel." }, { status: 500 }); }
+}
+
+export async function DELETE(req: NextRequest) {
+  const auth = await requireChaosMode();
+  if (!auth.authorized) return NextResponse.json({ error: "CHAOS MODE REQUIRED" }, { status: 403 });
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+    if (!id) return NextResponse.json({ error: "ID wajib diisi via ?id=" }, { status: 400 });
+    await db.newsArticle.delete({ where: { id } });
+    return NextResponse.json({ success: true, id, message: "Artikel dihapus." });
+  } catch (e) { return NextResponse.json({ error: "Gagal menghapus artikel." }, { status: 500 }); }
 }
