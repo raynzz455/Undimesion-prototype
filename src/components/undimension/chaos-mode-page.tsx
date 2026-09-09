@@ -868,6 +868,8 @@ function AchievementsTab() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [uploadingFor, setUploadingFor] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const achievements = data?.achievements ?? [];
 
   const handleCreate = async () => {
@@ -882,10 +884,35 @@ function AchievementsTab() {
   };
 
   const handleDelete = async (id: string, title: string) => {
-    if (!confirm(`Hapus "${title}"?`)) return;
+    if (!confirm(`Hapus "${title}"? Semua foto juga akan dihapus.`)) return;
     setDeletingId(id);
     try { const res = await chaosFetch(`/api/achievements?id=${id}`, { method: "DELETE" }); if (!res.ok) throw new Error("Gagal"); setSuccess("✓ Dihapus."); refetch(); play("close"); setTimeout(() => setSuccess(null), 3000); }
     catch (e) { setError(e instanceof Error ? e.message : "Gagal"); } finally { setDeletingId(null); }
+  };
+
+  const handleUploadImage = async (achievementId: string, file: File) => {
+    setUploadingFor(achievementId);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("achievementId", achievementId);
+      const res = await chaosFetch("/api/achievements/upload", { method: "POST", body: form });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || "Upload gagal");
+      setSuccess(`✓ Foto uploaded!`); refetch(); play("submit");
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (e) { setError(e instanceof Error ? e.message : "Upload gagal"); }
+    finally { setUploadingFor(null); }
+  };
+
+  const handleDeleteImage = async (imageId: string) => {
+    if (!confirm("Hapus foto ini?")) return;
+    try {
+      const res = await chaosFetch(`/api/achievements/upload?id=${imageId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Gagal");
+      setSuccess("✓ Foto dihapus."); refetch(); play("close");
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
   };
 
   return (
@@ -909,16 +936,66 @@ function AchievementsTab() {
           <h3 className="font-bebas text-2xl text-[#00e5ff] flex items-center gap-2"><Award className="w-5 h-5" /> ACHIEVEMENTS ({achievements.length})</h3>
           <button onClick={() => { play("click"); refetch(); }} className="font-mono-ud text-xs font-black bg-[#00e5ff] text-black px-3 py-1 border-2 border-[#00e5ff] hover:bg-transparent hover:text-[#00e5ff] transition-colors no-color-transition">↻</button>
         </div>
-        <div className="space-y-2 max-h-[500px] overflow-y-auto">
-          {achievements.length === 0 && <div className="text-center py-8 font-mono-ud text-xs text-white/40">No achievements.</div>}
+        <div className="space-y-2 max-h-[600px] overflow-y-auto">
+          {achievements.length === 0 && <div className="text-center py-8 font-mono-ud text-xs text-white/40">No achievements yet.</div>}
           {achievements.map((a) => (
-            <div key={a.id} className="border-2 border-[#00e5ff]/30 p-3 bg-black/50 flex items-start justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1"><span className="font-mono-ud text-[9px] text-[#d4ff00]">{a.year}</span><span className="font-mono-ud text-[9px] text-white/40">{a.memberId.toUpperCase()}</span></div>
-                <div className="font-bebas text-lg text-white truncate">{a.title}</div>
-                <div className="font-mono-ud text-[10px] text-white/50 line-clamp-2">{a.description}</div>
+            <div key={a.id} className="border-2 border-[#00e5ff]/30 p-3 bg-black/50">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setExpandedId(expandedId === a.id ? null : a.id)}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-mono-ud text-[9px] text-[#d4ff00]">{a.year}</span>
+                    <span className="font-mono-ud text-[9px] text-white/40">{a.memberId.toUpperCase()}</span>
+                    {a.images && a.images.length > 0 && <span className="font-mono-ud text-[9px] text-[#00e5ff]">📷 {a.images.length}</span>}
+                    <span className="font-mono-ud text-[9px] text-white/30">{expandedId === a.id ? "▼" : "▶"}</span>
+                  </div>
+                  <div className="font-bebas text-lg text-white truncate">{a.title}</div>
+                  <div className="font-mono-ud text-[10px] text-white/50 line-clamp-2">{a.description}</div>
+                </div>
+                <button onClick={() => handleDelete(a.id, a.title)} disabled={deletingId === a.id} className="p-2.5 border-2 border-white/30 hover:border-[#ff4d4d] hover:bg-[#ff4d4d]/10 transition-colors no-color-transition disabled:opacity-50 min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0" title="Delete">{deletingId === a.id ? <Loader2 className="w-5 h-5 animate-spin text-[#ff4d4d]" /> : <Trash2 className="w-5 h-5 text-[#ff4d4d]" />}</button>
               </div>
-              <button onClick={() => handleDelete(a.id, a.title)} disabled={deletingId === a.id} className="p-2.5 border-2 border-white/30 hover:border-[#ff4d4d] hover:bg-[#ff4d4d]/10 transition-colors no-color-transition disabled:opacity-50 min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0" title="Delete">{deletingId === a.id ? <Loader2 className="w-5 h-5 animate-spin text-[#ff4d4d]" /> : <Trash2 className="w-5 h-5 text-[#ff4d4d]" />}</button>
+              {/* Expanded: photo upload + image gallery */}
+              {expandedId === a.id && (
+                <div className="mt-3 pt-3 border-t-2 border-[#00e5ff]/20 space-y-3">
+                  {/* Upload button */}
+                  <label className="block">
+                    <span className="font-mono-ud text-[10px] font-bold text-[#d4ff00] tracking-wider">UPLOAD FOTO (sertifikat, medali, dll — max 4MB)</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) handleUploadImage(a.id, f);
+                      }}
+                      disabled={uploadingFor === a.id}
+                      className="block w-full mt-1 text-xs font-mono-ud text-white file:mr-3 file:py-2 file:px-4 file:border-2 file:border-[#d4ff00] file:bg-[#d4ff00] file:text-black file:font-bold file:cursor-pointer file:hover:bg-[#ff00ff] file:hover:text-white disabled:opacity-50"
+                    />
+                  </label>
+                  {uploadingFor === a.id && <div className="font-mono-ud text-[10px] text-[#d4ff00] flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Uploading...</div>}
+                  {/* Image gallery */}
+                  {a.images && a.images.length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                      {a.images.map((img, i) => (
+                        <div key={i} className="relative group border-2 border-[#00e5ff]/30 overflow-hidden">
+                          <img src={img} alt={`${a.title} ${i + 1}`} className="w-full aspect-square object-cover" loading="lazy" />
+                          <button
+                            onClick={() => {
+                              // Find image ID — we need to refetch to get IDs
+                              // For now, use index-based approach
+                              handleDeleteImageByIndex(a.id, i);
+                            }}
+                            className="absolute top-1 right-1 bg-[#ff4d4d] text-white p-1.5 border border-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#ff0000]"
+                            title="Delete photo"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="font-mono-ud text-[10px] text-white/30 text-center py-2">Belum ada foto. Upload sertifikat/medali di atas.</div>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>
