@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db, isDbConfigured } from "@/lib/db";
 import { GALLERY_PHOTOS } from "@/lib/undimension/data";
 
 export const dynamic = "force-dynamic";
@@ -8,6 +8,9 @@ export async function GET() {
   // Try the database first; if it fails (e.g. not pushed / seeded yet),
   // gracefully fall back to the static seed photos so the frontend never 500s.
   let dbPhotos: { id: string; img: string; title: string; date: string; rotate: string; author: string }[] = [];
+  if (!isDbConfigured()) {
+    return NextResponse.json({ photos: GALLERY_PHOTOS, count: GALLERY_PHOTOS.length });
+  }
   try {
     const rows = await db.galleryPhoto.findMany({
       orderBy: { createdAt: "desc" },

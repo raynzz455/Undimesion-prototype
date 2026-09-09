@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db, isDbConfigured } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   // Try the database; if it fails (e.g. not pushed / seeded yet),
   // return an empty list so the frontend never 500s.
+  if (!isDbConfigured()) {
+    return NextResponse.json({ articles: [], count: 0 });
+  }
   try {
     const articles = await db.newsArticle.findMany({
       orderBy: [{ pinned: "desc" }, { createdAt: "desc" }],
@@ -32,6 +35,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  if (!isDbConfigured()) {
+    return NextResponse.json({ articles: [], count: 0 });
+  }
   try {
     const body = await req.json();
     const title = String(body.title || "").trim().slice(0, 80);

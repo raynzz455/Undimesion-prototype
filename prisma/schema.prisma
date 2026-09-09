@@ -1,6 +1,5 @@
-// UNDIMENSION — Prisma Schema (Complete — 15 tables)
+// UNDIMENSION — Prisma Schema (Complete — 16 tables)
 // Uses Supabase PostgreSQL for both local dev and production.
-// Same database, same data — no more SQLite/PostgreSQL split.
 
 generator client {
   provider = "prisma-client-js"
@@ -12,7 +11,7 @@ datasource db {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// ABOUT PAGE TABLES (3)
+// ABOUT PAGE TABLES (4)
 // ═══════════════════════════════════════════════════════════════════════════
 
 model Member {
@@ -25,26 +24,38 @@ model Member {
   color           String
   highlight       String
   bio             String
-  statsJson       String   @default("[]")       // D&D 6-stat: [{label,value}]
-  socialsJson     String   @default("[]")       // [{label,href}]
-  // Portfolio CV fields
-  taglineCareer   String   @default("")         // "Full-Stack Developer"
-  location        String   @default("")         // "Jakarta, ID"
-  availability    String   @default("EMPLOYED") // EMPLOYED, OPEN TO WORK, FREELANCE
-  educationJson   String   @default("[]")       // [{school,degree,period,description}]
-  workHistoryJson String   @default("[]")       // [{company,role,period,description,current}]
-  skillsJson      String   @default("[]")       // [{name,level,category}]
-  // Meta
+  tagline         String   @default("")
+  quote           String   @default("")
+  funFactsJson    String   @default("[]")
+  element         String   @default("")
+  joinYear        String   @default("2020")
+  statsJson       String   @default("[]")
+  socialsJson     String   @default("[]")
+  taglineCareer   String   @default("")
+  location        String   @default("")
+  availability    String   @default("EMPLOYED")
+  educationJson   String   @default("[]")
+  workHistoryJson String   @default("[]")
+  skillsJson      String   @default("[]")
   order           Int      @default(0)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  // Relations
   dndCharacters       DnDCharacter[]
   portfolioProjects   PortfolioProject[]
   achievements        Achievement[]
   gamePlayerStats     GamePlayerStat[]
   gameCompatibilities GameCompatibility[]
+
+  @@index([order])
+}
+
+model Quote {
+  id        String   @id @default(cuid())
+  text      String
+  author    String   @default("THE COLLECTIVE")
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
 
   @@index([order])
 }

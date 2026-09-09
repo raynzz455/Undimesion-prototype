@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db, isDbConfigured } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +17,9 @@ const COLORS = [
 export async function GET() {
   // Try the database; if it fails (e.g. not pushed / seeded yet),
   // return an empty list so the frontend never 500s.
+  if (!isDbConfigured()) {
+    return NextResponse.json({ entries: [], count: 0 });
+  }
   try {
     const entries = await db.guestbookEntry.findMany({
       where: { approved: true },
@@ -41,6 +44,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  if (!isDbConfigured()) {
+    return NextResponse.json({ entries: [], count: 0 });
+  }
   try {
     const body = await req.json();
     const name = String(body.name || "").trim().slice(0, 40);

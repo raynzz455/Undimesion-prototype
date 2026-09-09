@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db, isDbConfigured } from "@/lib/db";
 import { MEMBERS } from "@/lib/undimension/data";
 
 export const dynamic = "force-dynamic";
@@ -7,6 +7,9 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   // Try the database; if it fails (e.g. not pushed / seeded yet),
   // fall back to the static seed members so the frontend never 500s.
+  if (!isDbConfigured()) {
+    return NextResponse.json({ members: MEMBERS });
+  }
   try {
     const members = await db.member.findMany({
       orderBy: { order: "asc" },
