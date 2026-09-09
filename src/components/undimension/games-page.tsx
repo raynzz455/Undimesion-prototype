@@ -196,7 +196,10 @@ function GameSectionView({ game }: { game: GameSection }) {
 
 export function GamesPage() {
   return (
-    <div className="page-enter flex flex-col bg-[#09090b] text-black dark:text-white relative">
+    // Page bg is always dark (cinematic game carousel look). Text must be
+    // white in BOTH themes — `text-black dark:text-white` would render black
+    // text on dark bg in light mode = unreadable. Hardcode to `text-white`.
+    <div className="page-enter flex flex-col bg-[#09090b] text-white relative">
       <StarField variant="dark" className="fixed z-[1]" sparkles={false} />
       {GAMES.map((game, i) => (
         <div key={game.id}>

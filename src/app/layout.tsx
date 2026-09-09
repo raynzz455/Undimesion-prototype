@@ -41,12 +41,19 @@ const chakra = Chakra_Petch({
   display: "swap",
 });
 
-// Vercel automatically sets VERCEL_URL for each deployment.
-// Use it for metadataBase so OG image URLs resolve correctly
-// regardless of which domain serves the page (production, preview, custom domain).
+// Vercel automatically sets VERCEL_URL for each deployment (e.g. "undimension.vercel.app"
+// or "undimension-abc123-vercel.app"). We build an absolute https:// URL from it so
+// OG image URLs resolve correctly when scraped by social platforms (Facebook, Twitter,
+// WhatsApp, Discord, etc.) which require ABSOLUTE URLs — relative "/og-image.png" won't work.
+//
+// Priority: VERCEL_URL → NEXT_PUBLIC_SITE_URL (custom domain) → fallback to the
+// production domain so metadata is always valid even in `next build` without env.
 const siteUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : process.env.NEXT_PUBLIC_SITE_URL || "https://undimension.vercel.app";
+
+// Absolute OG image URL — social scrapers need this to be a full https:// URL.
+const ogImageUrl = `${siteUrl}/og-image.png`;
 
 export const metadata: Metadata = {
   title: "UNDIMENSION — Circle Beyond Space & Time",
@@ -70,7 +77,7 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/logo.svg",
-    apple: "/og-image.png",
+    apple: ogImageUrl,
   },
   openGraph: {
     title: "UNDIMENSION — Circle Beyond Space & Time",
@@ -80,7 +87,7 @@ export const metadata: Metadata = {
     siteName: "UNDIMENSION",
     images: [
       {
-        url: "/og-image.png",
+        url: ogImageUrl,
         width: 1344,
         height: 768,
         alt: "UNDIMENSION — Circle Beyond Space & Time",
@@ -95,7 +102,7 @@ export const metadata: Metadata = {
     title: "UNDIMENSION — Circle Beyond Space & Time",
     description:
       "Sebuah circle teman lama yang tak terikat ruang maupun waktu. Est. 2020.",
-    images: ["/og-image.png"],
+    images: [ogImageUrl],
     creator: "@undimension",
   },
   robots: {

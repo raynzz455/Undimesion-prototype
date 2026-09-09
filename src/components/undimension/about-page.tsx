@@ -52,7 +52,7 @@ function HeroSection() {
           </p>
         </div>
         <div className="flex-1 w-full relative">
-          <div className="border-4 border-black dark:border-white bg-black dark:bg-[#111] p-8 shadow-[12px_12px_0_#000] dark:shadow-[12px_12px_0_#ff4d4d] rotate-2 text-white no-color-transition hover:rotate-0 hover:scale-105 transition-transform ud-glow ud-grad-border ud-corners text-[#d4ff00]">
+          <div className="border-4 border-black dark:border-white bg-black dark:bg-[#111] p-8 shadow-[12px_12px_0_#000] dark:shadow-[12px_12px_0_#ff4d4d] rotate-2 text-white no-color-transition hover:rotate-0 hover:scale-[1.02] transition-transform duration-300 ease-out ud-glow ud-grad-border ud-corners text-[#d4ff00]">
             <StarGraphic className="w-12 h-12 text-[#d4ff00] mb-6 animate-spin-slow" />
             <h2 className="font-bebas text-6xl mb-4">THE MISSION</h2>
             <p className="font-mono-ud text-lg mb-6 leading-relaxed">
@@ -116,27 +116,34 @@ function MemberCard({ m, i, onOpen }: { m: Member; i: number; onOpen: () => void
           isEven ? "md:flex-row" : "md:flex-row-reverse",
         )}
       >
-        {/* Image Container — bigger on desktop */}
+        {/* Image Container — bigger on desktop, with extra top padding on
+            mobile so the tape sticker (positioned -top-8) has room to breathe
+            without being clipped by the card's rotated bounds. */}
         <div
           className={cn(
-            "w-full md:w-[50%] lg:w-[48%] relative transition-transform duration-300 z-30 group-hover:rotate-0 px-2 md:px-6",
+            "w-full md:w-[50%] lg:w-[48%] relative transition-transform duration-300 ease-out z-30 group-hover:rotate-0 px-2 md:px-6 pt-12 md:pt-10",
             isEven
               ? "rotate-6 md:-translate-x-4 md:-translate-y-12"
               : "-rotate-6 md:translate-x-4 md:-translate-y-12",
           )}
         >
           <div className="border-8 border-black dark:border-white bg-black p-3 shadow-[16px_16px_0_#000] dark:shadow-[16px_16px_0_#fff]">
-            <div className="relative overflow-hidden group-hover:scale-[1.02] transition-transform cursor-pointer" onClick={onOpen} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") onOpen(); }}>
+            <div className="relative overflow-hidden group-hover:scale-[1.02] transition-transform duration-300 ease-out cursor-pointer" onClick={onOpen} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") onOpen(); }}>
               <img
                 src={m.img}
                 alt={m.nick}
-                className="w-full aspect-[4/5] object-cover grayscale contrast-[1.4] group-hover:grayscale-0 transition-all duration-300 ud-wobble-hover"
+                // Mobile keeps 4:5 portrait (compact for stacked layout).
+                // Desktop uses 9:16 (true portrait) — better for vertical
+                // member photos that were getting cropped too short.
+                className="w-full aspect-[4/5] md:aspect-[9/16] object-cover grayscale contrast-[1.4] group-hover:grayscale-0 transition-all duration-300 ud-wobble-hover"
                 loading="lazy"
               />
               <div className="absolute inset-0 ud-scanlines pointer-events-none" />
             </div>
-            {/* Tape Sticker */}
-            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#ffea00] border-4 border-black px-10 py-3 font-mono-ud font-black text-black text-3xl md:text-4xl shadow-[6px_6px_0_#000] -rotate-3 z-40 whitespace-nowrap">
+            {/* Tape Sticker — compact on mobile (smaller text + tighter
+                padding) so the nickname isn't clipped by the card edges.
+                whitespace-nowrap prevents wrapping for long nicknames. */}
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#ffea00] border-4 border-black px-4 py-1.5 md:px-10 md:py-3 font-mono-ud font-black text-black text-xl md:text-4xl shadow-[6px_6px_0_#000] -rotate-3 z-40 whitespace-nowrap">
               &ldquo;{m.nick.toUpperCase()}&rdquo;
             </div>
             <div className="absolute -bottom-6 right-0 bg-white border-4 border-black px-4 py-2 font-bebas text-3xl shadow-[4px_4px_0_#000] rotate-6 z-40">
@@ -275,7 +282,7 @@ function TheCollective({ onOpenMember, lastOpenedIdRef }: { onOpenMember: (m: Me
 
 function HarapanCardItem({ card }: { card: (typeof HARAPAN)[number] }) {
   return (
-    <div className={cn("relative transform hover:rotate-0 hover:scale-105 hover:z-50 transition-all duration-300 group ud-tilt ud-reveal ud-tape", card.rotate)}>
+    <div className={cn("relative transform hover:rotate-0 hover:scale-[1.02] hover:z-50 transition-transform duration-300 ease-out group ud-tilt ud-reveal ud-tape", card.rotate)}>
       <div className={cn("border-8 border-black relative", card.bg, card.shadow)}>
         {/* Circular stamp decoration */}
         <div className="ud-stamp-circle absolute -top-3 -left-3 z-20 text-[#ff4d4d] hidden md:flex">
@@ -416,11 +423,12 @@ export function AboutPage() {
       <HarapanSection />
       <ManifestoSection />
       <CosmicStarMap />
+      {/* Two-up: QuoteWidget (always dark) + ChaosDice (always dark). */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 border-t-8 border-black dark:border-white">
         <div className="border-b-4 lg:border-b-0 lg:border-r-4 border-black dark:border-white">
           <QuoteWidget />
         </div>
-        <div className="bg-[#09090b] dark:bg-white p-6 md:p-12 flex items-center justify-center">
+        <div className="bg-[#09090b] p-6 md:p-12 flex items-center justify-center">
           <ChaosDice />
         </div>
       </div>

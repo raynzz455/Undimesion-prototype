@@ -14,7 +14,16 @@ export async function GET(req: NextRequest) {
       orderBy: [{ year: "desc" }, { createdAt: "desc" }],
       include: { images: true },
     });
-    const achievements = rows.map((a) => ({ id: a.id, memberId: a.memberId, title: a.title, year: a.year, description: a.description, images: a.images.map((img) => img.img) }));
+    // Return image objects with both id (for delete) and img (URL for display)
+    // so the frontend can wire up per-image delete without extra round-trips.
+    const achievements = rows.map((a) => ({
+      id: a.id,
+      memberId: a.memberId,
+      title: a.title,
+      year: a.year,
+      description: a.description,
+      images: a.images.map((img) => ({ id: img.id, img: img.img })),
+    }));
     return NextResponse.json({ achievements, count: achievements.length });
   } catch (e) { return NextResponse.json({ achievements: [], count: 0 }); }
 }

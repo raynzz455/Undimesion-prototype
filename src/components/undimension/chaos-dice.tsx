@@ -64,15 +64,18 @@ export function ChaosDice() {
   }, [play, result]);
 
   return (
-    <div className="relative border-4 border-black dark:border-white bg-[#09090b] dark:bg-white p-6 shadow-[6px_6px_0_#000] dark:shadow-[6px_6px_0_#fff] ud-corners text-[#d4ff00] dark:text-black">
-      <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-white/20 dark:border-black/20">
+    // Always dark — pairs with the always-dark wrapper section in about-page.
+    // Previously inverted to white in dark mode which made the card blend with
+    // its wrapper. Now consistent dark card with white text in both themes.
+    <div className="relative border-4 border-white bg-[#09090b] p-6 shadow-[6px_6px_0_#fff] ud-corners text-[#d4ff00]">
+      <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-white/20">
         <Dices className="w-6 h-6 animate-spin-slow" />
-        <h3 className="font-bebas text-3xl text-white dark:text-black tracking-widest">
+        <h3 className="font-bebas text-3xl text-white tracking-widest">
           CHAOS DICE
         </h3>
       </div>
 
-      <p className="font-mono-ud text-xs text-white/60 dark:text-black/60 mb-4 tracking-wider">
+      <p className="font-mono-ud text-xs text-white/60 mb-4 tracking-wider">
         ▸ Lempar dadu untuk dapat entitas + misi acak
       </p>
 
@@ -91,7 +94,7 @@ export function ChaosDice() {
               {/* Member */}
               <div className="flex items-center gap-2">
                 <span
-                  className="w-4 h-4 border-2 border-black dark:border-white flex-shrink-0"
+                  className="w-4 h-4 border-2 border-white flex-shrink-0"
                   style={{ backgroundColor: MEMBER_COLORS[result.member.id] }}
                 />
                 <span
@@ -100,13 +103,13 @@ export function ChaosDice() {
                 >
                   {result.member.nick.toUpperCase()}
                 </span>
-                <span className="font-mono-ud text-[10px] text-white/50 dark:text-black/50">
+                <span className="font-mono-ud text-[10px] text-white/50">
                   {result.member.role}
                 </span>
               </div>
               {/* Activity */}
-              <div className="bg-black dark:bg-white p-3 border-2 border-white/30 dark:border-black/30">
-                <p className="font-mono-ud text-sm text-[#d4ff00] dark:text-black">
+              <div className="bg-black p-3 border-2 border-white/30">
+                <p className="font-mono-ud text-sm text-[#d4ff00]">
                   <Sparkles className="w-3 h-3 inline mr-1" />
                   MISI: {result.activity}
                 </p>
@@ -116,9 +119,9 @@ export function ChaosDice() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="flex items-center justify-center h-[120px] border-2 border-dashed border-white/20 dark:border-black/20"
+              className="flex items-center justify-center h-[120px] border-2 border-dashed border-white/20"
             >
-              <p className="font-mono-ud text-xs text-white/40 dark:text-black/40 tracking-[0.2em] uppercase">
+              <p className="font-mono-ud text-xs text-white/40 tracking-[0.2em] uppercase">
                 ▸ belum dilempar
               </p>
             </motion.div>
@@ -131,9 +134,9 @@ export function ChaosDice() {
         onClick={roll}
         disabled={rolling}
         className={cn(
-          "w-full font-bebas text-2xl py-3 border-4 border-white dark:border-black flex items-center justify-center gap-2 transition-all no-color-transition",
+          "w-full font-bebas text-2xl py-3 border-4 border-white flex items-center justify-center gap-2 transition-all no-color-transition",
           rolling
-            ? "bg-white/10 dark:bg-black/10 text-white/50 dark:text-black/50 cursor-wait"
+            ? "bg-white/10 text-white/50 cursor-wait"
             : "bg-[#ff00ff] text-white hover:-translate-y-1 hover:bg-[#d4ff00] hover:text-black",
         )}
       >
@@ -149,7 +152,7 @@ export function ChaosDice() {
       </button>
 
       {result && !rolling && (
-        <p className="font-mono-ud text-[10px] text-white/40 dark:text-black/40 mt-2 text-center tracking-[0.15em] uppercase">
+        <p className="font-mono-ud text-[10px] text-white/40 mt-2 text-center tracking-[0.15em] uppercase">
           ▸ {MEMBERS.length} entitas × {ACTIVITIES.length} misi = {MEMBERS.length * ACTIVITIES.length} kombinasi
         </p>
       )}

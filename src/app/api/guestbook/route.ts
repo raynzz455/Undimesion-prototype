@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, isDbConfigured } from "@/lib/db";
+import { rateLimit, getClientIP, sanitizeText } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -44,13 +45,24 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  // Rate-limit public submissions to prevent spam.
+  const ip = getClientIP(req);
+  const { allowed, retryAfter } = rateLimit(ip);
+  if (!allowed) {
+    return NextResponse.json(
+      { error: `Rate limit tercapai. Coba lagi dalam ${retryAfter} detik.` },
+      { status: 429, headers: { "Retry-After": String(retryAfter) } },
+    );
+  }
+
   if (!isDbConfigured()) {
     return NextResponse.json({ entries: [], count: 0 });
   }
   try {
     const body = await req.json();
-    const name = String(body.name || "").trim().slice(0, 40);
-    const message = String(body.message || "").trim().slice(0, 280);
+    // Sanitize input: strip HTML tags / event handlers to prevent stored XSS.
+    const name = sanitizeText(String(body.name || "")).slice(0, 40);
+    const message = sanitizeText(String(body.message || "")).slice(0, 280);
 
     if (!name || !message) {
       return NextResponse.json(

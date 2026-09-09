@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, isDbConfigured } from "@/lib/db";
+import { rateLimit, getClientIP, sanitizeText } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -35,15 +36,32 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  // Rate-limit public submissions to prevent spam.
+  // (News POST is unauthenticated in the public form — chaos-mode POST
+  // would bypass this, but the public NewsPortal form needs protection.)
+  const ip = getClientIP(req);
+  const { allowed, retryAfter } = rateLimit(ip);
+  if (!allowed) {
+    return NextResponse.json(
+      { error: `Rate limit tercapai. Coba lagi dalam ${retryAfter} detik.` },
+      { status: 429, headers: { "Retry-After": String(retryAfter) } },
+    );
+  }
+
   if (!isDbConfigured()) {
     return NextResponse.json({ articles: [], count: 0 });
   }
   try {
     const body = await req.json();
-    const title = String(body.title || "").trim().slice(0, 80);
-    const text = String(body.body || "").trim().slice(0, 500);
-    const category = String(body.category || "UPDATE").trim().slice(0, 20).toUpperCase();
-    const author = String(body.author || "THE COLLECTIVE").trim().slice(0, 30).toUpperCase();
+    // Sanitize input: strip HTML tags / event handlers to prevent stored XSS.
+    const title = sanitizeText(String(body.title || "")).slice(0, 80);
+    const text = sanitizeText(String(body.body || "")).slice(0, 500);
+    const category = sanitizeText(String(body.category || "UPDATE"))
+      .slice(0, 20)
+      .toUpperCase();
+    const author = sanitizeText(String(body.author || "THE COLLECTIVE"))
+      .slice(0, 30)
+      .toUpperCase();
     const img = body.img ? String(body.img).slice(0, 500) : null;
 
     if (!title || !text) {

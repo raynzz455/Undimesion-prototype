@@ -41,13 +41,17 @@ export function QuoteWidget() {
   const q = RANDOM_QUOTES[idx];
 
   return (
-    <div className="relative bg-black dark:bg-white py-16 px-6 md:px-12 border-y-8 border-white dark:border-black overflow-hidden">
+    // Section is ALWAYS dark (intentional contrast block between light sections).
+    // Previously this inverted to white in dark mode, which created a confusing
+    // mix of light/dark sections when the rest of the page was dark. Now it's
+    // a consistent dark band in both themes — text is always white-on-black.
+    <div className="relative bg-black py-16 px-6 md:px-12 border-y-8 border-white overflow-hidden">
       {/* Background scanlines */}
       <div className="absolute inset-0 ud-scanlines opacity-20 pointer-events-none" />
 
       <div className="max-w-4xl mx-auto relative z-10">
         <div className="text-center mb-6">
-          <span className="inline-flex items-center gap-2 font-mono-ud text-xs font-black tracking-[0.3em] uppercase text-[#d4ff00] dark:text-black bg-white/5 dark:bg-black/5 px-3 py-1 border border-[#d4ff00] dark:border-black">
+          <span className="inline-flex items-center gap-2 font-mono-ud text-xs font-black tracking-[0.3em] uppercase text-[#d4ff00] bg-white/5 px-3 py-1 border border-[#d4ff00]">
             <QuoteIcon className="w-3 h-3" />
             TRANSMISSION FROM THE COLLECTIVE
           </span>
@@ -72,10 +76,10 @@ export function QuoteWidget() {
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
               className="text-center"
             >
-              <p className="font-bebas text-3xl md:text-5xl lg:text-6xl text-white dark:text-black leading-tight uppercase mb-3">
+              <p className="font-bebas text-3xl md:text-5xl lg:text-6xl text-white leading-tight uppercase mb-3">
                 &ldquo;{q.text}&rdquo;
               </p>
-              <footer className="font-mono-ud text-sm font-black tracking-[0.3em] text-[#00e5ff] dark:text-[#ff4d4d]">
+              <footer className="font-mono-ud text-sm font-black tracking-[0.3em] text-[#00e5ff]">
                 — {q.author}
               </footer>
             </motion.blockquote>
@@ -90,16 +94,16 @@ export function QuoteWidget() {
               onClick={() => setIdx(i)}
               aria-label={`Quote ${i + 1}`}
               className={cn(
-                "h-2 border border-white dark:border-black transition-all",
+                "h-2 border border-white transition-all",
                 i === idx
                   ? "w-8 bg-[#d4ff00]"
-                  : "w-2 bg-white/20 dark:bg-black/20 hover:bg-white/40 dark:hover:bg-black/40",
+                  : "w-2 bg-white/20 hover:bg-white/40",
               )}
             />
           ))}
           <button
             onClick={next}
-            className="ml-3 w-8 h-8 flex items-center justify-center bg-[#ff4d4d] text-white border-2 border-white dark:border-black hover:rotate-180 transition-transform no-color-transition"
+            className="ml-3 w-8 h-8 flex items-center justify-center bg-[#ff4d4d] text-white border-2 border-white hover:rotate-180 transition-transform no-color-transition"
             aria-label="Shuffle quote"
           >
             <Shuffle className="w-4 h-4" />
@@ -107,7 +111,7 @@ export function QuoteWidget() {
         </div>
 
         {/* Hint */}
-        <p className="font-mono-ud text-[10px] text-white/40 dark:text-black/40 text-center mt-3 tracking-[0.2em] uppercase">
+        <p className="font-mono-ud text-[10px] text-white/40 text-center mt-3 tracking-[0.2em] uppercase">
           {paused ? "‖ PAUSED — CLICK TO RESUME" : "› HOVER TO PAUSE · CLICK TO SHUFFLE"}
         </p>
       </div>

@@ -19,7 +19,7 @@ export function ManifestoSection() {
 
   return (
     <section
-      className="relative bg-black dark:bg-white py-24 px-6 md:px-12 border-y-8 border-white dark:border-black overflow-hidden"
+      className="relative bg-black py-24 px-6 md:px-12 border-y-8 border-white overflow-hidden"
       aria-labelledby="ud-manifesto-title"
     >
       {/* Scanlines for CRT feel */}
@@ -27,7 +27,7 @@ export function ManifestoSection() {
 
       {/* Background giant word */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-        <span className="font-bebas text-[200px] md:text-[400px] text-white/[0.04] dark:text-black/[0.04] whitespace-nowrap leading-none">
+        <span className="font-bebas text-[200px] md:text-[400px] text-white/[0.04] whitespace-nowrap leading-none">
           CREED
         </span>
       </div>
@@ -35,12 +35,12 @@ export function ManifestoSection() {
       <div className="max-w-5xl mx-auto relative z-10">
         {/* Header */}
         <div className="mb-12 text-center">
-          <div className="inline-block bg-white text-black dark:bg-black dark:text-white font-mono-ud text-xs font-black px-3 py-1 border-4 border-white dark:border-black mb-4 -rotate-1">
+          <div className="inline-block bg-white text-black font-mono-ud text-xs font-black px-3 py-1 border-4 border-white mb-4 -rotate-1">
             § 06 — THE CREED
           </div>
           <h2
             id="ud-manifesto-title"
-            className="font-bebas text-6xl md:text-[120px] leading-none uppercase text-white dark:text-black ud-glitch-hover cursor-pointer"
+            className="font-bebas text-6xl md:text-[120px] leading-none uppercase text-white ud-glitch-hover cursor-pointer"
             data-text="MANIFESTO"
             style={{ textShadow: "4px 4px 0px #ff4d4d, 8px 8px 0px #00e5ff" }}
           >
@@ -62,7 +62,7 @@ export function ManifestoSection() {
               }`}
             >
               <span
-                className={line.accent ? "inline-block px-2" : "text-white/80 dark:text-black/80"}
+                className={line.accent ? "inline-block px-2" : "text-white/80"}
                 style={
                   line.accent
                     ? {
@@ -85,9 +85,9 @@ export function ManifestoSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.4, duration: 0.5 }}
-          className="mt-12 flex flex-col md:flex-row items-center justify-between gap-4 border-t-4 border-white dark:border-black pt-6"
+          className="mt-12 flex flex-col md:flex-row items-center justify-between gap-4 border-t-4 border-white pt-6"
         >
-          <p className="font-mono-ud text-sm text-white/60 dark:text-black/60 tracking-[0.2em] uppercase">
+          <p className="font-mono-ud text-sm text-white/60 tracking-[0.2em] uppercase">
             — Signed, the Collective · Est. 2020
           </p>
           <div className="flex items-center gap-2">
@@ -96,7 +96,7 @@ export function ManifestoSection() {
                 key={idx}
                 whileHover={{ scale: 1.4, rotate: 90 }}
                 onHoverStart={() => play("hover")}
-                className="w-6 h-6 border-2 border-white dark:border-black cursor-pointer"
+                className="w-6 h-6 border-2 border-white cursor-pointer"
                 style={{ backgroundColor: c }}
               />
             ))}

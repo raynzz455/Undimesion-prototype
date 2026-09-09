@@ -117,11 +117,13 @@ export function NavBar({
         </button>
         <button
           onClick={() => setTheme(isDark ? "light" : "dark")}
-          className="hidden md:flex items-center justify-center px-6 border-l-4 border-black dark:border-white bg-[#00e5ff] text-black hover:bg-black hover:text-[#00e5ff] transition-colors"
-          aria-label="Toggle theme"
+          className="hidden md:flex items-center justify-center gap-2 px-4 border-l-4 border-black dark:border-white bg-[#00e5ff] text-black hover:bg-black hover:text-[#00e5ff] transition-colors"
+          aria-label={`Switch to ${isDark ? "light" : "dark"} theme (current: ${isDark ? "dark" : "light"})`}
+          title={`Current theme: ${isDark ? "DARK" : "LIGHT"} — click to switch to ${isDark ? "LIGHT" : "DARK"}`}
         >
-          <span className="font-mono font-black uppercase tracking-widest text-lg">
-            [{isDark ? "LIGHT" : "DARK"}]
+          {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          <span className="font-mono font-black uppercase tracking-widest text-sm">
+            → {isDark ? "LIGHT" : "DARK"}
           </span>
         </button>
       </div>

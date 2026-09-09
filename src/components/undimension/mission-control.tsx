@@ -68,7 +68,9 @@ function StatCell({
       initial={{ opacity: 0, scale: 0.8, y: 20 }}
       animate={inView ? { opacity: 1, scale: 1, y: 0 } : {}}
       transition={{ delay, type: "spring", stiffness: 200, damping: 18 }}
-      className="border-4 border-black dark:border-white bg-white dark:bg-black p-4 relative overflow-hidden group hover:-translate-y-1 transition-transform"
+      // Section is always dark, so cards are always white-on-black for contrast.
+      // Hardcode text-black to prevent inheriting body's white foreground in dark mode.
+      className="border-4 border-black bg-white p-4 relative overflow-hidden group hover:-translate-y-1 transition-transform text-black"
       style={{ boxShadow: `6px 6px 0 ${color}` }}
     >
       <div
@@ -83,7 +85,7 @@ function StatCell({
         {animated.toLocaleString("id-ID")}
         {suffix && <span className="text-2xl ml-0.5">{suffix}</span>}
       </div>
-      <div className="font-mono-ud text-[10px] font-black text-black/70 dark:text-white/70 tracking-[0.15em] uppercase mt-1">
+      <div className="font-mono-ud text-[10px] font-black text-black/70 tracking-[0.15em] uppercase mt-1">
         {label}
       </div>
     </motion.div>
@@ -102,10 +104,11 @@ function LiveClock() {
     <div className="flex items-stretch gap-1">
       {cells.map((c, i) => (
         <div key={i} className="flex flex-col items-center">
-          <div className="bg-black dark:bg-white text-[#d4ff00] dark:text-black font-mono-ud font-black text-xl md:text-2xl px-2 py-1.5 border-2 border-black dark:border-white min-w-[2.5rem] text-center tabular-nums">
+          {/* Clock cell — black bg with lime digits (always) */}
+          <div className="bg-black text-[#d4ff00] font-mono-ud font-black text-xl md:text-2xl px-2 py-1.5 border-2 border-white min-w-[2.5rem] text-center tabular-nums">
             {String(c.v).padStart(2, "0")}
           </div>
-          <div className="font-mono-ud text-[8px] text-black/60 dark:text-white/60 tracking-[0.15em] uppercase mt-0.5">
+          <div className="font-mono-ud text-[8px] text-white/60 tracking-[0.15em] uppercase mt-0.5">
             {c.l}
           </div>
         </div>
@@ -132,12 +135,12 @@ export function MissionControl() {
 
   return (
     <section
-      className="relative bg-[#09090b] dark:bg-[#f4f4f0] py-20 px-6 md:px-12 border-t-8 border-white dark:border-black overflow-hidden"
+      className="relative bg-[#09090b] py-20 px-6 md:px-12 border-t-8 border-white overflow-hidden"
       aria-labelledby="ud-mission-control-title"
     >
       <div className="absolute inset-0 ud-scanlines opacity-15 pointer-events-none" />
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-        <span className="font-bebas text-[150px] md:text-[280px] text-white/[0.04] dark:text-black/[0.04] whitespace-nowrap leading-none">
+        <span className="font-bebas text-[150px] md:text-[280px] text-white/[0.04] whitespace-nowrap leading-none">
           MISSION
         </span>
       </div>
@@ -146,36 +149,36 @@ export function MissionControl() {
         {/* Header */}
         <div className="mb-10 flex flex-col md:flex-row items-start md:items-end justify-between gap-4">
           <div>
-            <div className="inline-block bg-[#00ff00] text-black font-mono-ud text-xs font-black px-3 py-1 border-4 border-white dark:border-black mb-3 -rotate-1">
+            <div className="inline-block bg-[#00ff00] text-black font-mono-ud text-xs font-black px-3 py-1 border-4 border-white mb-3 -rotate-1">
               § 08 — LIVE TELEMETRY
             </div>
             <h2
               id="ud-mission-control-title"
-              className="font-bebas text-5xl md:text-[90px] leading-none uppercase text-white dark:text-black ud-glitch-hover cursor-pointer"
+              className="font-bebas text-5xl md:text-[90px] leading-none uppercase text-white ud-glitch-hover cursor-pointer"
               data-text="MISSION CONTROL"
               style={{ textShadow: "4px 4px 0px #00ff00" }}
             >
               MISSION CONTROL
             </h2>
-            <p className="font-mono-ud text-sm text-white/70 dark:text-black/70 mt-2 max-w-xl">
+            <p className="font-mono-ud text-sm text-white/70 mt-2 max-w-xl">
               ▸ Live readout dari orbit collective. Numbers update real-time.
             </p>
           </div>
-          <div className="flex items-center gap-2 bg-[#d4ff00] text-black font-mono-ud text-xs font-black px-3 py-2 border-4 border-white dark:border-black">
+          <div className="flex items-center gap-2 bg-[#d4ff00] text-black font-mono-ud text-xs font-black px-3 py-2 border-4 border-white">
             <Activity className="w-4 h-4 animate-pulse" />
             STATUS: ONLINE
           </div>
         </div>
 
         {/* Live clock — time since establishment */}
-        <div className="border-4 border-white dark:border-black bg-black dark:bg-white p-4 md:p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-3">
+        <div className="border-4 border-white bg-black p-4 md:p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <Clock className="w-6 h-6 text-[#d4ff00] dark:text-black animate-pulse" />
+            <Clock className="w-6 h-6 text-[#d4ff00] animate-pulse" />
             <div>
-              <p className="font-bebas text-2xl md:text-3xl text-white dark:text-black leading-none">
+              <p className="font-bebas text-2xl md:text-3xl text-white leading-none">
                 TIME SINCE EST.
               </p>
-              <p className="font-mono-ud text-[10px] text-white/60 dark:text-black/60 tracking-[0.2em] uppercase">
+              <p className="font-mono-ud text-[10px] text-white/60 tracking-[0.2em] uppercase">
                 ▸ Counting since 2020-01-01
               </p>
             </div>
@@ -217,7 +220,7 @@ export function MissionControl() {
           />
         </div>
 
-        <p className="font-mono-ud text-[10px] text-white/40 dark:text-black/40 mt-4 text-center tracking-[0.2em] uppercase">
+        <p className="font-mono-ud text-[10px] text-white/40 mt-4 text-center tracking-[0.2em] uppercase">
           ▸ counts fetched live from /api/gallery + /api/guestbook · time-since updates every second
         </p>
       </div>

@@ -336,16 +336,18 @@ function MemberPortfolio({ member }: { member: Member }) {
   const { play } = useSfx();
 
   // Fetch DB achievements for this member (with images)
-  const { data: achievementsData } = useFetch<{ achievements: { id: string; memberId: string; title: string; year: string; description: string; images: string[] }[] }>(`/api/achievements?memberId=${member.id}`);
+  const { data: achievementsData } = useFetch<{ achievements: { id: string; memberId: string; title: string; year: string; description: string; images: { id: string; img: string }[] }[] }>(`/api/achievements?memberId=${member.id}`);
 
   if (!cv) return null;
 
-  // Merge: DB achievements (with photos) + static CV achievements
+  // Merge: DB achievements (with photos) + static CV achievements.
+  // DB returns { id, img }[] for images; flatten to URL strings for the
+  // Achievement type (which expects string[] for carousel display).
   const dbAchievements: Achievement[] = (achievementsData?.achievements ?? []).map((a) => ({
     title: a.title,
     year: a.year,
     description: a.description,
-    images: a.images,
+    images: a.images.map((img) => img.img),
   }));
   const allAchievements = [...dbAchievements, ...cv.achievements];
 

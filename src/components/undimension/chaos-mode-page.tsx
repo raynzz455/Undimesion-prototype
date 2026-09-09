@@ -858,7 +858,7 @@ function PortfolioTab() {
 // ACHIEVEMENTS TAB — Full CRUD
 // ═══════════════════════════════════════════════════════════════════════════
 function AchievementsTab() {
-  const { data, refetch } = useFetch<{ achievements: { id: string; memberId: string; title: string; year: string; description: string; images: string[] }[]; count: number }>("/api/achievements");
+  const { data, refetch } = useFetch<{ achievements: { id: string; memberId: string; title: string; year: string; description: string; images: { id: string; img: string }[] }[]; count: number }>("/api/achievements");
   const { chaosFetch } = useChaosFetch();
   const { play } = useSfx();
   const [title, setTitle] = useState("");
@@ -929,6 +929,9 @@ function AchievementsTab() {
           {error && <div className="bg-[#ff4d4d] text-white px-3 py-2 border-2 border-white font-mono-ud text-xs font-bold">! {error}</div>}
           {success && <div className="bg-[#00ff00] text-black px-3 py-2 border-2 border-black font-mono-ud text-xs font-bold">{success}</div>}
           <button onClick={handleCreate} className="w-full bg-[#d4ff00] text-black font-bebas text-2xl py-3 border-2 border-[#d4ff00] hover:bg-transparent hover:text-[#d4ff00] transition-colors no-color-transition"><Award className="w-5 h-5 inline mr-2" /> + ADD</button>
+          <p className="font-mono-ud text-[10px] text-white/50 text-center tracking-wider">
+            ▸ Setelah dibuat, klik tombol <span className="text-[#d4ff00] font-bold">+ ADD PHOTO</span> di kartu achievement untuk upload sertifikat/medali (opsional).
+          </p>
         </div>
       </div>
       <div className="border-4 border-[#00e5ff] bg-[#1a1a1a] p-4 shadow-[8px_8px_0_#00e5ff]">
@@ -938,66 +941,91 @@ function AchievementsTab() {
         </div>
         <div className="space-y-2 max-h-[600px] overflow-y-auto">
           {achievements.length === 0 && <div className="text-center py-8 font-mono-ud text-xs text-white/40">No achievements yet.</div>}
-          {achievements.map((a) => (
-            <div key={a.id} className="border-2 border-[#00e5ff]/30 p-3 bg-black/50">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setExpandedId(expandedId === a.id ? null : a.id)}>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-mono-ud text-[9px] text-[#d4ff00]">{a.year}</span>
-                    <span className="font-mono-ud text-[9px] text-white/40">{a.memberId.toUpperCase()}</span>
-                    {a.images && a.images.length > 0 && <span className="font-mono-ud text-[9px] text-[#00e5ff]">📷 {a.images.length}</span>}
-                    <span className="font-mono-ud text-[9px] text-white/30">{expandedId === a.id ? "▼" : "▶"}</span>
-                  </div>
-                  <div className="font-bebas text-lg text-white truncate">{a.title}</div>
-                  <div className="font-mono-ud text-[10px] text-white/50 line-clamp-2">{a.description}</div>
-                </div>
-                <button onClick={() => handleDelete(a.id, a.title)} disabled={deletingId === a.id} className="p-2.5 border-2 border-white/30 hover:border-[#ff4d4d] hover:bg-[#ff4d4d]/10 transition-colors no-color-transition disabled:opacity-50 min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0" title="Delete">{deletingId === a.id ? <Loader2 className="w-5 h-5 animate-spin text-[#ff4d4d]" /> : <Trash2 className="w-5 h-5 text-[#ff4d4d]" />}</button>
-              </div>
-              {/* Expanded: photo upload + image gallery */}
-              {expandedId === a.id && (
-                <div className="mt-3 pt-3 border-t-2 border-[#00e5ff]/20 space-y-3">
-                  {/* Upload button */}
-                  <label className="block">
-                    <span className="font-mono-ud text-[10px] font-bold text-[#d4ff00] tracking-wider">UPLOAD FOTO (sertifikat, medali, dll — max 4MB)</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) handleUploadImage(a.id, f);
-                      }}
-                      disabled={uploadingFor === a.id}
-                      className="block w-full mt-1 text-xs font-mono-ud text-white file:mr-3 file:py-2 file:px-4 file:border-2 file:border-[#d4ff00] file:bg-[#d4ff00] file:text-black file:font-bold file:cursor-pointer file:hover:bg-[#ff00ff] file:hover:text-white disabled:opacity-50"
-                    />
-                  </label>
-                  {uploadingFor === a.id && <div className="font-mono-ud text-[10px] text-[#d4ff00] flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Uploading...</div>}
-                  {/* Image gallery */}
-                  {a.images && a.images.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                      {a.images.map((img, i) => (
-                        <div key={i} className="relative group border-2 border-[#00e5ff]/30 overflow-hidden">
-                          <img src={img} alt={`${a.title} ${i + 1}`} className="w-full aspect-square object-cover" loading="lazy" />
-                          <button
-                            onClick={() => {
-                              // Find image ID — we need to refetch to get IDs
-                              // For now, use index-based approach
-                              handleDeleteImageByIndex(a.id, i);
-                            }}
-                            className="absolute top-1 right-1 bg-[#ff4d4d] text-white p-1.5 border border-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#ff0000]"
-                            title="Delete photo"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ))}
+          {achievements.map((a) => {
+            const imgCount = a.images?.length ?? 0;
+            const isExpanded = expandedId === a.id;
+            return (
+              <div key={a.id} className="border-2 border-[#00e5ff]/30 p-3 bg-black/50">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setExpandedId(isExpanded ? null : a.id)}>
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <span className="font-mono-ud text-[9px] text-[#d4ff00]">{a.year}</span>
+                      <span className="font-mono-ud text-[9px] text-white/40">{a.memberId.toUpperCase()}</span>
+                      {imgCount > 0 ? (
+                        <span className="font-mono-ud text-[9px] text-[#00e5ff] bg-[#00e5ff]/10 px-1.5 py-0.5 border border-[#00e5ff]/30">📷 {imgCount} PHOTO{imgCount > 1 ? "S" : ""}</span>
+                      ) : (
+                        <span className="font-mono-ud text-[9px] text-[#ff8c00] bg-[#ff8c00]/10 px-1.5 py-0.5 border border-[#ff8c00]/30 animate-pulse">📷 NO PHOTOS — ADD BELOW</span>
+                      )}
+                      <span className="font-mono-ud text-[9px] text-white/30">{isExpanded ? "▼ COLLAPSE" : "▶ EXPAND"}</span>
                     </div>
-                  ) : (
-                    <div className="font-mono-ud text-[10px] text-white/30 text-center py-2">Belum ada foto. Upload sertifikat/medali di atas.</div>
-                  )}
+                    <div className="font-bebas text-lg text-white truncate">{a.title}</div>
+                    <div className="font-mono-ud text-[10px] text-white/50 line-clamp-2">{a.description}</div>
+                  </div>
+                  <button onClick={() => handleDelete(a.id, a.title)} disabled={deletingId === a.id} className="p-2.5 border-2 border-white/30 hover:border-[#ff4d4d] hover:bg-[#ff4d4d]/10 transition-colors no-color-transition disabled:opacity-50 min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0" title="Delete achievement">{deletingId === a.id ? <Loader2 className="w-5 h-5 animate-spin text-[#ff4d4d]" /> : <Trash2 className="w-5 h-5 text-[#ff4d4d]" />}</button>
                 </div>
-              )}
-            </div>
-          ))}
+
+                {/* PROMINENT UPLOAD BUTTON — always visible (no expand required) */}
+                <label
+                  className={cn(
+                    "mt-3 flex items-center justify-center gap-2 border-2 border-dashed py-2.5 px-3 font-mono-ud text-xs font-bold tracking-wider cursor-pointer transition-colors no-color-transition min-h-[44px]",
+                    uploadingFor === a.id
+                      ? "border-[#d4ff00] bg-[#d4ff00]/10 text-[#d4ff00] cursor-wait"
+                      : "border-[#d4ff00] bg-[#d4ff00]/5 text-[#d4ff00] hover:bg-[#d4ff00] hover:text-black",
+                  )}
+                  title="Upload foto sertifikat, medali, dll (opsional, max 4MB)"
+                >
+                  <Upload className="w-4 h-4" />
+                  {uploadingFor === a.id ? (
+                    <span className="flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> UPLOADING…</span>
+                  ) : (
+                    <span>+ ADD PHOTO {imgCount > 0 && `({imgCount} uploaded)`}</span>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleUploadImage(a.id, f);
+                      // Reset so the same file can be re-selected later
+                      e.target.value = "";
+                    }}
+                    disabled={uploadingFor === a.id}
+                    className="sr-only"
+                  />
+                </label>
+
+                {/* Expanded: image gallery (delete per photo) */}
+                {isExpanded && (
+                  <div className="mt-3 pt-3 border-t-2 border-[#00e5ff]/20 space-y-3">
+                    {imgCount > 0 ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                        {a.images.map((img, i) => (
+                          <div key={img.id} className="relative group border-2 border-[#00e5ff]/30 overflow-hidden">
+                            <img src={img.img} alt={`${a.title} ${i + 1}`} className="w-full aspect-square object-cover" loading="lazy" />
+                            <button
+                              onClick={() => handleDeleteImage(img.id)}
+                              className="absolute top-1 right-1 bg-[#ff4d4d] text-white p-1.5 border border-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#ff0000] min-w-[24px] min-h-[24px] flex items-center justify-center"
+                              title="Delete photo"
+                              aria-label={`Delete photo ${i + 1}`}
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="font-mono-ud text-[10px] text-white/30 text-center py-2">
+                        Belum ada foto. Klik tombol <span className="text-[#d4ff00] font-bold">+ ADD PHOTO</span> di atas untuk upload sertifikat/medali.
+                      </div>
+                    )}
+                    <p className="font-mono-ud text-[9px] text-white/40 tracking-wider">
+                      ▸ Tip: hover foto lalu klik <Trash2 className="w-2.5 h-2.5 inline" /> untuk hapus. Foto disimpan di Supabase Storage.
+                    </p>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
