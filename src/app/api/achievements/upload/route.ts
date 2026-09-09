@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db, isDbConfigured } from "@/lib/db";
 import { requireChaosMode } from "@/lib/chaos-auth";
 
 export const dynamic = "force-dynamic";
@@ -8,6 +8,7 @@ const MAX_FILE_BYTES = 4 * 1024 * 1024;
 export async function POST(req: NextRequest) {
   const auth = await requireChaosMode();
   if (!auth.authorized) return NextResponse.json({ error: "CHAOS MODE REQUIRED" }, { status: 403 });
+  if (!isDbConfigured()) return NextResponse.json({ error: "Database not configured." }, { status: 503 });
   try {
     const formData = await req.formData();
     const file = formData.get("file");
@@ -37,6 +38,7 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const auth = await requireChaosMode();
   if (!auth.authorized) return NextResponse.json({ error: "CHAOS MODE REQUIRED" }, { status: 403 });
+  if (!isDbConfigured()) return NextResponse.json({ error: "Database not configured." }, { status: 503 });
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
