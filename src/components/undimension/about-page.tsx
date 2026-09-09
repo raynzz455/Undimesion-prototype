@@ -228,12 +228,11 @@ function MemberCard({ m, i, onOpen }: { m: Member; i: number; onOpen: () => void
   );
 }
 
-function TheCollective({ onOpenMember, lastOpenedIdRef }: { onOpenMember: (m: Member) => void; lastOpenedIdRef: React.RefObject<string | null> }) {
+function TheCollective({ members, onOpenMember, lastOpenedIdRef }: { members: Member[]; onOpenMember: (m: Member) => void; lastOpenedIdRef: React.RefObject<string | null> }) {
   const randomMember = () => {
-    // Exclude the last opened member so we never pick the same one twice in a row
     const lastId = lastOpenedIdRef.current;
-    const pool = MEMBERS.filter((m) => m.id !== lastId);
-    const pick = pool.length > 0 ? pool : MEMBERS;
+    const pool = members.filter((m) => m.id !== lastId);
+    const pick = pool.length > 0 ? pool : members;
     const m = pick[Math.floor(Math.random() * pick.length)];
     onOpenMember(m);
   };
@@ -266,7 +265,7 @@ function TheCollective({ onOpenMember, lastOpenedIdRef }: { onOpenMember: (m: Me
         </div>
 
         <div className="flex flex-col gap-32 md:gap-48 mt-20">
-          {MEMBERS.map((m, i) => (
+          {members.map((m, i) => (
             <MemberCard key={m.id} m={m} i={i} onOpen={() => onOpenMember(m)} />
           ))}
         </div>
