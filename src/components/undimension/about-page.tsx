@@ -81,7 +81,7 @@ function MarqueeBar() {
   return (
     <div className="border-y-8 border-black dark:border-white bg-[#d4ff00] py-6 mt-16 overflow-hidden flex -rotate-1 shadow-[0_10px_0_#000]">
       <Marquee
-        text="NO LIMITS • NEO-BRUTALISM • UNDIMENSION • "
+        text="ONE ORBIT • SEVEN STARS • BUILT WITH CHAOS • POWERED BY BONDS • UNDIMENSION • "
         className="text-black font-bebas text-7xl tracking-widest"
       />
     </div>
