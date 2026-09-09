@@ -395,12 +395,33 @@ function MemberPortfolio({ member }: { member: Member }) {
                   </span>
                 </div>
                 <h2 className="font-bebas text-5xl md:text-7xl leading-none">{member.name}</h2>
-                <p className="font-mono-ud text-sm font-bold mt-1">{cv.taglineCareer}</p>
-                <div className="flex items-center gap-4 mt-3 font-mono-ud text-xs">
-                  <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{cv.location}</span>
-                  <span className="flex items-center gap-1"><Clock className="w-3 h-3" />EST. {member.joinYear}</span>
+                <p className="font-mono-ud text-base md:text-lg font-bold mt-1">{cv.taglineCareer}</p>
+                <div className="flex items-center gap-4 mt-3 font-mono-ud text-sm md:text-base">
+                  <span className="flex items-center gap-1"><MapPin className="w-4 h-4" />{cv.location}</span>
+                  <span className="flex items-center gap-1"><Clock className="w-4 h-4" />EST. {member.joinYear}</span>
                 </div>
-                <p className="font-outfit text-sm mt-3 max-w-xl leading-relaxed">{member.bio}</p>
+                <p className="font-outfit text-base md:text-xl mt-4 max-w-xl leading-relaxed">{member.bio}</p>
+                {/* Socials */}
+                {member.socials && member.socials.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    {member.socials.map((s, i) => (
+                      <a
+                        key={i}
+                        href={s.href && s.href !== "#" ? s.href : undefined}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={cn(
+                          "inline-flex items-center gap-1.5 px-3 py-1.5 border-2 border-black dark:border-white font-mono-ud text-xs md:text-sm font-bold transition-all no-color-transition",
+                          s.href && s.href !== "#"
+                            ? "bg-black text-white dark:bg-white dark:text-black hover:bg-[#ff4d4d] hover:text-white hover:border-[#ff4d4d]"
+                            : "bg-black/5 dark:bg-white/5 text-black/30 dark:text-white/30 cursor-default"
+                        )}
+                      >
+                        {s.label}
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>

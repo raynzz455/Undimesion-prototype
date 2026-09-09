@@ -15,6 +15,7 @@ import { CosmicStarMap } from "./cosmic-star-map";
 import { ChaosDice } from "./chaos-dice";
 import { NewsPortal } from "./news-portal";
 import { MEMBERS, HARAPAN, type Member } from "@/lib/undimension/data";
+import { useFetch } from "@/hooks/use-fetch";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useSfx } from "@/hooks/use-sfx";
 import { useHashMember } from "@/hooks/use-hash-member";
@@ -378,9 +379,11 @@ function HarapanSection() {
 }
 
 export function AboutPage() {
+  // Fetch members from API (DB-backed) with static fallback
+  const { data: membersData } = useFetch<{ members: Member[] }>("/api/members");
+  const members = membersData?.members ?? MEMBERS;
+
   const [selected, setSelected] = useState<Member | null>(null);
-  // Track the last opened member id so RANDOM ENTITY never picks the same one
-  // twice in a row, even after the modal is closed.
   const lastOpenedIdRef = useRef<string | null>(null);
   useScrollReveal();
   const { play } = useSfx();
@@ -393,16 +396,12 @@ export function AboutPage() {
   const closeModal = () => {
     play("close");
     setSelected(null);
-    // Ensure navbar is restored immediately
     document.body.classList.remove("modal-open");
   };
 
-  // Deep-link: auto-open member modal when URL has #member-{id}
   useHashMember((id) => {
-    const m = MEMBERS.find((x) => x.id === id);
-    if (m) {
-      openMember(m);
-    }
+    const m = members.find((x) => x.id === id);
+    if (m) openMember(m);
   });
 
   return (
@@ -410,7 +409,7 @@ export function AboutPage() {
       <StarField variant="adaptive" className="fixed z-[1]" />
       <HeroSection />
       <MarqueeBar />
-      <TheCollective onOpenMember={openMember} lastOpenedIdRef={lastOpenedIdRef} />
+      <TheCollective members={members} onOpenMember={openMember} lastOpenedIdRef={lastOpenedIdRef} />
       <StatsRadarSection />
       <TimelineSection />
       <CompatibilityMatrix />
