@@ -4,5 +4,6 @@
   "regions": ["sin1"],
   "github": {
     "silent": true
-  }
+  },
+  "buildCommand": "npx prisma generate && next build"
 }

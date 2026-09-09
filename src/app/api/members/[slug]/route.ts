@@ -47,55 +47,93 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ slug: stri
 }
 
 export async function PUT(req: NextRequest, ctx: { params: Promise<{ slug: string }> }) {
+  // Step 1: Auth
   const auth = await requireChaosMode();
-  if (!auth.authorized) return NextResponse.json({ error: "CHAOS MODE REQUIRED" }, { status: 403 });
-  const { slug } = await ctx.params;
-
-  if (!isDbConfigured()) {
-    return NextResponse.json(
-      { error: "Database not configured. Set DATABASE_URL env var." },
-      { status: 503 }
-    );
+  if (!auth.authorized) {
+    return NextResponse.json({ error: "CHAOS MODE REQUIRED", step: "auth" }, { status: 403 });
   }
 
+  // Step 2: Get slug
+  const { slug } = await ctx.params;
+
+  // Step 3: Check DB
+  if (!isDbConfigured()) {
+    return NextResponse.json({ error: "Database not configured.", step: "dbConfig" }, { status: 503 });
+  }
+
+  // Step 4: Parse body
+  let body: any;
   try {
-    const body = await req.json();
+    body = await req.json();
+  } catch (e) {
+    return NextResponse.json({ error: "Invalid JSON body", detail: e instanceof Error ? e.message : String(e), step: "parseBody" }, { status: 400 });
+  }
 
-    // Build update data — only include fields that are present
-    const data: Record<string, unknown> = {};
-    const stringFields = ["name", "nick", "role", "img", "color", "highlight", "bio", "tagline", "quote", "element", "joinYear", "taglineCareer", "location", "availability"];
-    for (const f of stringFields) {
-      if (body[f] !== undefined) data[f] = String(body[f]).trim().slice(0, 2000);
-    }
-    if (body.stats !== undefined) data.statsJson = JSON.stringify(body.stats);
-    if (body.socials !== undefined) data.socialsJson = JSON.stringify(body.socials);
-    if (body.funFacts !== undefined) data.funFactsJson = JSON.stringify(body.funFacts);
-    if (body.workHistory !== undefined) data.workHistoryJson = JSON.stringify(body.workHistory);
-    if (body.education !== undefined) data.educationJson = JSON.stringify(body.education);
-    if (body.skills !== undefined) data.skillsJson = JSON.stringify(body.skills);
-
-    // Check if member exists first
+  // Step 5: Check member exists
+  try {
     const existing = await db.member.findUnique({ where: { slug } });
     if (!existing) {
-      return NextResponse.json(
-        { error: `Member with slug '${slug}' not found in database. Run: npm run db:push && npm run seed` },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: `Member '${slug}' not found in DB. Run: npm run db:push && npm run seed`, step: "memberExists" }, { status: 404 });
     }
+  } catch (e) {
+    return NextResponse.json({ error: "DB query failed (findUnique)", detail: e instanceof Error ? e.message : String(e), step: "findUnique" }, { status: 500 });
+  }
 
+  // Step 6: Build update data
+  const data: Record<string, unknown> = {};
+  const stringFields = ["name", "nick", "role", "img", "color", "highlight", "bio", "tagline", "quote", "element", "joinYear", "taglineCareer", "location", "availability"];
+  for (const f of stringFields) {
+    if (body[f] !== undefined) {
+      try { data[f] = String(body[f]).trim().slice(0, 2000); } catch (e) {
+        return NextResponse.json({ error: `Failed to process field: ${f}`, detail: e instanceof Error ? e.message : String(e), step: "buildData", field: f }, { status: 400 });
+      }
+    }
+  }
+
+  // JSON fields
+  if (body.stats !== undefined) {
+    try { data.statsJson = JSON.stringify(body.stats); } catch (e) {
+      return NextResponse.json({ error: "Failed to stringify stats", step: "jsonStats" }, { status: 400 });
+    }
+  }
+  if (body.socials !== undefined) {
+    try { data.socialsJson = JSON.stringify(body.socials); } catch (e) {
+      return NextResponse.json({ error: "Failed to stringify socials", step: "jsonSocials" }, { status: 400 });
+    }
+  }
+  if (body.funFacts !== undefined) {
+    try { data.funFactsJson = JSON.stringify(body.funFacts); } catch (e) {
+      return NextResponse.json({ error: "Failed to stringify funFacts", step: "jsonFunFacts" }, { status: 400 });
+    }
+  }
+  if (body.workHistory !== undefined) {
+    try { data.workHistoryJson = JSON.stringify(body.workHistory); } catch (e) {
+      return NextResponse.json({ error: "Failed to stringify workHistory", step: "jsonWorkHistory" }, { status: 400 });
+    }
+  }
+  if (body.education !== undefined) {
+    try { data.educationJson = JSON.stringify(body.education); } catch (e) {
+      return NextResponse.json({ error: "Failed to stringify education", step: "jsonEducation" }, { status: 400 });
+    }
+  }
+  if (body.skills !== undefined) {
+    try { data.skillsJson = JSON.stringify(body.skills); } catch (e) {
+      return NextResponse.json({ error: "Failed to stringify skills", step: "jsonSkills" }, { status: 400 });
+    }
+  }
+
+  // Step 7: Update
+  try {
     const updated = await db.member.update({ where: { slug }, data });
     return NextResponse.json({ member: mapMember(updated) });
   } catch (e) {
-    const errMsg = e instanceof Error ? e.message : "Unknown error";
-    console.error(`[PUT /api/members/${slug}] Error:`, errMsg);
-
-    // Return detailed error so user can debug
-    return NextResponse.json(
-      {
-        error: "Gagal update member.",
-        detail: errMsg.includes("column") ? "Database column missing — run SQL migration: prisma/migrations/0000_complete_schema.sql" : errMsg,
-      },
-      { status: 500 }
-    );
+    const errMsg = e instanceof Error ? e.message : String(e);
+    console.error(`[PUT /api/members/${slug}] Update failed:`, errMsg);
+    return NextResponse.json({
+      error: "DB update failed",
+      detail: errMsg,
+      step: "dbUpdate",
+      fieldsAttempted: Object.keys(data),
+    }, { status: 500 });
   }
 }
