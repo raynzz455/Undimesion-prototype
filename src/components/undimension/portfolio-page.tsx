@@ -8,6 +8,7 @@ import { MEMBERS, type Member, type PortfolioProject } from "@/lib/undimension/d
 import { MEMBER_CV } from "@/lib/undimension/cv-data";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useSfx } from "@/hooks/use-sfx";
+import { useFetch } from "@/hooks/use-fetch";
 import { cn } from "@/lib/utils";
 import {
   Github, ExternalLink, Code2, Gamepad2, Smartphone, Wrench, Bot, Package,
@@ -333,7 +334,20 @@ function MemberPortfolio({ member }: { member: Member }) {
   const cv = MEMBER_CV[member.id];
   const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
   const { play } = useSfx();
+
+  // Fetch DB achievements for this member (with images)
+  const { data: achievementsData } = useFetch<{ achievements: { id: string; memberId: string; title: string; year: string; description: string; images: string[] }[] }>(`/api/achievements?memberId=${member.id}`);
+
   if (!cv) return null;
+
+  // Merge: DB achievements (with photos) + static CV achievements
+  const dbAchievements: Achievement[] = (achievementsData?.achievements ?? []).map((a) => ({
+    title: a.title,
+    year: a.year,
+    description: a.description,
+    images: a.images,
+  }));
+  const allAchievements = [...dbAchievements, ...cv.achievements];
 
   const memberColor = member.color.replace("bg-[", "").replace("]", "");
   const availColor = AVAILABILITY_COLORS[cv.availability] || "#00e5ff";
@@ -480,7 +494,7 @@ function MemberPortfolio({ member }: { member: Member }) {
             <span className="ml-auto font-mono-ud text-sm text-black/40 dark:text-white/40">▸ CLICK TO EXPAND</span>
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {cv.achievements.map((a, i) => (
+            {allAchievements.map((a, i) => (
               <motion.button
                 key={i}
                 initial={{ opacity: 0, scale: 0.9 }}
