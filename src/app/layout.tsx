@@ -57,6 +57,8 @@ export const metadata: Metadata = {
   authors: [{ name: "The Undimension Collective" }],
   creator: "The Undimension Collective",
   publisher: "The Undimension Collective",
+  // metadataBase makes relative URLs (like /og-image.png) resolve to full URLs.
+  // We use the production domain — Vercel will serve the same OG image regardless.
   metadataBase: new URL("https://undimension.vercel.app"),
   alternates: {
     canonical: "/",
@@ -73,10 +75,11 @@ export const metadata: Metadata = {
     siteName: "UNDIMENSION",
     images: [
       {
-        url: "/og-image.png",
+        url: "https://undimension.vercel.app/og-image.png",
         width: 1344,
         height: 768,
         alt: "UNDIMENSION — Circle Beyond Space & Time",
+        type: "image/png",
       },
     ],
     locale: "id_ID",
@@ -87,7 +90,7 @@ export const metadata: Metadata = {
     title: "UNDIMENSION — Circle Beyond Space & Time",
     description:
       "Sebuah circle teman lama yang tak terikat ruang maupun waktu. Est. 2020.",
-    images: ["/og-image.png"],
+    images: ["https://undimension.vercel.app/og-image.png"],
     creator: "@undimension",
   },
   robots: {
@@ -100,7 +103,6 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  themeColor: "#09090b",
 };
 
 export const viewport: Viewport = {
