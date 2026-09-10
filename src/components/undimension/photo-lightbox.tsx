@@ -31,8 +31,10 @@ export function PhotoLightbox({
 
   // Reset zoom when navigating
   useEffect(() => {
-    setZoomed(false);
-    setZoomScale(1);
+    Promise.resolve().then(() => {
+      setZoomed(false);
+      setZoomScale(1);
+    });
   }, [index]);
 
   const next = useCallback(() => {
