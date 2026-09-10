@@ -151,7 +151,7 @@ export function PhotoLightbox({
                 {/* Image container — pan/zoom enabled */}
                 <div
                   className="relative overflow-hidden bg-black"
-                  style={{ cursor: zoomed ? (isDragging.current ? "grabbing" : "grab") : "zoom-in" }}
+                  style={{ cursor: zoomed ? "grab" : "zoom-in" }}
                   onPointerDown={onPointerDown}
                   onPointerMove={onPointerMove}
                   onPointerUp={onPointerUp}
