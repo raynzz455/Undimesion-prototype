@@ -81,6 +81,15 @@ export const metadata: Metadata = {
       "Sebuah circle teman lama yang tak terikat ruang maupun waktu. Datang dari mimpi yang berbeda, namun melangkah di orbit yang sama. Est. 2020.",
     url: siteUrl,
     siteName: "UNDIMENSION",
+    images: [
+      {
+        url: `${siteUrl}/og-image.png`,
+        width: 1200,
+        height: 630,
+        alt: "UNDIMENSION — Circle Beyond Space & Time",
+        type: "image/png",
+      },
+    ],
     locale: "id_ID",
     type: "website",
   },
@@ -89,6 +98,7 @@ export const metadata: Metadata = {
     title: "UNDIMENSION — Circle Beyond Space & Time",
     description:
       "Sebuah circle teman lama yang tak terikat ruang maupun waktu. Est. 2020.",
+    images: [`${siteUrl}/og-image.png`],
   },
   robots: {
     index: true,

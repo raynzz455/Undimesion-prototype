@@ -15,14 +15,14 @@ import {
   ChevronLeft, ChevronRight, Play, Pause,
 } from "lucide-react";
 
-const PHOTOS_PER_PAGE = 6;
-const AUTO_ADVANCE_MS = 5000;
+const PHOTOS_PER_PAGE = 12;
+const AUTO_ADVANCE_MS = 6000;
 
 function GalleryCard({ p, onOpen }: { p: GalleryPhoto; onOpen: () => void }) {
   return (
     <div
       className={cn(
-        "border-4 border-black dark:border-white shadow-[8px_8px_0_#000] dark:shadow-[8px_8px_0_#fff] bg-white dark:bg-[#1a1a1a] p-3 inline-block w-full transform hover:rotate-0 hover:z-50 hover:scale-105 transition-transform z-10 relative no-color-transition cursor-pointer",
+        "border-4 border-black dark:border-white shadow-[8px_8px_0_#000] dark:shadow-[8px_8px_0_#fff] bg-white dark:bg-[#1a1a1a] p-3 w-full break-inside-avoid transform hover:rotate-0 hover:z-50 hover:scale-105 transition-transform z-10 relative no-color-transition cursor-pointer",
         p.rotate,
       )}
       onClick={onOpen}
@@ -59,7 +59,7 @@ function GalleryCard({ p, onOpen }: { p: GalleryPhoto; onOpen: () => void }) {
 
 function GallerySkeleton() {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+    <div className="columns-2 md:columns-3 lg:columns-4 gap-3 md:gap-4">
       {[0, 1, 2, 3, 4, 5].map((i) => (
         <div key={i} className="border-4 border-black dark:border-white bg-white dark:bg-[#1a1a1a] p-3 shadow-[8px_8px_0_#000]">
           <div className="border-4 border-black dark:border-white bg-black/20 dark:bg-white/10 mb-3 aspect-[4/3] animate-pulse" />
@@ -136,7 +136,7 @@ function PaginatedCarousel({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -40 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4"
+            className="columns-2 md:columns-3 lg:columns-4 gap-3 md:gap-4"
           >
             {pagePhotos.map((p, i) => {
               const globalIdx = currentPage * PHOTOS_PER_PAGE + i;

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useCallback, useRef } from "react";
+import { useEffect, useLayoutEffect, useCallback, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
 import type { GalleryPhoto } from "@/lib/undimension/data";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 
@@ -20,7 +20,20 @@ export function PhotoLightbox({
   const open = index >= 0 && index < photos.length;
   const photo = open ? photos[index] : null;
   const panelRef = useRef<HTMLDivElement>(null);
+  const [zoomed, setZoomed] = useState(false);
+  const [zoomScale, setZoomScale] = useState(1);
   useFocusTrap(panelRef, open);
+
+  const toggleZoom = useCallback(() => {
+    setZoomed((z) => !z);
+    setZoomScale((s) => (s === 1 ? 2 : 1));
+  }, []);
+
+  // Reset zoom when navigating
+  useEffect(() => {
+    setZoomed(false);
+    setZoomScale(1);
+  }, [index]);
 
   const next = useCallback(() => {
     if (!open) return;
@@ -118,12 +131,21 @@ export function PhotoLightbox({
                   <img
                     src={photo.img}
                     alt={photo.title}
-                    className="w-full max-h-[65vh] object-contain"
+                    className={`w-full max-h-[65vh] object-contain cursor-zoom-in transition-transform duration-300 ${zoomed ? "cursor-zoom-out" : ""}`}
+                    style={{ transform: `scale(${zoomScale})` }}
+                    onClick={toggleZoom}
                   />
                   <div className="absolute inset-0 ud-scanlines opacity-30 pointer-events-none" />
                   <div className="absolute top-3 left-3 bg-[#ff4d4d] border-2 border-black px-2 py-1 font-mono-ud font-black text-white text-xs -rotate-3">
                     FRAME_{String(index + 1).padStart(2, "0")}
                   </div>
+                  <button
+                    onClick={toggleZoom}
+                    className="absolute top-3 right-3 bg-[#d4ff00] text-black p-2 border-2 border-black hover:bg-[#ff00ff] hover:text-white transition-colors no-color-transition z-10"
+                    aria-label={zoomed ? "Zoom out" : "Zoom in"}
+                  >
+                    {zoomed ? <ZoomOut className="w-5 h-5" /> : <ZoomIn className="w-5 h-5" />}
+                  </button>
                 </div>
 
                 <div className="flex items-end justify-between gap-3 border-t-4 border-black dark:border-white pt-3">
