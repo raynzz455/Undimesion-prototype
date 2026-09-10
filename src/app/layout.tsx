@@ -68,7 +68,11 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   icons: {
-    icon: "/logo.svg",
+    icon: [
+      { url: "/logo.svg", type: "image/svg+xml" },
+      { url: "/icon.png", type: "image/png", sizes: "256x256" },
+    ],
+    apple: "/icon.png",
   },
   openGraph: {
     title: "UNDIMENSION — Circle Beyond Space & Time",
