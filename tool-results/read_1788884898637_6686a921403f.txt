@@ -1,0 +1,1385 @@
+     1→"use client";
+     2→
+     3→import { useState, useEffect } from "react";
+     4→import { motion } from "framer-motion";
+     5→import {
+     6→  Upload,
+     7→  Loader2,
+     8→  Image as ImageIcon,
+     9→  LogOut,
+    10→  Shield,
+    11→  Zap,
+    12→  FolderOpen,
+    13→  Award,
+    14→  Settings,
+    15→  Newspaper,
+    16→  MessageSquare,
+    17→  Users,
+    18→  Trash2,
+    19→  Edit3,
+    20→  Pin,
+    21→  PinOff,
+    22→  CheckCircle,
+    23→  XCircle,
+    24→  X,
+    25→} from "lucide-react";
+    26→import { StarField } from "./star-field";
+    27→import { useFetch } from "@/hooks/use-fetch";
+    28→import { useChaosFetch } from "@/hooks/use-chaos-fetch";
+    29→import { useSfx } from "@/hooks/use-sfx";
+    30→import { cn } from "@/lib/utils";
+    31→import type { GalleryPhoto, Member } from "@/lib/undimension/data";
+    32→
+    33→type Tab = "gallery" | "members" | "news" | "guestbook" | "portfolio" | "achievements" | "info";
+    34→
+    35→function ChaosModePage({ onExit }: { onExit: () => void }) {
+    36→  const [tab, setTab] = useState<Tab>("gallery");
+    37→  const { play } = useSfx();
+    38→
+    39→  const tabs: { key: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+    40→    { key: "gallery", label: "GALLERY", icon: ImageIcon },
+    41→    { key: "members", label: "MEMBERS", icon: Users },
+    42→    { key: "news", label: "NEWS", icon: Newspaper },
+    43→    { key: "guestbook", label: "GUESTBOOK", icon: MessageSquare },
+    44→    { key: "portfolio", label: "PORTFOLIO", icon: FolderOpen },
+    45→    { key: "achievements", label: "ACHIEVEMENTS", icon: Award },
+    46→    { key: "info", label: "INFO / ERD", icon: Settings },
+    47→  ];
+    48→
+    49→  return (
+    50→    <div className="page-enter bg-[#09090b] min-h-screen relative overflow-hidden pt-24 pb-12">
+    51→      <StarField variant="dark" className="fixed z-[1]" />
+    52→      <div className="ud-grain" aria-hidden />
+    53→
+    54→      {/* Header bar */}
+    55→      <div className="fixed top-0 left-0 right-0 z-50 bg-[#ff00ff] text-white border-b-4 border-black px-4 py-2 flex items-center justify-between">
+    56→        <div className="flex items-center gap-2">
+    57→          <Shield className="w-5 h-5" />
+    58→          <span className="font-bebas text-xl tracking-widest">⚡ CHAOS MODE — MEMBER AREA</span>
+    59→        </div>
+    60→        <button
+    61→          onClick={() => { play("close"); onExit(); }}
+    62→          className="flex items-center gap-1 bg-black text-white font-mono-ud text-xs font-black px-3 py-1.5 border-2 border-white hover:bg-[#ff4d4d] transition-colors no-color-transition"
+    63→        >
+    64→          <LogOut className="w-3 h-3" /> EXIT
+    65→        </button>
+    66→      </div>
+    67→
+    68→      <div className="max-w-5xl mx-auto px-4 md:px-6 relative z-10">
+    69→        {/* Title */}
+    70→        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-6">
+    71→          <div className="inline-flex items-center gap-2 bg-[#d4ff00] text-black font-mono-ud text-xs font-black px-3 py-1 border-4 border-black mb-3">
+    72→            <Zap className="w-4 h-4" /> GOD MODE ACTIVE
+    73→          </div>
+    74→          <h1 className="font-bebas text-5xl md:text-[80px] leading-none uppercase text-white" style={{ textShadow: "4px 4px 0px #ff00ff, 8px 8px 0px #00e5ff" }}>
+    75→            CHAOS MODE
+    76→          </h1>
+    77→          <p className="font-mono-ud text-xs text-white/60 mt-1 tracking-wider">
+    78→            ▸ MEMBER-ONLY · CRUD MANAGEMENT · ALL IN ONE
+    79→          </p>
+    80→        </motion.div>
+    81→
+    82→        {/* Tab bar */}
+    83→        <div className="flex flex-wrap gap-2 mb-6 border-4 border-[#ff00ff] bg-black p-2">
+    84→          {tabs.map((t) => {
+    85→            const Icon = t.icon;
+    86→            return (
+    87→              <button
+    88→                key={t.key}
+    89→                onClick={() => { play("click"); setTab(t.key); }}
+    90→                className={cn(
+    91→                  "flex items-center gap-2 px-4 py-2 border-2 font-bebas text-lg tracking-wider transition-all no-color-transition",
+    92→                  tab === t.key
+    93→                    ? "bg-[#ff00ff] text-white border-white"
+    94→                    : "bg-transparent text-white/50 border-white/20 hover:text-white hover:border-white/50",
+    95→                )}
+    96→              >
+    97→                <Icon className="w-4 h-4" /> {t.label}
+    98→              </button>
+    99→            );
+   100→          })}
+   101→        </div>
+   102→
+   103→        {/* Tab content */}
+   104→        {tab === "gallery" && <GalleryTab />}
+   105→        {tab === "members" && <MembersTab />}
+   106→        {tab === "news" && <NewsTab />}
+   107→        {tab === "guestbook" && <GuestbookTab />}
+   108→        {tab === "portfolio" && <PortfolioTab />}
+   109→        {tab === "achievements" && <AchievementsTab />}
+   110→        {tab === "info" && <InfoTab />}
+   111→      </div>
+   112→    </div>
+   113→  );
+   114→}
+   115→
+   116→// ── Gallery Upload + Delete + Edit Tab ──────────────────────────────────────
+   117→// Dynamic masonry layout — photos can be 9:16, 16:9, 1:1, or 4:3.
+   118→// Uses CSS columns for masonry effect (no JS measurement needed).
+   119→function GalleryTab() {
+   120→  const { data, refetch } = useFetch<{ photos: GalleryPhoto[]; count: number }>("/api/gallery");
+   121→  const { chaosFetch } = useChaosFetch();
+   122→  const [title, setTitle] = useState("");
+   123→  const [author, setAuthor] = useState("");
+   124→  const [date, setDate] = useState(String(new Date().getFullYear()));
+   125→  const [file, setFile] = useState<File | null>(null);
+   126→  const [uploading, setUploading] = useState(false);
+   127→  const [error, setError] = useState<string | null>(null);
+   128→  const [success, setSuccess] = useState<string | null>(null);
+   129→  const [deletingId, setDeletingId] = useState<string | null>(null);
+   130→  const [editingPhoto, setEditingPhoto] = useState<GalleryPhoto | null>(null);
+   131→  const { play } = useSfx();
+   132→  const photos = data?.photos ?? [];
+   133→
+   134→  const handleUpload = async () => {
+   135→    if (!file || !title.trim()) { setError("Judul dan foto wajib diisi."); return; }
+   136→    setUploading(true); setError(null); setSuccess(null);
+   137→    try {
+   138→      const form = new FormData();
+   139→      form.append("file", file);
+   140→      form.append("title", title);
+   141→      form.append("author", author || "ANON");
+   142→      form.append("date", date);
+   143→      const res = await chaosFetch("/api/gallery/upload", { method: "POST", body: form });
+   144→      if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || "Upload gagal"); }
+   145→      const result = await res.json();
+   146→      setSuccess(`✓ ${result.title} uploaded!`);
+   147→      setTitle(""); setAuthor(""); setFile(null); refetch(); play("submit");
+   148→      setTimeout(() => setSuccess(null), 5000);
+   149→    } catch (e) { setError(e instanceof Error ? e.message : "Upload gagal"); }
+   150→    finally { setUploading(false); }
+   151→  };
+   152→
+   153→  const handleDelete = async (id: string, title: string) => {
+   154→    if (!confirm(`Hapus foto "${title}"? Tindakan ini tidak bisa dibatalkan.`)) return;
+   155→    setDeletingId(id);
+   156→    try {
+   157→      const res = await chaosFetch(`/api/gallery?id=${id}`, { method: "DELETE" });
+   158→      const d = await res.json();
+   159→      if (!res.ok) throw new Error(d.error || "Gagal hapus");
+   160→      setSuccess(`✓ Foto "${title}" dihapus.`);
+   161→      refetch(); play("close");
+   162→      setTimeout(() => setSuccess(null), 3000);
+   163→    } catch (e) {
+   164→      setError(e instanceof Error ? e.message : "Gagal hapus foto");
+   165→    } finally {
+   166→      setDeletingId(null);
+   167→    }
+   168→  };
+   169→
+   170→  const isDbPhoto = (id: string) => !id.startsWith("g") || id.length > 3;
+   171→
+   172→  return (
+   173→    <div className="space-y-4">
+   174→      {/* Upload form */}
+   175→      <div className="border-8 border-[#ff00ff] bg-black p-6 shadow-[12px_12px_0_#ff00ff]">
+   176→        <h2 className="font-bebas text-4xl text-[#ff00ff] mb-4 flex items-center gap-2">
+   177→          <Upload className="w-8 h-8" /> UPLOAD GALLERY PHOTO
+   178→        </h2>
+   179→        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+   180→          <div className="space-y-3">
+   181→            <label className="block">
+   182→              <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">FOTO *</span>
+   183→              <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+   184→                className="block w-full mt-1 text-xs font-mono-ud text-white file:mr-3 file:py-2 file:px-4 file:border-2 file:border-[#d4ff00] file:bg-[#d4ff00] file:text-black file:font-bold file:cursor-pointer file:hover:bg-[#ff00ff] file:hover:text-white" />
+   185→            </label>
+   186→            <label className="block">
+   187→              <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">JUDUL *</span>
+   188→              <input value={title} onChange={(e) => setTitle(e.target.value.slice(0, 40))} placeholder="VISI AWAL"
+   189→                className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   190→            </label>
+   191→          </div>
+   192→          <div className="space-y-3">
+   193→            <label className="block">
+   194→              <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">OLEH</span>
+   195→              <input value={author} onChange={(e) => setAuthor(e.target.value.slice(0, 30))} placeholder="ALDI"
+   196→                className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   197→            </label>
+   198→            <label className="block">
+   199→              <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">TAHUN</span>
+   200→              <input value={date} onChange={(e) => setDate(e.target.value)}
+   201→                className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   202→            </label>
+   203→          </div>
+   204→        </div>
+   205→        {error && <div className="mt-4 bg-[#ff4d4d] text-white px-3 py-2 border-2 border-white font-mono-ud text-xs font-bold">! {error}</div>}
+   206→        {success && <div className="mt-4 bg-[#00ff00] text-black px-3 py-2 border-2 border-black font-mono-ud text-xs font-bold">{success}</div>}
+   207→        <button onClick={handleUpload} disabled={uploading}
+   208→          className={cn("mt-4 w-full font-bebas text-3xl py-4 border-4 border-[#d4ff00] flex items-center justify-center gap-2 transition-all no-color-transition",
+   209→            uploading ? "bg-[#1a1a1a] text-white/50 cursor-wait" : "bg-[#d4ff00] text-black hover:-translate-y-1 hover:bg-[#ff00ff] hover:text-white hover:border-white")}>
+   210→          {uploading ? <><Loader2 className="w-6 h-6 animate-spin" /> UPLOADING...</> : <><Upload className="w-6 h-6" /> UPLOAD TO GALLERY</>}
+   211→        </button>
+   212→      </div>
+   213→
+   214→      {/* Gallery archive — dynamic masonry layout */}
+   215→      <div className="border-4 border-[#00e5ff] bg-[#1a1a1a] p-4 shadow-[8px_8px_0_#00e5ff]">
+   216→        <div className="flex items-center justify-between mb-3">
+   217→          <h3 className="font-bebas text-2xl text-[#00e5ff] flex items-center gap-2">
+   218→            <ImageIcon className="w-5 h-5" /> GALLERY ARCHIVE ({photos.length})
+   219→          </h3>
+   220→          <button onClick={() => { play("click"); refetch(); }} className="font-mono-ud text-xs font-black bg-[#00e5ff] text-black px-3 py-1 border-2 border-[#00e5ff] hover:bg-transparent hover:text-[#00e5ff] transition-colors no-color-transition">↻ REFRESH</button>
+   221→        </div>
+   222→        <p className="font-mono-ud text-[10px] text-white/40 mb-3 tracking-wider">
+   223→          ▸ Dynamic masonry layout — photos display in their natural aspect ratio (9:16, 16:9, 1:1, 4:3)
+   224→        </p>
+   225→        {/* Masonry: CSS columns break naturally, images keep original aspect ratio */}
+   226→        <div className="columns-2 sm:columns-3 md:columns-4 gap-3 max-h-[600px] overflow-y-auto">
+   227→          {photos.map((p) => {
+   228→            const canEdit = isDbPhoto(p.id);
+   229→            return (
+   230→              <div key={p.id} className="break-inside-avoid mb-3 border-2 border-[#00e5ff]/30 p-2 bg-black/50 relative group">
+   231→                {/* Image — natural aspect ratio (no forced square) */}
+   232→                <img
+   233→                  src={p.img}
+   234→                  alt={p.title}
+   235→                  className="w-full h-auto object-cover"
+   236→                  loading="lazy"
+   237→                />
+   238→                {/* Info overlay */}
+   239→                <div className="mt-1.5">
+   240→                  <div className="font-mono-ud text-[10px] text-[#00e5ff] truncate font-bold">{p.title}</div>
+   241→                  <div className="font-mono-ud text-[8px] text-white/40">{p.author} · {p.date}</div>
+   242→                </div>
+   243→                {/* CRUD buttons — always visible on mobile, hover on desktop */}
+   244→                {canEdit ? (
+   245→                  <div className="absolute top-2 right-2 flex gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+   246→                    <button
+   247→                      onClick={() => setEditingPhoto(p)}
+   248→                      className="bg-[#00e5ff] text-black p-2 border-2 border-white hover:bg-[#00b8cc] transition-colors no-color-transition"
+   249→                      title="Edit photo"
+   250→                      aria-label="Edit photo"
+   251→                    >
+   252→                      <Edit3 className="w-4 h-4" />
+   253→                    </button>
+   254→                    <button
+   255→                      onClick={() => handleDelete(p.id, p.title)}
+   256→                      disabled={deletingId === p.id}
+   257→                      className="bg-[#ff4d4d] text-white p-2 border-2 border-white hover:bg-[#ff0000] disabled:opacity-50 transition-colors no-color-transition"
+   258→                      title="Delete photo"
+   259→                      aria-label="Delete photo"
+   260→                    >
+   261→                      {deletingId === p.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+   262→                    </button>
+   263→                  </div>
+   264→                ) : (
+   265→                  <div className="absolute top-2 right-2 bg-black/70 text-white/60 px-2 py-1 font-mono-ud text-[9px] font-bold border border-white/30">SEED</div>
+   266→                )}
+   267→              </div>
+   268→            );
+   269→          })}
+   270→        </div>
+   271→      </div>
+   272→
+   273→      {/* Edit modal */}
+   274→      {editingPhoto && (
+   275→        <EditPhotoModal
+   276→          photo={editingPhoto}
+   277→          onClose={() => setEditingPhoto(null)}
+   278→          onSaved={() => { setEditingPhoto(null); refetch(); }}
+   279→        />
+   280→      )}
+   281→    </div>
+   282→  );
+   283→}
+   284→
+   285→// ── Edit Photo Modal ────────────────────────────────────────────────────────
+   286→function EditPhotoModal({ photo, onClose, onSaved }: { photo: GalleryPhoto; onClose: () => void; onSaved: () => void }) {
+   287→  const { chaosFetch } = useChaosFetch();
+   288→  const { play } = useSfx();
+   289→  const [title, setTitle] = useState(photo.title);
+   290→  const [author, setAuthor] = useState(photo.author);
+   291→  const [date, setDate] = useState(photo.date);
+   292→  const [saving, setSaving] = useState(false);
+   293→  const [error, setError] = useState<string | null>(null);
+   294→
+   295→  const handleSave = async () => {
+   296→    if (!title.trim()) { setError("Judul wajib diisi."); return; }
+   297→    setSaving(true); setError(null);
+   298→    try {
+   299→      const res = await chaosFetch("/api/gallery", {
+   300→        method: "PUT",
+   301→        body: JSON.stringify({ id: photo.id, title, author, date }),
+   302→      });
+   303→      const d = await res.json();
+   304→      if (!res.ok) throw new Error(d.error || "Gagal update");
+   305→      play("submit");
+   306→      onSaved();
+   307→    } catch (e) {
+   308→      setError(e instanceof Error ? e.message : "Gagal update foto");
+   309→    } finally {
+   310→      setSaving(false);
+   311→    }
+   312→  };
+   313→
+   314→  return (
+   315→    <div
+   316→      className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-start justify-center p-3 md:p-6 pt-4 md:pt-8 overflow-y-auto"
+   317→      onClick={onClose}
+   318→    >
+   319→      {/* Relative wrapper — X button anchors to this */}
+   320→      <div className="relative w-full max-w-md my-auto">
+   321→        {/* X Close — absolute to wrapper, top-right corner */}
+   322→        <button
+   323→          onClick={onClose}
+   324→          className="absolute -top-4 -right-4 z-30 w-10 h-10 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-white shadow-[4px_4px_0_#000] hover:rotate-90 transition-transform no-color-transition"
+   325→          aria-label="Close"
+   326→        >
+   327→          <X className="w-5 h-5" />
+   328→        </button>
+   329→        <div
+   330→          className="bg-[#1a1a1a] border-4 border-[#00e5ff] p-6 shadow-[8px_8px_0_#00e5ff] max-h-[90vh] overflow-y-auto"
+   331→          onClick={(e) => e.stopPropagation()}
+   332→        >
+   333→          <h3 className="font-bebas text-3xl text-[#00e5ff] mb-4 flex items-center gap-2">
+   334→            <Edit3 className="w-6 h-6" /> EDIT PHOTO
+   335→          </h3>
+   336→          {/* Preview */}
+   337→          <img src={photo.img} alt={photo.title} className="w-full max-h-48 object-contain mb-4 border-2 border-white/20" />
+   338→          <div className="space-y-3">
+   339→            <label className="block">
+   340→              <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">JUDUL</span>
+   341→              <input value={title} onChange={(e) => setTitle(e.target.value.slice(0, 40))}
+   342→                className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-black text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   343→            </label>
+   344→            <label className="block">
+   345→              <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">OLEH</span>
+   346→              <input value={author} onChange={(e) => setAuthor(e.target.value.slice(0, 30))}
+   347→                className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-black text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   348→            </label>
+   349→            <label className="block">
+   350→              <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">TAHUN</span>
+   351→              <input value={date} onChange={(e) => setDate(e.target.value)}
+   352→                className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-black text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   353→            </label>
+   354→            {error && <div className="bg-[#ff4d4d] text-white px-3 py-2 border-2 border-white font-mono-ud text-xs font-bold">! {error}</div>}
+   355→            <div className="flex gap-2 pt-2">
+   356→              <button onClick={onClose} className="flex-1 bg-transparent text-white font-bebas text-xl py-3 border-2 border-white/30 hover:border-white hover:bg-white/5 transition-colors no-color-transition">
+   357→                CANCEL
+   358→              </button>
+   359→              <button onClick={handleSave} disabled={saving}
+   360→                className="flex-1 bg-[#00e5ff] text-black font-bebas text-xl py-3 border-2 border-[#00e5ff] hover:bg-[#00b8cc] disabled:opacity-50 transition-colors no-color-transition flex items-center justify-center gap-2">
+   361→                {saving ? <><Loader2 className="w-5 h-5 animate-spin" /> SAVING...</> : <>✓ SAVE</>}
+   362→              </button>
+   363→            </div>
+   364→          </div>
+   365→        </div>
+   366→      </div>
+   367→    </div>
+   368→  );
+   369→}
+   370→
+   371→// ── Members Management Tab (chaos-editable member profiles) ─────────────────
+   372→function MembersTab() {
+   373→  const { data, refetch } = useFetch<{ members: Member[] }>("/api/members");
+   374→  const { chaosFetch } = useChaosFetch();
+   375→  const { play } = useSfx();
+   376→  const members = data?.members ?? [];
+   377→
+   378→  const [selectedSlug, setSelectedSlug] = useState<string>("");
+   379→  const [name, setName] = useState("");
+   380→  const [nick, setNick] = useState("");
+   381→  const [role, setRole] = useState("");
+   382→  const [img, setImg] = useState("");
+   383→  const [color, setColor] = useState("#ff4d4d");
+   384→  const [highlight, setHighlight] = useState("#ff4d4d");
+   385→  const [bio, setBio] = useState("");
+   386→  const [tagline, setTagline] = useState("");
+   387→  const [quote, setQuote] = useState("");
+   388→  const [element, setElement] = useState("");
+   389→  const [joinYear, setJoinYear] = useState("2020");
+   390→  const [stats, setStats] = useState<{ label: string; value: string }[]>(
+   391→    Array.from({ length: 6 }, (_, i) => ({
+   392→      label: ["STR", "DEX", "CON", "INT", "WIS", "CHA"][i] ?? "",
+   393→      value: "10",
+   394→    })),
+   395→  );
+   396→  const [socials, setSocials] = useState<{ label: string; href: string }[]>(
+   397→    Array.from({ length: 3 }, () => ({ label: "", href: "" })),
+   398→  );
+   399→  const [funFactsText, setFunFactsText] = useState("");
+   400→  const [saving, setSaving] = useState(false);
+   401→  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+   402→  const [error, setError] = useState<string | null>(null);
+   403→  const [success, setSuccess] = useState<string | null>(null);
+   404→
+   405→  // When the members list loads (or changes), default to the first member.
+   406→  const firstSlug = members[0]?.id ?? "";
+   407→  useEffect(() => {
+   408→    if (!selectedSlug && firstSlug) {
+   409→      setSelectedSlug(firstSlug);
+   410→    }
+   411→  }, [firstSlug, selectedSlug]);
+   412→
+   413→  // Hydrate the form whenever the selected member changes.
+   414→  useEffect(() => {
+   415→    if (!selectedSlug) return;
+   416→    const m = members.find((x) => x.id === selectedSlug);
+   417→    if (!m) return;
+   418→    setName(m.name);
+   419→    setNick(m.nick);
+   420→    setRole(m.role);
+   421→    setImg(m.img);
+   422→    // Extract hex color from bg-[#hex] / text-[#hex] utility classes
+   423→    const extractHex = (cls: string) => {
+   424→      const match = cls.match(/#([0-9a-fA-F]{3,8})/);
+   425→      return match ? `#${match[1]}` : "#ff4d4d";
+   426→    };
+   427→    setColor(extractHex(m.color));
+   428→    setHighlight(extractHex(m.highlight));
+   429→    setBio(m.bio);
+   430→    setTagline(m.tagline);
+   431→    setQuote(m.quote);
+   432→    setElement(m.element);
+   433→    setJoinYear(m.joinYear);
+   434→    // Pad stats to 6 entries
+   435→    const paddedStats = Array.from({ length: 6 }, (_, i) => ({
+   436→      label: m.stats[i]?.label ?? ["STR", "DEX", "CON", "INT", "WIS", "CHA"][i] ?? "",
+   437→      value: m.stats[i]?.value ?? "10",
+   438→    }));
+   439→    setStats(paddedStats);
+   440→    // Pad socials to 3 entries
+   441→    const paddedSocials = Array.from({ length: 3 }, (_, i) => ({
+   442→      label: m.socials[i]?.label ?? "",
+   443→      href: m.socials[i]?.href ?? "",
+   444→    }));
+   445→    setSocials(paddedSocials);
+   446→    setFunFactsText(m.funFacts.join("\n"));
+   447→    setError(null);
+   448→    setSuccess(null);
+   449→  }, [selectedSlug, members]);
+   450→
+   451→  const updateStat = (i: number, key: "label" | "value", v: string) => {
+   452→    setStats((prev) => prev.map((s, idx) => (idx === i ? { ...s, [key]: v } : s)));
+   453→  };
+   454→  const updateSocial = (i: number, key: "label" | "href", v: string) => {
+   455→    setSocials((prev) => prev.map((s, idx) => (idx === i ? { ...s, [key]: v } : s)));
+   456→  };
+   457→
+   458→  const handleSave = async () => {
+   459→    if (!selectedSlug) { setError("Pilih member dulu."); return; }
+   460→    if (!name.trim() || !nick.trim()) { setError("Name dan nick wajib diisi."); return; }
+   461→    setSaving(true); setError(null); setSuccess(null);
+   462→    try {
+   463→      const funFacts = funFactsText
+   464→        .split("\n")
+   465→        .map((s) => s.trim())
+   466→        .filter(Boolean)
+   467→        .slice(0, 8);
+   468→      const payload = {
+   469→        name: name.trim(),
+   470→        nick: nick.trim(),
+   471→        role: role.trim(),
+   472→        img: img.trim(),
+   473→        color: `bg-[${color}]`,
+   474→        highlight: `text-[${highlight}]`,
+   475→        bio: bio.trim(),
+   476→        tagline: tagline.trim(),
+   477→        quote: quote.trim(),
+   478→        element: element.trim().toUpperCase(),
+   479→        joinYear: joinYear.trim(),
+   480→        stats: stats.filter((s) => s.label && s.value),
+   481→        socials: socials.filter((s) => s.label && s.href),
+   482→        funFacts,
+   483→      };
+   484→      const res = await chaosFetch(`/api/members/${encodeURIComponent(selectedSlug)}`, {
+   485→        method: "PUT",
+   486→        body: JSON.stringify(payload),
+   487→      });
+   488→      const d = await res.json();
+   489→      if (!res.ok) throw new Error(d.error || d.message || "Gagal update member");
+   490→      setSuccess(`✓ ${d.member?.nick ?? nick} updated!`);
+   491→      refetch(); play("submit");
+   492→      setTimeout(() => setSuccess(null), 5000);
+   493→    } catch (e) {
+   494→      setError(e instanceof Error ? e.message : "Gagal update member");
+   495→    } finally {
+   496→      setSaving(false);
+   497→    }
+   498→  };
+   499→
+   500→  const STAT_LABELS = ["STR", "DEX", "CON", "INT", "WIS", "CHA"];
+   501→
+   502→  return (
+   503→    <div className="space-y-4">
+   504→      {/* Member selector + edit form */}
+   505→      <div className="border-8 border-[#d4ff00] bg-black p-6 shadow-[12px_12px_0_#d4ff00]">
+   506→        <h2 className="font-bebas text-4xl text-[#d4ff00] mb-4 flex items-center gap-2">
+   507→          <Users className="w-8 h-8" /> EDIT MEMBER PROFILE
+   508→        </h2>
+   509→        <p className="font-mono-ud text-[10px] text-white/40 mb-4 tracking-wider">
+   510→          ▸ Changes here update the live member cards + detail modal on the About page.
+   511→          <br />▸ Slug is the unique identifier (aldi, razka, reza, abyan, rasya, rifqi, dudit).
+   512→        </p>
+   513→
+   514→        {/* Member selector */}
+   515→        <label className="block mb-4">
+   516→          <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">SELECT MEMBER</span>
+   517→          <select
+   518→            value={selectedSlug}
+   519→            onChange={(e) => { play("click"); setSelectedSlug(e.target.value); }}
+   520→            className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]"
+   521→          >
+   522→            {members.length === 0 && <option value="">Loading members…</option>}
+   523→            {members.map((m) => (
+   524→              <option key={m.id} value={m.id}>
+   525→                {m.id.toUpperCase()} · {m.nick} ({m.role})
+   526→              </option>
+   527→            ))}
+   528→          </select>
+   529→        </label>
+   530→
+   531→        {/* Basic identity */}
+   532→        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+   533→          <label className="block">
+   534→            <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">NAME</span>
+   535→            <input value={name} onChange={(e) => setName(e.target.value.slice(0, 100))}
+   536→              className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   537→          </label>
+   538→          <label className="block">
+   539→            <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">NICK</span>
+   540→            <input value={nick} onChange={(e) => setNick(e.target.value.slice(0, 50))}
+   541→              className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   542→          </label>
+   543→          <label className="block">
+   544→            <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">ROLE (e.g. THE FOUNDER)</span>
+   545→            <input value={role} onChange={(e) => setRole(e.target.value.slice(0, 80))}
+   546→              className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   547→          </label>
+   548→          <label className="block">
+   549→            <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">PHOTO</span>
+   550→            <div className="mt-1 space-y-2">
+   551→              {/* Photo preview */}
+   552→              {img && (
+   553→                <div className="relative w-full max-w-[120px] aspect-[3/4] border-2 border-[#d4ff00]/40 overflow-hidden bg-black">
+   554→                  <img src={img} alt="Member preview" className="w-full h-full object-cover" />
+   555→                </div>
+   556→              )}
+   557→              {/* Upload button */}
+   558→              <label className="block">
+   559→                <span className="font-mono-ud text-[10px] text-[#d4ff00]/60">▸ Upload photo (auto-convert, max 8MB):</span>
+   560→                <input
+   561→                  type="file"
+   562→                  accept="image/*"
+   563→                  onChange={async (e) => {
+   564→                    const f = e.target.files?.[0];
+   565→                    if (!f) return;
+   566→                    setUploadingPhoto(true);
+   567→                    try {
+   568→                      const form = new FormData();
+   569→                      form.append("file", f);
+   570→                      const res = await chaosFetch("/api/members/upload", { method: "POST", body: form });
+   571→                      const d = await res.json();
+   572→                      if (!res.ok) throw new Error(d.error || "Upload gagal");
+   573→                      setImg(d.url);
+   574→                      setSuccess(`✓ Photo uploaded (${d.sizeKb}KB)`);
+   575→                      play("submit");
+   576→                      setTimeout(() => setSuccess(null), 3000);
+   577→                    } catch (err) {
+   578→                      setError(err instanceof Error ? err.message : "Upload gagal");
+   579→                    } finally {
+   580→                      setUploadingPhoto(false);
+   581→                    }
+   582→                  }}
+   583→                  className="block w-full text-xs font-mono-ud text-white file:mr-3 file:py-2 file:px-4 file:border-2 file:border-[#d4ff00] file:bg-[#d4ff00] file:text-black file:font-bold file:cursor-pointer file:hover:bg-[#ff00ff] file:hover:text-white"
+   584→                />
+   585→              </label>
+   586→              {/* Manual URL fallback */}
+   587→              <input value={img} onChange={(e) => setImg(e.target.value.slice(0, 500))}
+   588→                placeholder="/members/opening.webp (atau paste URL)"
+   589→                className="block w-full px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   590→            </div>
+   591→          </label>
+   592→        </div>
+   593→
+   594→        {/* Color + element + join year */}
+   595→        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+   596→          <label className="block">
+   597→            <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">COLOR</span>
+   598→            <input type="color" value={color} onChange={(e) => setColor(e.target.value)}
+   599→              className="block w-full mt-1 h-10 border-2 border-[#d4ff00] bg-transparent cursor-pointer" />
+   600→          </label>
+   601→          <label className="block">
+   602→            <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">HIGHLIGHT</span>
+   603→            <input type="color" value={highlight} onChange={(e) => setHighlight(e.target.value)}
+   604→              className="block w-full mt-1 h-10 border-2 border-[#d4ff00] bg-transparent cursor-pointer" />
+   605→          </label>
+   606→          <label className="block">
+   607→            <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">ELEMENT</span>
+   608→            <input value={element} onChange={(e) => setElement(e.target.value.slice(0, 30))}
+   609→              placeholder="FIRE / ICE / VOID…"
+   610→              className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   611→          </label>
+   612→          <label className="block">
+   613→            <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">JOIN YEAR</span>
+   614→            <input value={joinYear} onChange={(e) => setJoinYear(e.target.value.slice(0, 10))}
+   615→              className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   616→          </label>
+   617→        </div>
+   618→
+   619→        {/* Bio + tagline + quote */}
+   620→        <label className="block mb-3">
+   621→          <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">
+   622→            BIO
+   623→          </span>
+   624→          <span className="font-mono-ud text-[10px] text-[#d4ff00]/60 block mb-1">
+   625→            ▸ Tip: Wrap teks dengan **double asterisk** untuk warna highlight. Contoh: "Ini **bagian berwarna** di bio."
+   626→          </span>
+   627→          <textarea value={bio} onChange={(e) => setBio(e.target.value.slice(0, 2000))} rows={4}
+   628→            placeholder="Bio member. Gunakan **teks** untuk highlight warna."
+   629→            className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm resize-none focus:outline-none focus:border-[#ff00ff]" />
+   630→        </label>
+   631→        <label className="block mb-3">
+   632→          <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">TAGLINE (short one-liner)</span>
+   633→          <input value={tagline} onChange={(e) => setTagline(e.target.value.slice(0, 200))}
+   634→            className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   635→        </label>
+   636→        <label className="block mb-3">
+   637→          <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">QUOTE (personal quote)</span>
+   638→          <textarea value={quote} onChange={(e) => setQuote(e.target.value.slice(0, 600))} rows={2}
+   639→            className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm resize-none focus:outline-none focus:border-[#ff00ff]" />
+   640→        </label>
+   641→
+   642→        {/* Stats grid (6) */}
+   643→        <div className="mb-3">
+   644→          <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider block mb-1">
+   645→            D&D STATS (6 — STR/DEX/CON/INT/WIS/CHA)
+   646→          </span>
+   647→          <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
+   648→            {stats.map((s, i) => (
+   649→              <div key={i} className="border-2 border-[#d4ff00]/40 p-2 bg-[#1a1a1a]">
+   650→                <input value={s.label} onChange={(e) => updateStat(i, "label", e.target.value.slice(0, 8))}
+   651→                  placeholder={STAT_LABELS[i]}
+   652→                  className="block w-full px-2 py-1 bg-black border border-[#d4ff00]/30 text-[#d4ff00] font-mono-ud text-xs text-center focus:outline-none focus:border-[#ff00ff]" />
+   653→                <input value={s.value} onChange={(e) => updateStat(i, "value", e.target.value.slice(0, 6))}
+   654→                  type="number" min={0} max={99}
+   655→                  className="block w-full mt-1 px-2 py-1 bg-black border border-[#d4ff00]/30 text-white font-bebas text-xl text-center focus:outline-none focus:border-[#ff00ff]" />
+   656→              </div>
+   657→            ))}
+   658→          </div>
+   659→        </div>
+   660→
+   661→        {/* Socials (3) */}
+   662→        <div className="mb-3">
+   663→          <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider block mb-1">
+   664→            SOCIALS (3 rows)
+   665→          </span>
+   666→          <span className="font-mono-ud text-[10px] text-[#d4ff00]/60 block mb-2">
+   667→            ▸ Isi label (mis. INSTAGRAM) + URL lengkap (mis. https://instagram.com/username)
+   668→          </span>
+   669→          <div className="space-y-2">
+   670→            {socials.map((s, i) => (
+   671→              <div key={i} className="grid grid-cols-1 md:grid-cols-3 gap-2">
+   672→                <input value={s.label} onChange={(e) => updateSocial(i, "label", e.target.value.slice(0, 30))}
+   673→                  placeholder="INSTAGRAM"
+   674→                  className="px-2 py-1.5 border-2 border-[#d4ff00]/40 bg-[#1a1a1a] text-white font-mono-ud text-xs focus:outline-none focus:border-[#ff00ff]" />
+   675→                <input value={s.href} onChange={(e) => updateSocial(i, "href", e.target.value.slice(0, 200))}
+   676→                  placeholder="https://instagram.com/username"
+   677→                  className="md:col-span-2 px-2 py-1.5 border-2 border-[#d4ff00]/40 bg-[#1a1a1a] text-white font-mono-ud text-xs focus:outline-none focus:border-[#ff00ff]" />
+   678→              </div>
+   679→            ))}
+   680→          </div>
+   681→        </div>
+   682→
+   683→        {/* Fun facts */}
+   684→        <label className="block mb-3">
+   685→          <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">
+   686→            FUN FACTS
+   687→          </span>
+   688→          <span className="font-mono-ud text-[10px] text-[#d4ff00]/60 block mb-1">
+   689→            ▸ Satu fact per baris — tekan Enter untuk tambah fact baru (max 8).
+   690→          </span>
+   691→          <textarea value={funFactsText} onChange={(e) => setFunFactsText(e.target.value)} rows={5}
+   692→            placeholder={"Selalu jadi orang pertama yang online di grup\nPemilik rekor 'paling sering ngajak nongkrong'\nPunya playlist spotify untuk tiap mood"}
+   693→            className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm resize-none focus:outline-none focus:border-[#ff00ff]" />
+   694→        </label>
+   695→
+   696→        {error && (
+   697→          <div className="bg-[#ff4d4d] text-white px-3 py-2 border-2 border-white font-mono-ud text-xs font-bold flex items-center gap-2 mb-3">
+   698→            <XCircle className="w-4 h-4" /> {error}
+   699→          </div>
+   700→        )}
+   701→        {success && (
+   702→          <div className="bg-[#00ff00] text-black px-3 py-2 border-2 border-black font-mono-ud text-xs font-bold flex items-center gap-2 mb-3">
+   703→            <CheckCircle className="w-4 h-4" /> {success}
+   704→          </div>
+   705→        )}
+   706→
+   707→        <button onClick={handleSave} disabled={saving || !selectedSlug}
+   708→          className={cn("w-full font-bebas text-3xl py-4 border-4 border-[#d4ff00] flex items-center justify-center gap-2 transition-all no-color-transition",
+   709→            saving ? "bg-[#1a1a1a] text-white/50 cursor-wait" : "bg-[#d4ff00] text-black hover:-translate-y-1 hover:bg-[#ff00ff] hover:text-white hover:border-white")}>
+   710→          {saving ? <><Loader2 className="w-6 h-6 animate-spin" /> SAVING...</> : <><Users className="w-6 h-6" /> SAVE MEMBER PROFILE</>}
+   711→        </button>
+   712→      </div>
+   713→
+   714→      {/* Member preview list */}
+   715→      <div className="border-4 border-[#00e5ff] bg-[#1a1a1a] p-4 shadow-[8px_8px_0_#00e5ff]">
+   716→        <div className="flex items-center justify-between mb-3">
+   717→          <h3 className="font-bebas text-2xl text-[#00e5ff] flex items-center gap-2">
+   718→            <Users className="w-5 h-5" /> MEMBERS ({members.length})
+   719→          </h3>
+   720→          <button onClick={() => { play("click"); refetch(); }}
+   721→            className="font-mono-ud text-xs font-black bg-[#00e5ff] text-black px-3 py-1 border-2 border-[#00e5ff] hover:bg-transparent hover:text-[#00e5ff] transition-colors no-color-transition">
+   722→            ↻ REFRESH
+   723→          </button>
+   724→        </div>
+   725→        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-h-[400px] overflow-y-auto">
+   726→          {members.map((m) => (
+   727→            <button
+   728→              key={m.id}
+   729→              onClick={() => { play("click"); setSelectedSlug(m.id); }}
+   730→              className={cn(
+   731→                "border-2 p-2 bg-black/50 text-left transition-colors no-color-transition",
+   732→                selectedSlug === m.id ? "border-[#ff00ff]" : "border-[#00e5ff]/30 hover:border-[#00e5ff]",
+   733→              )}
+   734→            >
+   735→              <div className="aspect-square w-full overflow-hidden border border-white/10">
+   736→                <img src={m.img} alt={m.nick} className="w-full h-full object-cover grayscale" loading="lazy" />
+   737→              </div>
+   738→              <div className="mt-1.5">
+   739→                <div className="font-bebas text-lg text-white leading-none">{m.nick}</div>
+   740→                <div className="font-mono-ud text-[9px] text-[#00e5ff]">{m.id.toUpperCase()} · {m.role}</div>
+   741→                <div className="font-mono-ud text-[8px] text-white/40 mt-0.5">EL: {m.element || "—"} · {m.joinYear}</div>
+   742→              </div>
+   743→            </button>
+   744→          ))}
+   745→        </div>
+   746→      </div>
+   747→    </div>
+   748→  );
+   749→}
+   750→
+   751→// ── News Management Tab (CRUD) ──────────────────────────────────────────────
+   752→type NewsArticle = {
+   753→  id: string;
+   754→  title: string;
+   755→  body: string;
+   756→  category: string;
+   757→  author: string;
+   758→  img: string | null;
+   759→  pinned: boolean;
+   760→  createdAt: string;
+   761→};
+   762→
+   763→function NewsTab() {
+   764→  const { data, refetch } = useFetch<{ articles: NewsArticle[]; count: number }>("/api/news");
+   765→  const { chaosFetch } = useChaosFetch();
+   766→  const [title, setTitle] = useState("");
+   767→  const [body, setBody] = useState("");
+   768→  const [category, setCategory] = useState("UPDATE");
+   769→  const [author, setAuthor] = useState("");
+   770→  const [error, setError] = useState<string | null>(null);
+   771→  const [success, setSuccess] = useState<string | null>(null);
+   772→  const [deletingId, setDeletingId] = useState<string | null>(null);
+   773→  const { play } = useSfx();
+   774→  const articles = data?.articles ?? [];
+   775→
+   776→  const handleCreate = async () => {
+   777→    if (!title.trim() || !body.trim()) { setError("Title dan body wajib diisi."); return; }
+   778→    setError(null); setSuccess(null);
+   779→    try {
+   780→      const res = await chaosFetch("/api/news", {
+   781→        method: "POST",
+   782→        body: JSON.stringify({ title, body, category, author: author || "THE COLLECTIVE" }),
+   783→      });
+   784→      const d = await res.json();
+   785→      if (!res.ok) throw new Error(d.error || "Gagal membuat artikel");
+   786→      setSuccess(`✓ Artikel "${d.title}" dipublikasikan!`);
+   787→      setTitle(""); setBody(""); setAuthor(""); refetch(); play("submit");
+   788→      setTimeout(() => setSuccess(null), 4000);
+   789→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+   790→  };
+   791→
+   792→  const handleDelete = async (id: string, title: string) => {
+   793→    if (!confirm(`Hapus artikel "${title}"?`)) return;
+   794→    setDeletingId(id);
+   795→    try {
+   796→      const res = await chaosFetch(`/api/news?id=${id}`, { method: "DELETE" });
+   797→      if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+   798→      setSuccess(`✓ Artikel dihapus.`);
+   799→      refetch(); play("close");
+   800→      setTimeout(() => setSuccess(null), 3000);
+   801→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+   802→    finally { setDeletingId(null); }
+   803→  };
+   804→
+   805→  const togglePin = async (article: NewsArticle) => {
+   806→    try {
+   807→      const res = await chaosFetch("/api/news", {
+   808→        method: "PUT",
+   809→        body: JSON.stringify({ id: article.id, pinned: !article.pinned }),
+   810→      });
+   811→      if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+   812→      refetch(); play("click");
+   813→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+   814→  };
+   815→
+   816→  const CATEGORIES = ["UPDATE", "EVENT", "CHAOS", "MILESTONE", "NOTICE"];
+   817→  const CAT_COLORS: Record<string, string> = {
+   818→    UPDATE: "#00e5ff", EVENT: "#ff4d4d", CHAOS: "#ff00ff",
+   819→    MILESTONE: "#d4ff00", NOTICE: "#ff8c00",
+   820→  };
+   821→
+   822→  return (
+   823→    <div className="space-y-4">
+   824→      {/* Create form */}
+   825→      <div className="border-8 border-[#00e5ff] bg-black p-6 shadow-[12px_12px_0_#00e5ff]">
+   826→        <h2 className="font-bebas text-4xl text-[#00e5ff] mb-4 flex items-center gap-2">
+   827→          <Newspaper className="w-8 h-8" /> PUBLISH NEWS ARTICLE
+   828→        </h2>
+   829→        <div className="space-y-3">
+   830→          <input value={title} onChange={(e) => setTitle(e.target.value.slice(0, 80))}
+   831→            placeholder="ARTICLE TITLE *"
+   832→            className="block w-full px-3 py-2 border-2 border-[#00e5ff] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   833→          <textarea value={body} onChange={(e) => setBody(e.target.value.slice(0, 500))}
+   834→            placeholder="ARTICLE BODY * (max 500 chars)" rows={3}
+   835→            className="block w-full px-3 py-2 border-2 border-[#00e5ff] bg-[#1a1a1a] text-white font-mono-ud text-sm resize-none focus:outline-none focus:border-[#ff00ff]" />
+   836→          <div className="grid grid-cols-2 gap-3">
+   837→            <select value={category} onChange={(e) => setCategory(e.target.value)}
+   838→              className="px-3 py-2 border-2 border-[#00e5ff] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]">
+   839→              {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+   840→            </select>
+   841→            <input value={author} onChange={(e) => setAuthor(e.target.value.slice(0, 30))}
+   842→              placeholder="AUTHOR (default: THE COLLECTIVE)"
+   843→              className="px-3 py-2 border-2 border-[#00e5ff] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   844→          </div>
+   845→          {error && <div className="bg-[#ff4d4d] text-white px-3 py-2 border-2 border-white font-mono-ud text-xs font-bold">! {error}</div>}
+   846→          {success && <div className="bg-[#00ff00] text-black px-3 py-2 border-2 border-black font-mono-ud text-xs font-bold">{success}</div>}
+   847→          <button onClick={handleCreate}
+   848→            className="w-full bg-[#00e5ff] text-black font-bebas text-2xl py-3 border-2 border-[#00e5ff] hover:bg-transparent hover:text-[#00e5ff] transition-colors no-color-transition">
+   849→            <Newspaper className="w-5 h-5 inline mr-2" /> PUBLISH ARTICLE
+   850→          </button>
+   851→        </div>
+   852→      </div>
+   853→
+   854→      {/* Articles list with delete/pin */}
+   855→      <div className="border-4 border-[#ff00ff] bg-[#1a1a1a] p-4 shadow-[8px_8px_0_#ff00ff]">
+   856→        <div className="flex items-center justify-between mb-3">
+   857→          <h3 className="font-bebas text-2xl text-[#ff00ff] flex items-center gap-2">
+   858→            <Newspaper className="w-5 h-5" /> ARTICLES ({articles.length})
+   859→          </h3>
+   860→          <button onClick={() => { play("click"); refetch(); }} className="font-mono-ud text-xs font-black bg-[#ff00ff] text-black px-3 py-1 border-2 border-[#ff00ff] hover:bg-transparent hover:text-[#ff00ff] transition-colors no-color-transition">↻ REFRESH</button>
+   861→        </div>
+   862→        <div className="space-y-2 max-h-[500px] overflow-y-auto">
+   863→          {articles.length === 0 && (
+   864→            <div className="text-center py-8 font-mono-ud text-xs text-white/40">No articles yet. Create one above!</div>
+   865→          )}
+   866→          {articles.map((a) => (
+   867→            <div key={a.id} className="border-2 border-[#ff00ff]/30 p-3 bg-black/50 group">
+   868→              <div className="flex items-start justify-between gap-2">
+   869→                <div className="flex-1 min-w-0">
+   870→                  <div className="flex items-center gap-2 mb-1">
+   871→                    <span className="font-mono-ud text-[9px] font-black px-1.5 py-0.5 border"
+   872→                      style={{ color: CAT_COLORS[a.category] || "#fff", borderColor: CAT_COLORS[a.category] || "#fff" }}>
+   873→                      {a.category}
+   874→                    </span>
+   875→                    {a.pinned && <span className="font-mono-ud text-[9px] text-[#d4ff00]">📌 PINNED</span>}
+   876→                    <span className="font-mono-ud text-[9px] text-white/40">{a.author}</span>
+   877→                  </div>
+   878→                  <div className="font-bebas text-lg text-white truncate">{a.title}</div>
+   879→                  <div className="font-mono-ud text-[10px] text-white/50 line-clamp-2">{a.body}</div>
+   880→                </div>
+   881→                <div className="flex flex-col gap-2">
+   882→                  <button onClick={() => togglePin(a)}
+   883→                    className="p-2.5 border-2 border-white/30 hover:border-[#d4ff00] hover:bg-[#d4ff00]/10 transition-colors no-color-transition min-w-[44px] min-h-[44px] flex items-center justify-center"
+   884→                    title={a.pinned ? "Unpin article" : "Pin to top"}
+   885→                    aria-label={a.pinned ? "Unpin article" : "Pin article"}>
+   886→                    {a.pinned ? <PinOff className="w-5 h-5 text-[#d4ff00]" /> : <Pin className="w-5 h-5 text-white/60" />}
+   887→                  </button>
+   888→                  <button onClick={() => handleDelete(a.id, a.title)} disabled={deletingId === a.id}
+   889→                    className="p-2.5 border-2 border-white/30 hover:border-[#ff4d4d] hover:bg-[#ff4d4d]/10 transition-colors no-color-transition disabled:opacity-50 min-w-[44px] min-h-[44px] flex items-center justify-center"
+   890→                    title="Delete article"
+   891→                    aria-label="Delete article">
+   892→                    {deletingId === a.id ? <Loader2 className="w-5 h-5 animate-spin text-[#ff4d4d]" /> : <Trash2 className="w-5 h-5 text-[#ff4d4d]" />}
+   893→                  </button>
+   894→                </div>
+   895→              </div>
+   896→            </div>
+   897→          ))}
+   898→        </div>
+   899→      </div>
+   900→    </div>
+   901→  );
+   902→}
+   903→
+   904→// ── Guestbook Management Tab (CRUD) ─────────────────────────────────────────
+   905→type GuestbookEntry = {
+   906→  id: string;
+   907→  name: string;
+   908→  message: string;
+   909→  color: string;
+   910→  createdAt: string;
+   911→};
+   912→
+   913→function GuestbookTab() {
+   914→  const { data, refetch } = useFetch<{ entries: GuestbookEntry[]; count: number }>("/api/guestbook");
+   915→  const { chaosFetch } = useChaosFetch();
+   916→  const [name, setName] = useState("");
+   917→  const [message, setMessage] = useState("");
+   918→  const [error, setError] = useState<string | null>(null);
+   919→  const [success, setSuccess] = useState<string | null>(null);
+   920→  const [deletingId, setDeletingId] = useState<string | null>(null);
+   921→  const { play } = useSfx();
+   922→  const entries = data?.entries ?? [];
+   923→
+   924→  const handleCreate = async () => {
+   925→    if (!name.trim() || !message.trim()) { setError("Nama dan pesan wajib diisi."); return; }
+   926→    setError(null); setSuccess(null);
+   927→    try {
+   928→      const res = await chaosFetch("/api/guestbook", {
+   929→        method: "POST",
+   930→        body: JSON.stringify({ name, message }),
+   931→      });
+   932→      const d = await res.json();
+   933→      if (!res.ok) throw new Error(d.error || "Gagal");
+   934→      setSuccess(`✓ Pesan dari ${d.name} ditambahkan!`);
+   935→      setName(""); setMessage(""); refetch(); play("submit");
+   936→      setTimeout(() => setSuccess(null), 4000);
+   937→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+   938→  };
+   939→
+   940→  const handleDelete = async (id: string, name: string) => {
+   941→    if (!confirm(`Hapus pesan dari "${name}"?`)) return;
+   942→    setDeletingId(id);
+   943→    try {
+   944→      const res = await chaosFetch(`/api/guestbook?id=${id}`, { method: "DELETE" });
+   945→      if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+   946→      setSuccess(`✓ Pesan dihapus.`);
+   947→      refetch(); play("close");
+   948→      setTimeout(() => setSuccess(null), 3000);
+   949→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+   950→    finally { setDeletingId(null); }
+   951→  };
+   952→
+   953→  return (
+   954→    <div className="space-y-4">
+   955→      {/* Create form */}
+   956→      <div className="border-8 border-[#d4ff00] bg-black p-6 shadow-[12px_12px_0_#d4ff00]">
+   957→        <h2 className="font-bebas text-4xl text-[#d4ff00] mb-4 flex items-center gap-2">
+   958→          <MessageSquare className="w-8 h-8" /> ADD GUESTBOOK ENTRY
+   959→        </h2>
+   960→        <div className="space-y-3">
+   961→          <input value={name} onChange={(e) => setName(e.target.value.slice(0, 40))}
+   962→            placeholder="NAME *"
+   963→            className="block w-full px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   964→          <textarea value={message} onChange={(e) => setMessage(e.target.value.slice(0, 280))}
+   965→            placeholder="MESSAGE * (max 280 chars)" rows={3}
+   966→            className="block w-full px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm resize-none focus:outline-none focus:border-[#ff00ff]" />
+   967→          {error && <div className="bg-[#ff4d4d] text-white px-3 py-2 border-2 border-white font-mono-ud text-xs font-bold">! {error}</div>}
+   968→          {success && <div className="bg-[#00ff00] text-black px-3 py-2 border-2 border-black font-mono-ud text-xs font-bold">{success}</div>}
+   969→          <button onClick={handleCreate}
+   970→            className="w-full bg-[#d4ff00] text-black font-bebas text-2xl py-3 border-2 border-[#d4ff00] hover:bg-transparent hover:text-[#d4ff00] transition-colors no-color-transition">
+   971→            <MessageSquare className="w-5 h-5 inline mr-2" /> POST MESSAGE
+   972→          </button>
+   973→        </div>
+   974→      </div>
+   975→
+   976→      {/* Entries with delete */}
+   977→      <div className="border-4 border-[#00e5ff] bg-[#1a1a1a] p-4 shadow-[8px_8px_0_#00e5ff]">
+   978→        <div className="flex items-center justify-between mb-3">
+   979→          <h3 className="font-bebas text-2xl text-[#00e5ff] flex items-center gap-2">
+   980→            <MessageSquare className="w-5 h-5" /> ENTRIES ({entries.length})
+   981→          </h3>
+   982→          <button onClick={() => { play("click"); refetch(); }} className="font-mono-ud text-xs font-black bg-[#00e5ff] text-black px-3 py-1 border-2 border-[#00e5ff] hover:bg-transparent hover:text-[#00e5ff] transition-colors no-color-transition">↻ REFRESH</button>
+   983→        </div>
+   984→        <div className="space-y-2 max-h-[500px] overflow-y-auto">
+   985→          {entries.length === 0 && (
+   986→            <div className="text-center py-8 font-mono-ud text-xs text-white/40">No entries yet. Add one above!</div>
+   987→          )}
+   988→          {entries.map((e) => (
+   989→            <div key={e.id} className="border-2 border-[#00e5ff]/30 p-3 bg-black/50 flex items-start justify-between gap-2 group">
+   990→              <div className="flex-1 min-w-0">
+   991→                <div className="flex items-center gap-2 mb-1">
+   992→                  <span className="w-3 h-3 flex-shrink-0" style={{ backgroundColor: e.color }} />
+   993→                  <span className="font-bebas text-lg text-white">{e.name}</span>
+   994→                  <span className="font-mono-ud text-[9px] text-white/40">
+   995→                    {new Date(e.createdAt).toLocaleString("id-ID", { dateStyle: "short", timeStyle: "short" })}
+   996→                  </span>
+   997→                </div>
+   998→                <div className="font-mono-ud text-xs text-white/70">{e.message}</div>
+   999→              </div>
+  1000→              <button onClick={() => handleDelete(e.id, e.name)} disabled={deletingId === e.id}
+  1001→                className="p-2.5 border-2 border-white/30 hover:border-[#ff4d4d] hover:bg-[#ff4d4d]/10 transition-colors no-color-transition disabled:opacity-50 min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0"
+  1002→                title="Delete entry"
+  1003→                aria-label="Delete guestbook entry">
+  1004→                {deletingId === e.id ? <Loader2 className="w-5 h-5 animate-spin text-[#ff4d4d]" /> : <Trash2 className="w-5 h-5 text-[#ff4d4d]" />}
+  1005→              </button>
+  1006→            </div>
+  1007→          ))}
+  1008→        </div>
+  1009→      </div>
+  1010→    </div>
+  1011→  );
+  1012→}
+  1013→
+  1014→// ── Portfolio Management Tab (CRUD) ─────────────────────────────────────────
+  1015→type DbProject = {
+  1016→  id: string;
+  1017→  title: string;
+  1018→  description: string;
+  1019→  tech: string[];
+  1020→  category: string;
+  1021→  status: string;
+  1022→  year: string;
+  1023→  memberId: string;
+  1024→  link: string | null;
+  1025→  repo: string | null;
+  1026→  color: string;
+  1027→};
+  1028→
+  1029→const PORTFOLIO_CATEGORIES = ["WEB", "GAME", "MOBILE", "TOOL", "BOT", "OTHER"];
+  1030→const PORTFOLIO_STATUSES = ["LIVE", "WIP", "ARCHIVED"];
+  1031→const MEMBER_SLUGS = ["aldi", "rembo", "eja", "byan", "acong", "tipki", "dudit"];
+  1032→
+  1033→function PortfolioTab() {
+  1034→  const { data, refetch } = useFetch<{ projects: DbProject[]; count: number }>("/api/portfolio");
+  1035→  const { chaosFetch } = useChaosFetch();
+  1036→  const { play } = useSfx();
+  1037→  const [title, setTitle] = useState("");
+  1038→  const [description, setDescription] = useState("");
+  1039→  const [tech, setTech] = useState("");
+  1040→  const [category, setCategory] = useState("WEB");
+  1041→  const [status, setStatus] = useState("WIP");
+  1042→  const [year, setYear] = useState(String(new Date().getFullYear()));
+  1043→  const [memberId, setMemberId] = useState("aldi");
+  1044→  const [link, setLink] = useState("");
+  1045→  const [repo, setRepo] = useState("");
+  1046→  const [color, setColor] = useState("#ff4d4d");
+  1047→  const [error, setError] = useState<string | null>(null);
+  1048→  const [success, setSuccess] = useState<string | null>(null);
+  1049→  const [deletingId, setDeletingId] = useState<string | null>(null);
+  1050→
+  1051→  const projects = data?.projects ?? [];
+  1052→
+  1053→  const handleCreate = async () => {
+  1054→    if (!title.trim() || !description.trim()) { setError("Title dan description wajib diisi."); return; }
+  1055→    setError(null); setSuccess(null);
+  1056→    try {
+  1057→      const res = await chaosFetch("/api/portfolio", {
+  1058→        method: "POST",
+  1059→        body: JSON.stringify({
+  1060→          title, description,
+  1061→          tech: tech.split(",").map((t) => t.trim()).filter(Boolean),
+  1062→          category, status, year, memberId,
+  1063→          link: link || null, repo: repo || null, color,
+  1064→        }),
+  1065→      });
+  1066→      const d = await res.json();
+  1067→      if (!res.ok) throw new Error(d.error || "Gagal");
+  1068→      setSuccess(`✓ Project "${d.title}" dibuat!`);
+  1069→      setTitle(""); setDescription(""); setTech(""); setLink(""); setRepo("");
+  1070→      refetch(); play("submit");
+  1071→      setTimeout(() => setSuccess(null), 4000);
+  1072→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+  1073→  };
+  1074→
+  1075→  const handleDelete = async (id: string, title: string) => {
+  1076→    if (!confirm(`Hapus project "${title}"?`)) return;
+  1077→    setDeletingId(id);
+  1078→    try {
+  1079→      const res = await chaosFetch(`/api/portfolio?id=${id}`, { method: "DELETE" });
+  1080→      if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+  1081→      setSuccess(`✓ Project dihapus.`);
+  1082→      refetch(); play("close");
+  1083→      setTimeout(() => setSuccess(null), 3000);
+  1084→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+  1085→    finally { setDeletingId(null); }
+  1086→  };
+  1087→
+  1088→  const isDbProject = (id: string) => !id.startsWith("p") || id.length > 3;
+  1089→
+  1090→  const CAT_COLORS: Record<string, string> = {
+  1091→    WEB: "#00e5ff", GAME: "#ff4d4d", MOBILE: "#ff00ff",
+  1092→    TOOL: "#d4ff00", BOT: "#8a2be2", OTHER: "#ff8c00",
+  1093→  };
+  1094→
+  1095→  return (
+  1096→    <div className="space-y-4">
+  1097→      {/* Create form */}
+  1098→      <div className="border-8 border-[#8a2be2] bg-black p-6 shadow-[12px_12px_0_#8a2be2]">
+  1099→        <h2 className="font-bebas text-4xl text-[#8a2be2] mb-4 flex items-center gap-2">
+  1100→          <FolderOpen className="w-8 h-8" /> ADD PORTFOLIO PROJECT
+  1101→        </h2>
+  1102→        <div className="space-y-3">
+  1103→          <input value={title} onChange={(e) => setTitle(e.target.value.slice(0, 80))}
+  1104→            placeholder="PROJECT TITLE *"
+  1105→            className="block w-full px-3 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+  1106→          <textarea value={description} onChange={(e) => setDescription(e.target.value.slice(0, 500))}
+  1107→            placeholder="DESCRIPTION * (max 500 chars)" rows={3}
+  1108→            className="block w-full px-3 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-sm resize-none focus:outline-none focus:border-[#ff00ff]" />
+  1109→          <input value={tech} onChange={(e) => setTech(e.target.value)}
+  1110→            placeholder="TECH (comma separated: Next.js, TypeScript, ...)"
+  1111→            className="block w-full px-3 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+  1112→          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+  1113→            <select value={category} onChange={(e) => setCategory(e.target.value)}
+  1114→              className="px-2 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-xs focus:outline-none focus:border-[#ff00ff]">
+  1115→              {PORTFOLIO_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+  1116→            </select>
+  1117→            <select value={status} onChange={(e) => setStatus(e.target.value)}
+  1118→              className="px-2 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-xs focus:outline-none focus:border-[#ff00ff]">
+  1119→              {PORTFOLIO_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+  1120→            </select>
+  1121→            <input value={year} onChange={(e) => setYear(e.target.value)} placeholder="YEAR"
+  1122→              className="px-2 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-xs focus:outline-none focus:border-[#ff00ff]" />
+  1123→            <select value={memberId} onChange={(e) => setMemberId(e.target.value)}
+  1124→              className="px-2 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-xs focus:outline-none focus:border-[#ff00ff]">
+  1125→              {MEMBER_SLUGS.map((m) => <option key={m} value={m}>{m.toUpperCase()}</option>)}
+  1126→            </select>
+  1127→          </div>
+  1128→          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+  1129→            <input value={link} onChange={(e) => setLink(e.target.value)} placeholder="Live demo URL (optional)"
+  1130→              className="px-3 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-xs focus:outline-none focus:border-[#ff00ff]" />
+  1131→            <input value={repo} onChange={(e) => setRepo(e.target.value)} placeholder="GitHub repo URL (optional)"
+  1132→              className="px-3 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-xs focus:outline-none focus:border-[#ff00ff]" />
+  1133→          </div>
+  1134→          <div className="flex items-center gap-2">
+  1135→            <span className="font-mono-ud text-xs text-[#d4ff00]">COLOR:</span>
+  1136→            <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="w-10 h-8 border-2 border-[#8a2be2] bg-transparent cursor-pointer" />
+  1137→          </div>
+  1138→          {error && <div className="bg-[#ff4d4d] text-white px-3 py-2 border-2 border-white font-mono-ud text-xs font-bold">! {error}</div>}
+  1139→          {success && <div className="bg-[#00ff00] text-black px-3 py-2 border-2 border-black font-mono-ud text-xs font-bold">{success}</div>}
+  1140→          <button onClick={handleCreate}
+  1141→            className="w-full bg-[#8a2be2] text-white font-bebas text-2xl py-3 border-2 border-[#8a2be2] hover:bg-transparent hover:text-[#8a2be2] transition-colors no-color-transition">
+  1142→            <FolderOpen className="w-5 h-5 inline mr-2" /> + ADD PROJECT
+  1143→          </button>
+  1144→        </div>
+  1145→      </div>
+  1146→
+  1147→      {/* Projects list */}
+  1148→      <div className="border-4 border-[#00e5ff] bg-[#1a1a1a] p-4 shadow-[8px_8px_0_#00e5ff]">
+  1149→        <div className="flex items-center justify-between mb-3">
+  1150→          <h3 className="font-bebas text-2xl text-[#00e5ff] flex items-center gap-2">
+  1151→            <FolderOpen className="w-5 h-5" /> PROJECTS ({projects.length})
+  1152→          </h3>
+  1153→          <button onClick={() => { play("click"); refetch(); }} className="font-mono-ud text-xs font-black bg-[#00e5ff] text-black px-3 py-1 border-2 border-[#00e5ff] hover:bg-transparent hover:text-[#00e5ff] transition-colors no-color-transition">↻ REFRESH</button>
+  1154→        </div>
+  1155→        <div className="space-y-2 max-h-[500px] overflow-y-auto">
+  1156→          {projects.length === 0 && (
+  1157→            <div className="text-center py-8 font-mono-ud text-xs text-white/40">No projects yet. Create one above!</div>
+  1158→          )}
+  1159→          {projects.map((p) => (
+  1160→            <div key={p.id} className="border-2 border-[#00e5ff]/30 p-3 bg-black/50 flex items-start justify-between gap-2 group">
+  1161→              <div className="flex-1 min-w-0">
+  1162→                <div className="flex items-center gap-2 mb-1 flex-wrap">
+  1163→                  <span className="font-mono-ud text-[9px] font-black px-1.5 py-0.5 border"
+  1164→                    style={{ color: CAT_COLORS[p.category] || "#fff", borderColor: CAT_COLORS[p.category] || "#fff" }}>
+  1165→                    {p.category}
+  1166→                  </span>
+  1167→                  <span className="font-mono-ud text-[9px] font-black px-1.5 py-0.5 border border-white/30"
+  1168→                    style={{ color: p.status === "LIVE" ? "#00ff00" : p.status === "WIP" ? "#ff8c00" : "#666" }}>
+  1169→                    {p.status}
+  1170→                  </span>
+  1171→                  <span className="font-mono-ud text-[9px] text-white/40">{p.year} · {p.memberId?.toUpperCase() || p.author}</span>
+  1172→                  {isDbProject(p.id) && <span className="font-mono-ud text-[8px] text-[#d4ff00]">DB</span>}
+  1173→                </div>
+  1174→                <div className="font-bebas text-lg text-white truncate">{p.title}</div>
+  1175→                <div className="font-mono-ud text-[10px] text-white/50 line-clamp-2">{p.description}</div>
+  1176→                {p.tech && p.tech.length > 0 && (
+  1177→                  <div className="font-mono-ud text-[9px] text-[#00e5ff]/60 mt-1 truncate">{p.tech.join(" · ")}</div>
+  1178→                )}
+  1179→              </div>
+  1180→              {isDbProject(p.id) ? (
+  1181→                <button onClick={() => handleDelete(p.id, p.title)} disabled={deletingId === p.id}
+  1182→                  className="p-2.5 border-2 border-white/30 hover:border-[#ff4d4d] hover:bg-[#ff4d4d]/10 transition-colors no-color-transition disabled:opacity-50 min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0"
+  1183→                  title="Delete project" aria-label="Delete project">
+  1184→                  {deletingId === p.id ? <Loader2 className="w-5 h-5 animate-spin text-[#ff4d4d]" /> : <Trash2 className="w-5 h-5 text-[#ff4d4d]" />}
+  1185→                </button>
+  1186→              ) : (
+  1187→                <div className="bg-black/70 text-white/60 px-2 py-1 font-mono-ud text-[9px] font-bold border border-white/30 flex-shrink-0">SEED</div>
+  1188→              )}
+  1189→            </div>
+  1190→          ))}
+  1191→        </div>
+  1192→      </div>
+  1193→    </div>
+  1194→  );
+  1195→}
+  1196→
+  1197→// ── Achievements Management Tab (CRUD) ──────────────────────────────────────
+  1198→type DbAchievement = {
+  1199→  id: string;
+  1200→  memberId: string;
+  1201→  title: string;
+  1202→  year: string;
+  1203→  description: string;
+  1204→  images: string[];
+  1205→};
+  1206→
+  1207→function AchievementsTab() {
+  1208→  const { data, refetch } = useFetch<{ achievements: DbAchievement[]; count: number }>("/api/achievements");
+  1209→  const { chaosFetch } = useChaosFetch();
+  1210→  const { play } = useSfx();
+  1211→  const [title, setTitle] = useState("");
+  1212→  const [year, setYear] = useState(String(new Date().getFullYear()));
+  1213→  const [description, setDescription] = useState("");
+  1214→  const [memberId, setMemberId] = useState("aldi");
+  1215→  const [error, setError] = useState<string | null>(null);
+  1216→  const [success, setSuccess] = useState<string | null>(null);
+  1217→  const [deletingId, setDeletingId] = useState<string | null>(null);
+  1218→
+  1219→  const achievements = data?.achievements ?? [];
+  1220→
+  1221→  const handleCreate = async () => {
+  1222→    if (!title.trim() || !description.trim()) { setError("Title dan description wajib diisi."); return; }
+  1223→    setError(null); setSuccess(null);
+  1224→    try {
+  1225→      const res = await chaosFetch("/api/achievements", {
+  1226→        method: "POST",
+  1227→        body: JSON.stringify({ title, year, description, memberId }),
+  1228→      });
+  1229→      const d = await res.json();
+  1230→      if (!res.ok) throw new Error(d.error || "Gagal");
+  1231→      setSuccess(`✓ Achievement "${d.title}" dibuat!`);
+  1232→      setTitle(""); setDescription("");
+  1233→      refetch(); play("submit");
+  1234→      setTimeout(() => setSuccess(null), 4000);
+  1235→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+  1236→  };
+  1237→
+  1238→  const handleDelete = async (id: string, title: string) => {
+  1239→    if (!confirm(`Hapus achievement "${title}"?`)) return;
+  1240→    setDeletingId(id);
+  1241→    try {
+  1242→      const res = await chaosFetch(`/api/achievements?id=${id}`, { method: "DELETE" });
+  1243→      if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+  1244→      setSuccess(`✓ Achievement dihapus.`);
+  1245→      refetch(); play("close");
+  1246→      setTimeout(() => setSuccess(null), 3000);
+  1247→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+  1248→    finally { setDeletingId(null); }
+  1249→  };
+  1250→
+  1251→  return (
+  1252→    <div className="space-y-4">
+  1253→      {/* Create form */}
+  1254→      <div className="border-8 border-[#d4ff00] bg-black p-6 shadow-[12px_12px_0_#d4ff00]">
+  1255→        <h2 className="font-bebas text-4xl text-[#d4ff00] mb-4 flex items-center gap-2">
+  1256→          <Award className="w-8 h-8" /> ADD ACHIEVEMENT
+  1257→        </h2>
+  1258→        <div className="space-y-3">
+  1259→          <input value={title} onChange={(e) => setTitle(e.target.value.slice(0, 100))}
+  1260→            placeholder="ACHIEVEMENT TITLE *"
+  1261→            className="block w-full px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+  1262→          <textarea value={description} onChange={(e) => setDescription(e.target.value.slice(0, 500))}
+  1263→            placeholder="DESCRIPTION * (max 500 chars)" rows={3}
+  1264→            className="block w-full px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm resize-none focus:outline-none focus:border-[#ff00ff]" />
+  1265→          <div className="grid grid-cols-2 gap-2">
+  1266→            <input value={year} onChange={(e) => setYear(e.target.value)} placeholder="YEAR"
+  1267→              className="px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+  1268→            <select value={memberId} onChange={(e) => setMemberId(e.target.value)}
+  1269→              className="px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]">
+  1270→              {MEMBER_SLUGS.map((m) => <option key={m} value={m}>{m.toUpperCase()}</option>)}
+  1271→            </select>
+  1272→          </div>
+  1273→          {error && <div className="bg-[#ff4d4d] text-white px-3 py-2 border-2 border-white font-mono-ud text-xs font-bold">! {error}</div>}
+  1274→          {success && <div className="bg-[#00ff00] text-black px-3 py-2 border-2 border-black font-mono-ud text-xs font-bold">{success}</div>}
+  1275→          <button onClick={handleCreate}
+  1276→            className="w-full bg-[#d4ff00] text-black font-bebas text-2xl py-3 border-2 border-[#d4ff00] hover:bg-transparent hover:text-[#d4ff00] transition-colors no-color-transition">
+  1277→            <Award className="w-5 h-5 inline mr-2" /> + ADD ACHIEVEMENT
+  1278→          </button>
+  1279→        </div>
+  1280→      </div>
+  1281→
+  1282→      {/* Achievements list */}
+  1283→      <div className="border-4 border-[#00e5ff] bg-[#1a1a1a] p-4 shadow-[8px_8px_0_#00e5ff]">
+  1284→        <div className="flex items-center justify-between mb-3">
+  1285→          <h3 className="font-bebas text-2xl text-[#00e5ff] flex items-center gap-2">
+  1286→            <Award className="w-5 h-5" /> ACHIEVEMENTS ({achievements.length})
+  1287→          </h3>
+  1288→          <button onClick={() => { play("click"); refetch(); }} className="font-mono-ud text-xs font-black bg-[#00e5ff] text-black px-3 py-1 border-2 border-[#00e5ff] hover:bg-transparent hover:text-[#00e5ff] transition-colors no-color-transition">↻ REFRESH</button>
+  1289→        </div>
+  1290→        <div className="space-y-2 max-h-[500px] overflow-y-auto">
+  1291→          {achievements.length === 0 && (
+  1292→            <div className="text-center py-8 font-mono-ud text-xs text-white/40">No achievements yet. Create one above!</div>
+  1293→          )}
+  1294→          {achievements.map((a) => (
+  1295→            <div key={a.id} className="border-2 border-[#00e5ff]/30 p-3 bg-black/50 flex items-start justify-between gap-2 group">
+  1296→              <div className="flex-1 min-w-0">
+  1297→                <div className="flex items-center gap-2 mb-1">
+  1298→                  <span className="font-mono-ud text-[9px] text-[#d4ff00]">{a.year}</span>
+  1299→                  <span className="font-mono-ud text-[9px] text-white/40">{a.memberId.toUpperCase()}</span>
+  1300→                </div>
+  1301→                <div className="font-bebas text-lg text-white truncate">{a.title}</div>
+  1302→                <div className="font-mono-ud text-[10px] text-white/50 line-clamp-2">{a.description}</div>
+  1303→                {a.images && a.images.length > 0 && (
+  1304→                  <div className="font-mono-ud text-[9px] text-[#d4ff00]/60 mt-1">{a.images.length} image(s)</div>
+  1305→                )}
+  1306→              </div>
+  1307→              <button onClick={() => handleDelete(a.id, a.title)} disabled={deletingId === a.id}
+  1308→                className="p-2.5 border-2 border-white/30 hover:border-[#ff4d4d] hover:bg-[#ff4d4d]/10 transition-colors no-color-transition disabled:opacity-50 min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0"
+  1309→                title="Delete achievement" aria-label="Delete achievement">
+  1310→                {deletingId === a.id ? <Loader2 className="w-5 h-5 animate-spin text-[#ff4d4d]" /> : <Trash2 className="w-5 h-5 text-[#ff4d4d]" />}
+  1311→              </button>
+  1312→            </div>
+  1313→          ))}
+  1314→        </div>
+  1315→      </div>
+  1316→    </div>
+  1317→  );
+  1318→}
+  1319→
+  1320→// ── Info / ERD Tab ──────────────────────────────────────────────────────────
+  1321→function InfoTab() {
+  1322→  return (
+  1323→    <div className="border-8 border-[#00e5ff] bg-black p-6 shadow-[12px_12px_0_#00e5ff]">
+  1324→      <h2 className="font-bebas text-4xl text-[#00e5ff] mb-4 flex items-center gap-2">
+  1325→        <Settings className="w-8 h-8" /> SYSTEM INFO & CRUD ENDPOINTS
+  1326→      </h2>
+  1327→      <div className="space-y-4 font-mono-ud text-xs text-white/80">
+  1328→        {/* CRUD endpoints */}
+  1329→        <div>
+  1330→          <h3 className="font-bebas text-2xl text-[#00e5ff] mb-2 border-b-2 border-[#00e5ff]/30 pb-1">▸ CRUD ENDPOINTS</h3>
+  1331→          <div className="space-y-1 text-[11px]">
+  1332→            <div className="text-[#d4ff00]">GALLERY:</div>
+  1333→            <div>  GET    /api/gallery        — list all photos (public)</div>
+  1334→            <div>  POST   /api/gallery/upload — upload new photo (chaos)</div>
+  1335→            <div>  PUT    /api/gallery        — edit photo metadata (chaos)</div>
+  1336→            <div>  DELETE /api/gallery?id=X   — delete photo (chaos)</div>
+  1337→            <div className="text-[#d4ff00] mt-2">NEWS:</div>
+  1338→            <div>  GET    /api/news           — list articles (public)</div>
+  1339→            <div>  POST   /api/news           — create article (public)</div>
+  1340→            <div>  PUT    /api/news           — edit/pin article (chaos)</div>
+  1341→            <div>  DELETE /api/news?id=X      — delete article (chaos)</div>
+  1342→            <div className="text-[#d4ff00] mt-2">GUESTBOOK:</div>
+  1343→            <div>  GET    /api/guestbook      — list entries (public)</div>
+  1344→            <div>  POST   /api/guestbook      — post entry (public)</div>
+  1345→            <div>  PUT    /api/guestbook      — edit/approve entry (chaos)</div>
+  1346→            <div>  DELETE /api/guestbook?id=X — delete entry (chaos)</div>
+  1347→            <div className="text-[#d4ff00] mt-2">AUTH:</div>
+  1348→            <div>  GET    /api/chaos-token    — get chaos token (called on konami)</div>
+  1349→            <div className="text-[#d4ff00] mt-2">MEMBERS (chaos-editable profiles):</div>
+  1350→            <div>  GET    /api/members        — list all members (public, with tagline/quote/funFacts/element/joinYear)</div>
+  1351→            <div>  GET    /api/members/[slug] — single member (public)</div>
+  1352→            <div>  PUT    /api/members/[slug] — update member (chaos)</div>
+  1353→          </div>
+  1354→        </div>
+  1355→
+  1356→        {/* Chaos mode access */}
+  1357→        <div>
+  1358→          <h3 className="font-bebas text-2xl text-[#00e5ff] mb-2 border-b-2 border-[#00e5ff]/30 pb-1">▸ CHAOS MODE ACCESS</h3>
+  1359→          <div className="space-y-1 text-[11px]">
+  1360→            <div>1. Activate <span className="text-[#ff00ff]">Chaos Mode</span> (Shuffle button in navbar)</div>
+  1361→            <div>2. Enter key sequence: <span className="text-[#d4ff00]">↑ ↓ ← → ← ← ↑</span> (arrow keys only)</div>
+  1362→            <div>3. God Mode unlocks → token fetched from /api/chaos-token</div>
+  1363→            <div>4. Token stored in localStorage as <code className="text-[#d4ff00]">ud-chaos-token</code></div>
+  1364→            <div>5. Click CHAOS MODE button → access CRUD UI</div>
+  1365→            <div>6. All DELETE/PUT requests auto-include <code className="text-[#d4ff00]">x-chaos-token</code> header</div>
+  1366→          </div>
+  1367→        </div>
+  1368→
+  1369→        {/* Architecture */}
+  1370→        <div>
+  1371→          <h3 className="font-bebas text-2xl text-[#00e5ff] mb-2 border-b-2 border-[#00e5ff]/30 pb-1">▸ ARCHITECTURE</h3>
+  1372→          <div className="space-y-1 text-[11px]">
+  1373→            <div>▸ <span className="text-[#d4ff00]">Hosting:</span> Vercel (Next.js 16 — frontend + API)</div>
+  1374→            <div>▸ <span className="text-[#d4ff00]">Database:</span> Supabase PostgreSQL (shared local + prod)</div>
+  1375→            <div>▸ <span className="text-[#d4ff00]">Storage:</span> Supabase Bucket (gallery uploads)</div>
+  1376→            <div>▸ <span className="text-[#d4ff00]">Auth:</span> Chaos-mode token (simple shared secret)</div>
+  1377→          </div>
+  1378→        </div>
+  1379→      </div>
+  1380→    </div>
+  1381→  );
+  1382→}
+  1383→
+  1384→export { ChaosModePage };
+  1385→

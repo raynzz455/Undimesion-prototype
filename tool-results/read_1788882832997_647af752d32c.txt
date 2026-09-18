@@ -1,0 +1,998 @@
+     1→"use client";
+     2→
+     3→import { useState } from "react";
+     4→import { motion } from "framer-motion";
+     5→import {
+     6→  Upload,
+     7→  Loader2,
+     8→  Image as ImageIcon,
+     9→  LogOut,
+    10→  Shield,
+    11→  Zap,
+    12→  FolderOpen,
+    13→  Award,
+    14→  Settings,
+    15→  Newspaper,
+    16→  MessageSquare,
+    17→  Trash2,
+    18→  Edit3,
+    19→  Pin,
+    20→  PinOff,
+    21→  CheckCircle,
+    22→  XCircle,
+    23→  X,
+    24→} from "lucide-react";
+    25→import { StarField } from "./star-field";
+    26→import { useFetch } from "@/hooks/use-fetch";
+    27→import { useChaosFetch } from "@/hooks/use-chaos-fetch";
+    28→import { useSfx } from "@/hooks/use-sfx";
+    29→import { cn } from "@/lib/utils";
+    30→import type { GalleryPhoto } from "@/lib/undimension/data";
+    31→
+    32→type Tab = "gallery" | "news" | "guestbook" | "portfolio" | "achievements" | "info";
+    33→
+    34→function ChaosModePage({ onExit }: { onExit: () => void }) {
+    35→  const [tab, setTab] = useState<Tab>("gallery");
+    36→  const { play } = useSfx();
+    37→
+    38→  const tabs: { key: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+    39→    { key: "gallery", label: "GALLERY", icon: ImageIcon },
+    40→    { key: "news", label: "NEWS", icon: Newspaper },
+    41→    { key: "guestbook", label: "GUESTBOOK", icon: MessageSquare },
+    42→    { key: "portfolio", label: "PORTFOLIO", icon: FolderOpen },
+    43→    { key: "achievements", label: "ACHIEVEMENTS", icon: Award },
+    44→    { key: "info", label: "INFO / ERD", icon: Settings },
+    45→  ];
+    46→
+    47→  return (
+    48→    <div className="page-enter bg-[#09090b] min-h-screen relative overflow-hidden pt-24 pb-12">
+    49→      <StarField variant="dark" className="fixed z-[1]" />
+    50→      <div className="ud-grain" aria-hidden />
+    51→
+    52→      {/* Header bar */}
+    53→      <div className="fixed top-0 left-0 right-0 z-50 bg-[#ff00ff] text-white border-b-4 border-black px-4 py-2 flex items-center justify-between">
+    54→        <div className="flex items-center gap-2">
+    55→          <Shield className="w-5 h-5" />
+    56→          <span className="font-bebas text-xl tracking-widest">⚡ CHAOS MODE — MEMBER AREA</span>
+    57→        </div>
+    58→        <button
+    59→          onClick={() => { play("close"); onExit(); }}
+    60→          className="flex items-center gap-1 bg-black text-white font-mono-ud text-xs font-black px-3 py-1.5 border-2 border-white hover:bg-[#ff4d4d] transition-colors no-color-transition"
+    61→        >
+    62→          <LogOut className="w-3 h-3" /> EXIT
+    63→        </button>
+    64→      </div>
+    65→
+    66→      <div className="max-w-5xl mx-auto px-4 md:px-6 relative z-10">
+    67→        {/* Title */}
+    68→        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-6">
+    69→          <div className="inline-flex items-center gap-2 bg-[#d4ff00] text-black font-mono-ud text-xs font-black px-3 py-1 border-4 border-black mb-3">
+    70→            <Zap className="w-4 h-4" /> GOD MODE ACTIVE
+    71→          </div>
+    72→          <h1 className="font-bebas text-5xl md:text-[80px] leading-none uppercase text-white" style={{ textShadow: "4px 4px 0px #ff00ff, 8px 8px 0px #00e5ff" }}>
+    73→            CHAOS MODE
+    74→          </h1>
+    75→          <p className="font-mono-ud text-xs text-white/60 mt-1 tracking-wider">
+    76→            ▸ MEMBER-ONLY · CRUD MANAGEMENT · ALL IN ONE
+    77→          </p>
+    78→        </motion.div>
+    79→
+    80→        {/* Tab bar */}
+    81→        <div className="flex flex-wrap gap-2 mb-6 border-4 border-[#ff00ff] bg-black p-2">
+    82→          {tabs.map((t) => {
+    83→            const Icon = t.icon;
+    84→            return (
+    85→              <button
+    86→                key={t.key}
+    87→                onClick={() => { play("click"); setTab(t.key); }}
+    88→                className={cn(
+    89→                  "flex items-center gap-2 px-4 py-2 border-2 font-bebas text-lg tracking-wider transition-all no-color-transition",
+    90→                  tab === t.key
+    91→                    ? "bg-[#ff00ff] text-white border-white"
+    92→                    : "bg-transparent text-white/50 border-white/20 hover:text-white hover:border-white/50",
+    93→                )}
+    94→              >
+    95→                <Icon className="w-4 h-4" /> {t.label}
+    96→              </button>
+    97→            );
+    98→          })}
+    99→        </div>
+   100→
+   101→        {/* Tab content */}
+   102→        {tab === "gallery" && <GalleryTab />}
+   103→        {tab === "news" && <NewsTab />}
+   104→        {tab === "guestbook" && <GuestbookTab />}
+   105→        {tab === "portfolio" && <PortfolioTab />}
+   106→        {tab === "achievements" && <AchievementsTab />}
+   107→        {tab === "info" && <InfoTab />}
+   108→      </div>
+   109→    </div>
+   110→  );
+   111→}
+   112→
+   113→// ── Gallery Upload + Delete + Edit Tab ──────────────────────────────────────
+   114→// Dynamic masonry layout — photos can be 9:16, 16:9, 1:1, or 4:3.
+   115→// Uses CSS columns for masonry effect (no JS measurement needed).
+   116→function GalleryTab() {
+   117→  const { data, refetch } = useFetch<{ photos: GalleryPhoto[]; count: number }>("/api/gallery");
+   118→  const { chaosFetch } = useChaosFetch();
+   119→  const [title, setTitle] = useState("");
+   120→  const [author, setAuthor] = useState("");
+   121→  const [date, setDate] = useState(String(new Date().getFullYear()));
+   122→  const [file, setFile] = useState<File | null>(null);
+   123→  const [uploading, setUploading] = useState(false);
+   124→  const [error, setError] = useState<string | null>(null);
+   125→  const [success, setSuccess] = useState<string | null>(null);
+   126→  const [deletingId, setDeletingId] = useState<string | null>(null);
+   127→  const [editingPhoto, setEditingPhoto] = useState<GalleryPhoto | null>(null);
+   128→  const { play } = useSfx();
+   129→  const photos = data?.photos ?? [];
+   130→
+   131→  const handleUpload = async () => {
+   132→    if (!file || !title.trim()) { setError("Judul dan foto wajib diisi."); return; }
+   133→    setUploading(true); setError(null); setSuccess(null);
+   134→    try {
+   135→      const form = new FormData();
+   136→      form.append("file", file);
+   137→      form.append("title", title);
+   138→      form.append("author", author || "ANON");
+   139→      form.append("date", date);
+   140→      const res = await chaosFetch("/api/gallery/upload", { method: "POST", body: form });
+   141→      if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || "Upload gagal"); }
+   142→      const result = await res.json();
+   143→      setSuccess(`✓ ${result.title} uploaded!`);
+   144→      setTitle(""); setAuthor(""); setFile(null); refetch(); play("submit");
+   145→      setTimeout(() => setSuccess(null), 5000);
+   146→    } catch (e) { setError(e instanceof Error ? e.message : "Upload gagal"); }
+   147→    finally { setUploading(false); }
+   148→  };
+   149→
+   150→  const handleDelete = async (id: string, title: string) => {
+   151→    if (!confirm(`Hapus foto "${title}"? Tindakan ini tidak bisa dibatalkan.`)) return;
+   152→    setDeletingId(id);
+   153→    try {
+   154→      const res = await chaosFetch(`/api/gallery?id=${id}`, { method: "DELETE" });
+   155→      const d = await res.json();
+   156→      if (!res.ok) throw new Error(d.error || "Gagal hapus");
+   157→      setSuccess(`✓ Foto "${title}" dihapus.`);
+   158→      refetch(); play("close");
+   159→      setTimeout(() => setSuccess(null), 3000);
+   160→    } catch (e) {
+   161→      setError(e instanceof Error ? e.message : "Gagal hapus foto");
+   162→    } finally {
+   163→      setDeletingId(null);
+   164→    }
+   165→  };
+   166→
+   167→  const isDbPhoto = (id: string) => !id.startsWith("g") || id.length > 3;
+   168→
+   169→  return (
+   170→    <div className="space-y-4">
+   171→      {/* Upload form */}
+   172→      <div className="border-8 border-[#ff00ff] bg-black p-6 shadow-[12px_12px_0_#ff00ff]">
+   173→        <h2 className="font-bebas text-4xl text-[#ff00ff] mb-4 flex items-center gap-2">
+   174→          <Upload className="w-8 h-8" /> UPLOAD GALLERY PHOTO
+   175→        </h2>
+   176→        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+   177→          <div className="space-y-3">
+   178→            <label className="block">
+   179→              <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">FOTO *</span>
+   180→              <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+   181→                className="block w-full mt-1 text-xs font-mono-ud text-white file:mr-3 file:py-2 file:px-4 file:border-2 file:border-[#d4ff00] file:bg-[#d4ff00] file:text-black file:font-bold file:cursor-pointer file:hover:bg-[#ff00ff] file:hover:text-white" />
+   182→            </label>
+   183→            <label className="block">
+   184→              <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">JUDUL *</span>
+   185→              <input value={title} onChange={(e) => setTitle(e.target.value.slice(0, 40))} placeholder="VISI AWAL"
+   186→                className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   187→            </label>
+   188→          </div>
+   189→          <div className="space-y-3">
+   190→            <label className="block">
+   191→              <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">OLEH</span>
+   192→              <input value={author} onChange={(e) => setAuthor(e.target.value.slice(0, 30))} placeholder="ALDI"
+   193→                className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   194→            </label>
+   195→            <label className="block">
+   196→              <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">TAHUN</span>
+   197→              <input value={date} onChange={(e) => setDate(e.target.value)}
+   198→                className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   199→            </label>
+   200→          </div>
+   201→        </div>
+   202→        {error && <div className="mt-4 bg-[#ff4d4d] text-white px-3 py-2 border-2 border-white font-mono-ud text-xs font-bold">! {error}</div>}
+   203→        {success && <div className="mt-4 bg-[#00ff00] text-black px-3 py-2 border-2 border-black font-mono-ud text-xs font-bold">{success}</div>}
+   204→        <button onClick={handleUpload} disabled={uploading}
+   205→          className={cn("mt-4 w-full font-bebas text-3xl py-4 border-4 border-[#d4ff00] flex items-center justify-center gap-2 transition-all no-color-transition",
+   206→            uploading ? "bg-[#1a1a1a] text-white/50 cursor-wait" : "bg-[#d4ff00] text-black hover:-translate-y-1 hover:bg-[#ff00ff] hover:text-white hover:border-white")}>
+   207→          {uploading ? <><Loader2 className="w-6 h-6 animate-spin" /> UPLOADING...</> : <><Upload className="w-6 h-6" /> UPLOAD TO GALLERY</>}
+   208→        </button>
+   209→      </div>
+   210→
+   211→      {/* Gallery archive — dynamic masonry layout */}
+   212→      <div className="border-4 border-[#00e5ff] bg-[#1a1a1a] p-4 shadow-[8px_8px_0_#00e5ff]">
+   213→        <div className="flex items-center justify-between mb-3">
+   214→          <h3 className="font-bebas text-2xl text-[#00e5ff] flex items-center gap-2">
+   215→            <ImageIcon className="w-5 h-5" /> GALLERY ARCHIVE ({photos.length})
+   216→          </h3>
+   217→          <button onClick={() => { play("click"); refetch(); }} className="font-mono-ud text-xs font-black bg-[#00e5ff] text-black px-3 py-1 border-2 border-[#00e5ff] hover:bg-transparent hover:text-[#00e5ff] transition-colors no-color-transition">↻ REFRESH</button>
+   218→        </div>
+   219→        <p className="font-mono-ud text-[10px] text-white/40 mb-3 tracking-wider">
+   220→          ▸ Dynamic masonry layout — photos display in their natural aspect ratio (9:16, 16:9, 1:1, 4:3)
+   221→        </p>
+   222→        {/* Masonry: CSS columns break naturally, images keep original aspect ratio */}
+   223→        <div className="columns-2 sm:columns-3 md:columns-4 gap-3 max-h-[600px] overflow-y-auto">
+   224→          {photos.map((p) => {
+   225→            const canEdit = isDbPhoto(p.id);
+   226→            return (
+   227→              <div key={p.id} className="break-inside-avoid mb-3 border-2 border-[#00e5ff]/30 p-2 bg-black/50 relative group">
+   228→                {/* Image — natural aspect ratio (no forced square) */}
+   229→                <img
+   230→                  src={p.img}
+   231→                  alt={p.title}
+   232→                  className="w-full h-auto object-cover"
+   233→                  loading="lazy"
+   234→                />
+   235→                {/* Info overlay */}
+   236→                <div className="mt-1.5">
+   237→                  <div className="font-mono-ud text-[10px] text-[#00e5ff] truncate font-bold">{p.title}</div>
+   238→                  <div className="font-mono-ud text-[8px] text-white/40">{p.author} · {p.date}</div>
+   239→                </div>
+   240→                {/* CRUD buttons — always visible on mobile, hover on desktop */}
+   241→                {canEdit ? (
+   242→                  <div className="absolute top-2 right-2 flex gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+   243→                    <button
+   244→                      onClick={() => setEditingPhoto(p)}
+   245→                      className="bg-[#00e5ff] text-black p-2 border-2 border-white hover:bg-[#00b8cc] transition-colors no-color-transition"
+   246→                      title="Edit photo"
+   247→                      aria-label="Edit photo"
+   248→                    >
+   249→                      <Edit3 className="w-4 h-4" />
+   250→                    </button>
+   251→                    <button
+   252→                      onClick={() => handleDelete(p.id, p.title)}
+   253→                      disabled={deletingId === p.id}
+   254→                      className="bg-[#ff4d4d] text-white p-2 border-2 border-white hover:bg-[#ff0000] disabled:opacity-50 transition-colors no-color-transition"
+   255→                      title="Delete photo"
+   256→                      aria-label="Delete photo"
+   257→                    >
+   258→                      {deletingId === p.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+   259→                    </button>
+   260→                  </div>
+   261→                ) : (
+   262→                  <div className="absolute top-2 right-2 bg-black/70 text-white/60 px-2 py-1 font-mono-ud text-[9px] font-bold border border-white/30">SEED</div>
+   263→                )}
+   264→              </div>
+   265→            );
+   266→          })}
+   267→        </div>
+   268→      </div>
+   269→
+   270→      {/* Edit modal */}
+   271→      {editingPhoto && (
+   272→        <EditPhotoModal
+   273→          photo={editingPhoto}
+   274→          onClose={() => setEditingPhoto(null)}
+   275→          onSaved={() => { setEditingPhoto(null); refetch(); }}
+   276→        />
+   277→      )}
+   278→    </div>
+   279→  );
+   280→}
+   281→
+   282→// ── Edit Photo Modal ────────────────────────────────────────────────────────
+   283→function EditPhotoModal({ photo, onClose, onSaved }: { photo: GalleryPhoto; onClose: () => void; onSaved: () => void }) {
+   284→  const { chaosFetch } = useChaosFetch();
+   285→  const { play } = useSfx();
+   286→  const [title, setTitle] = useState(photo.title);
+   287→  const [author, setAuthor] = useState(photo.author);
+   288→  const [date, setDate] = useState(photo.date);
+   289→  const [saving, setSaving] = useState(false);
+   290→  const [error, setError] = useState<string | null>(null);
+   291→
+   292→  const handleSave = async () => {
+   293→    if (!title.trim()) { setError("Judul wajib diisi."); return; }
+   294→    setSaving(true); setError(null);
+   295→    try {
+   296→      const res = await chaosFetch("/api/gallery", {
+   297→        method: "PUT",
+   298→        body: JSON.stringify({ id: photo.id, title, author, date }),
+   299→      });
+   300→      const d = await res.json();
+   301→      if (!res.ok) throw new Error(d.error || "Gagal update");
+   302→      play("submit");
+   303→      onSaved();
+   304→    } catch (e) {
+   305→      setError(e instanceof Error ? e.message : "Gagal update foto");
+   306→    } finally {
+   307→      setSaving(false);
+   308→    }
+   309→  };
+   310→
+   311→  return (
+   312→    <div
+   313→      className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-start justify-center p-3 md:p-6 pt-4 md:pt-8 overflow-y-auto"
+   314→      onClick={onClose}
+   315→    >
+   316→      {/* Relative wrapper — X button anchors to this */}
+   317→      <div className="relative w-full max-w-md my-auto">
+   318→        {/* X Close — absolute to wrapper, top-right corner */}
+   319→        <button
+   320→          onClick={onClose}
+   321→          className="absolute -top-4 -right-4 z-30 w-10 h-10 flex items-center justify-center bg-[#ff4d4d] text-white border-4 border-white shadow-[4px_4px_0_#000] hover:rotate-90 transition-transform no-color-transition"
+   322→          aria-label="Close"
+   323→        >
+   324→          <X className="w-5 h-5" />
+   325→        </button>
+   326→        <div
+   327→          className="bg-[#1a1a1a] border-4 border-[#00e5ff] p-6 shadow-[8px_8px_0_#00e5ff] max-h-[90vh] overflow-y-auto"
+   328→          onClick={(e) => e.stopPropagation()}
+   329→        >
+   330→          <h3 className="font-bebas text-3xl text-[#00e5ff] mb-4 flex items-center gap-2">
+   331→            <Edit3 className="w-6 h-6" /> EDIT PHOTO
+   332→          </h3>
+   333→          {/* Preview */}
+   334→          <img src={photo.img} alt={photo.title} className="w-full max-h-48 object-contain mb-4 border-2 border-white/20" />
+   335→          <div className="space-y-3">
+   336→            <label className="block">
+   337→              <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">JUDUL</span>
+   338→              <input value={title} onChange={(e) => setTitle(e.target.value.slice(0, 40))}
+   339→                className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-black text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   340→            </label>
+   341→            <label className="block">
+   342→              <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">OLEH</span>
+   343→              <input value={author} onChange={(e) => setAuthor(e.target.value.slice(0, 30))}
+   344→                className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-black text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   345→            </label>
+   346→            <label className="block">
+   347→              <span className="font-mono-ud text-xs font-bold text-[#d4ff00] tracking-wider">TAHUN</span>
+   348→              <input value={date} onChange={(e) => setDate(e.target.value)}
+   349→                className="block w-full mt-1 px-3 py-2 border-2 border-[#d4ff00] bg-black text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   350→            </label>
+   351→            {error && <div className="bg-[#ff4d4d] text-white px-3 py-2 border-2 border-white font-mono-ud text-xs font-bold">! {error}</div>}
+   352→            <div className="flex gap-2 pt-2">
+   353→              <button onClick={onClose} className="flex-1 bg-transparent text-white font-bebas text-xl py-3 border-2 border-white/30 hover:border-white hover:bg-white/5 transition-colors no-color-transition">
+   354→                CANCEL
+   355→              </button>
+   356→              <button onClick={handleSave} disabled={saving}
+   357→                className="flex-1 bg-[#00e5ff] text-black font-bebas text-xl py-3 border-2 border-[#00e5ff] hover:bg-[#00b8cc] disabled:opacity-50 transition-colors no-color-transition flex items-center justify-center gap-2">
+   358→                {saving ? <><Loader2 className="w-5 h-5 animate-spin" /> SAVING...</> : <>✓ SAVE</>}
+   359→              </button>
+   360→            </div>
+   361→          </div>
+   362→        </div>
+   363→      </div>
+   364→    </div>
+   365→  );
+   366→}
+   367→
+   368→// ── News Management Tab (CRUD) ──────────────────────────────────────────────
+   369→type NewsArticle = {
+   370→  id: string;
+   371→  title: string;
+   372→  body: string;
+   373→  category: string;
+   374→  author: string;
+   375→  img: string | null;
+   376→  pinned: boolean;
+   377→  createdAt: string;
+   378→};
+   379→
+   380→function NewsTab() {
+   381→  const { data, refetch } = useFetch<{ articles: NewsArticle[]; count: number }>("/api/news");
+   382→  const { chaosFetch } = useChaosFetch();
+   383→  const [title, setTitle] = useState("");
+   384→  const [body, setBody] = useState("");
+   385→  const [category, setCategory] = useState("UPDATE");
+   386→  const [author, setAuthor] = useState("");
+   387→  const [error, setError] = useState<string | null>(null);
+   388→  const [success, setSuccess] = useState<string | null>(null);
+   389→  const [deletingId, setDeletingId] = useState<string | null>(null);
+   390→  const { play } = useSfx();
+   391→  const articles = data?.articles ?? [];
+   392→
+   393→  const handleCreate = async () => {
+   394→    if (!title.trim() || !body.trim()) { setError("Title dan body wajib diisi."); return; }
+   395→    setError(null); setSuccess(null);
+   396→    try {
+   397→      const res = await chaosFetch("/api/news", {
+   398→        method: "POST",
+   399→        body: JSON.stringify({ title, body, category, author: author || "THE COLLECTIVE" }),
+   400→      });
+   401→      const d = await res.json();
+   402→      if (!res.ok) throw new Error(d.error || "Gagal membuat artikel");
+   403→      setSuccess(`✓ Artikel "${d.title}" dipublikasikan!`);
+   404→      setTitle(""); setBody(""); setAuthor(""); refetch(); play("submit");
+   405→      setTimeout(() => setSuccess(null), 4000);
+   406→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+   407→  };
+   408→
+   409→  const handleDelete = async (id: string, title: string) => {
+   410→    if (!confirm(`Hapus artikel "${title}"?`)) return;
+   411→    setDeletingId(id);
+   412→    try {
+   413→      const res = await chaosFetch(`/api/news?id=${id}`, { method: "DELETE" });
+   414→      if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+   415→      setSuccess(`✓ Artikel dihapus.`);
+   416→      refetch(); play("close");
+   417→      setTimeout(() => setSuccess(null), 3000);
+   418→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+   419→    finally { setDeletingId(null); }
+   420→  };
+   421→
+   422→  const togglePin = async (article: NewsArticle) => {
+   423→    try {
+   424→      const res = await chaosFetch("/api/news", {
+   425→        method: "PUT",
+   426→        body: JSON.stringify({ id: article.id, pinned: !article.pinned }),
+   427→      });
+   428→      if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+   429→      refetch(); play("click");
+   430→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+   431→  };
+   432→
+   433→  const CATEGORIES = ["UPDATE", "EVENT", "CHAOS", "MILESTONE", "NOTICE"];
+   434→  const CAT_COLORS: Record<string, string> = {
+   435→    UPDATE: "#00e5ff", EVENT: "#ff4d4d", CHAOS: "#ff00ff",
+   436→    MILESTONE: "#d4ff00", NOTICE: "#ff8c00",
+   437→  };
+   438→
+   439→  return (
+   440→    <div className="space-y-4">
+   441→      {/* Create form */}
+   442→      <div className="border-8 border-[#00e5ff] bg-black p-6 shadow-[12px_12px_0_#00e5ff]">
+   443→        <h2 className="font-bebas text-4xl text-[#00e5ff] mb-4 flex items-center gap-2">
+   444→          <Newspaper className="w-8 h-8" /> PUBLISH NEWS ARTICLE
+   445→        </h2>
+   446→        <div className="space-y-3">
+   447→          <input value={title} onChange={(e) => setTitle(e.target.value.slice(0, 80))}
+   448→            placeholder="ARTICLE TITLE *"
+   449→            className="block w-full px-3 py-2 border-2 border-[#00e5ff] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   450→          <textarea value={body} onChange={(e) => setBody(e.target.value.slice(0, 500))}
+   451→            placeholder="ARTICLE BODY * (max 500 chars)" rows={3}
+   452→            className="block w-full px-3 py-2 border-2 border-[#00e5ff] bg-[#1a1a1a] text-white font-mono-ud text-sm resize-none focus:outline-none focus:border-[#ff00ff]" />
+   453→          <div className="grid grid-cols-2 gap-3">
+   454→            <select value={category} onChange={(e) => setCategory(e.target.value)}
+   455→              className="px-3 py-2 border-2 border-[#00e5ff] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]">
+   456→              {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+   457→            </select>
+   458→            <input value={author} onChange={(e) => setAuthor(e.target.value.slice(0, 30))}
+   459→              placeholder="AUTHOR (default: THE COLLECTIVE)"
+   460→              className="px-3 py-2 border-2 border-[#00e5ff] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   461→          </div>
+   462→          {error && <div className="bg-[#ff4d4d] text-white px-3 py-2 border-2 border-white font-mono-ud text-xs font-bold">! {error}</div>}
+   463→          {success && <div className="bg-[#00ff00] text-black px-3 py-2 border-2 border-black font-mono-ud text-xs font-bold">{success}</div>}
+   464→          <button onClick={handleCreate}
+   465→            className="w-full bg-[#00e5ff] text-black font-bebas text-2xl py-3 border-2 border-[#00e5ff] hover:bg-transparent hover:text-[#00e5ff] transition-colors no-color-transition">
+   466→            <Newspaper className="w-5 h-5 inline mr-2" /> PUBLISH ARTICLE
+   467→          </button>
+   468→        </div>
+   469→      </div>
+   470→
+   471→      {/* Articles list with delete/pin */}
+   472→      <div className="border-4 border-[#ff00ff] bg-[#1a1a1a] p-4 shadow-[8px_8px_0_#ff00ff]">
+   473→        <div className="flex items-center justify-between mb-3">
+   474→          <h3 className="font-bebas text-2xl text-[#ff00ff] flex items-center gap-2">
+   475→            <Newspaper className="w-5 h-5" /> ARTICLES ({articles.length})
+   476→          </h3>
+   477→          <button onClick={() => { play("click"); refetch(); }} className="font-mono-ud text-xs font-black bg-[#ff00ff] text-black px-3 py-1 border-2 border-[#ff00ff] hover:bg-transparent hover:text-[#ff00ff] transition-colors no-color-transition">↻ REFRESH</button>
+   478→        </div>
+   479→        <div className="space-y-2 max-h-[500px] overflow-y-auto">
+   480→          {articles.length === 0 && (
+   481→            <div className="text-center py-8 font-mono-ud text-xs text-white/40">No articles yet. Create one above!</div>
+   482→          )}
+   483→          {articles.map((a) => (
+   484→            <div key={a.id} className="border-2 border-[#ff00ff]/30 p-3 bg-black/50 group">
+   485→              <div className="flex items-start justify-between gap-2">
+   486→                <div className="flex-1 min-w-0">
+   487→                  <div className="flex items-center gap-2 mb-1">
+   488→                    <span className="font-mono-ud text-[9px] font-black px-1.5 py-0.5 border"
+   489→                      style={{ color: CAT_COLORS[a.category] || "#fff", borderColor: CAT_COLORS[a.category] || "#fff" }}>
+   490→                      {a.category}
+   491→                    </span>
+   492→                    {a.pinned && <span className="font-mono-ud text-[9px] text-[#d4ff00]">📌 PINNED</span>}
+   493→                    <span className="font-mono-ud text-[9px] text-white/40">{a.author}</span>
+   494→                  </div>
+   495→                  <div className="font-bebas text-lg text-white truncate">{a.title}</div>
+   496→                  <div className="font-mono-ud text-[10px] text-white/50 line-clamp-2">{a.body}</div>
+   497→                </div>
+   498→                <div className="flex flex-col gap-2">
+   499→                  <button onClick={() => togglePin(a)}
+   500→                    className="p-2.5 border-2 border-white/30 hover:border-[#d4ff00] hover:bg-[#d4ff00]/10 transition-colors no-color-transition min-w-[44px] min-h-[44px] flex items-center justify-center"
+   501→                    title={a.pinned ? "Unpin article" : "Pin to top"}
+   502→                    aria-label={a.pinned ? "Unpin article" : "Pin article"}>
+   503→                    {a.pinned ? <PinOff className="w-5 h-5 text-[#d4ff00]" /> : <Pin className="w-5 h-5 text-white/60" />}
+   504→                  </button>
+   505→                  <button onClick={() => handleDelete(a.id, a.title)} disabled={deletingId === a.id}
+   506→                    className="p-2.5 border-2 border-white/30 hover:border-[#ff4d4d] hover:bg-[#ff4d4d]/10 transition-colors no-color-transition disabled:opacity-50 min-w-[44px] min-h-[44px] flex items-center justify-center"
+   507→                    title="Delete article"
+   508→                    aria-label="Delete article">
+   509→                    {deletingId === a.id ? <Loader2 className="w-5 h-5 animate-spin text-[#ff4d4d]" /> : <Trash2 className="w-5 h-5 text-[#ff4d4d]" />}
+   510→                  </button>
+   511→                </div>
+   512→              </div>
+   513→            </div>
+   514→          ))}
+   515→        </div>
+   516→      </div>
+   517→    </div>
+   518→  );
+   519→}
+   520→
+   521→// ── Guestbook Management Tab (CRUD) ─────────────────────────────────────────
+   522→type GuestbookEntry = {
+   523→  id: string;
+   524→  name: string;
+   525→  message: string;
+   526→  color: string;
+   527→  createdAt: string;
+   528→};
+   529→
+   530→function GuestbookTab() {
+   531→  const { data, refetch } = useFetch<{ entries: GuestbookEntry[]; count: number }>("/api/guestbook");
+   532→  const { chaosFetch } = useChaosFetch();
+   533→  const [name, setName] = useState("");
+   534→  const [message, setMessage] = useState("");
+   535→  const [error, setError] = useState<string | null>(null);
+   536→  const [success, setSuccess] = useState<string | null>(null);
+   537→  const [deletingId, setDeletingId] = useState<string | null>(null);
+   538→  const { play } = useSfx();
+   539→  const entries = data?.entries ?? [];
+   540→
+   541→  const handleCreate = async () => {
+   542→    if (!name.trim() || !message.trim()) { setError("Nama dan pesan wajib diisi."); return; }
+   543→    setError(null); setSuccess(null);
+   544→    try {
+   545→      const res = await chaosFetch("/api/guestbook", {
+   546→        method: "POST",
+   547→        body: JSON.stringify({ name, message }),
+   548→      });
+   549→      const d = await res.json();
+   550→      if (!res.ok) throw new Error(d.error || "Gagal");
+   551→      setSuccess(`✓ Pesan dari ${d.name} ditambahkan!`);
+   552→      setName(""); setMessage(""); refetch(); play("submit");
+   553→      setTimeout(() => setSuccess(null), 4000);
+   554→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+   555→  };
+   556→
+   557→  const handleDelete = async (id: string, name: string) => {
+   558→    if (!confirm(`Hapus pesan dari "${name}"?`)) return;
+   559→    setDeletingId(id);
+   560→    try {
+   561→      const res = await chaosFetch(`/api/guestbook?id=${id}`, { method: "DELETE" });
+   562→      if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+   563→      setSuccess(`✓ Pesan dihapus.`);
+   564→      refetch(); play("close");
+   565→      setTimeout(() => setSuccess(null), 3000);
+   566→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+   567→    finally { setDeletingId(null); }
+   568→  };
+   569→
+   570→  return (
+   571→    <div className="space-y-4">
+   572→      {/* Create form */}
+   573→      <div className="border-8 border-[#d4ff00] bg-black p-6 shadow-[12px_12px_0_#d4ff00]">
+   574→        <h2 className="font-bebas text-4xl text-[#d4ff00] mb-4 flex items-center gap-2">
+   575→          <MessageSquare className="w-8 h-8" /> ADD GUESTBOOK ENTRY
+   576→        </h2>
+   577→        <div className="space-y-3">
+   578→          <input value={name} onChange={(e) => setName(e.target.value.slice(0, 40))}
+   579→            placeholder="NAME *"
+   580→            className="block w-full px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   581→          <textarea value={message} onChange={(e) => setMessage(e.target.value.slice(0, 280))}
+   582→            placeholder="MESSAGE * (max 280 chars)" rows={3}
+   583→            className="block w-full px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm resize-none focus:outline-none focus:border-[#ff00ff]" />
+   584→          {error && <div className="bg-[#ff4d4d] text-white px-3 py-2 border-2 border-white font-mono-ud text-xs font-bold">! {error}</div>}
+   585→          {success && <div className="bg-[#00ff00] text-black px-3 py-2 border-2 border-black font-mono-ud text-xs font-bold">{success}</div>}
+   586→          <button onClick={handleCreate}
+   587→            className="w-full bg-[#d4ff00] text-black font-bebas text-2xl py-3 border-2 border-[#d4ff00] hover:bg-transparent hover:text-[#d4ff00] transition-colors no-color-transition">
+   588→            <MessageSquare className="w-5 h-5 inline mr-2" /> POST MESSAGE
+   589→          </button>
+   590→        </div>
+   591→      </div>
+   592→
+   593→      {/* Entries with delete */}
+   594→      <div className="border-4 border-[#00e5ff] bg-[#1a1a1a] p-4 shadow-[8px_8px_0_#00e5ff]">
+   595→        <div className="flex items-center justify-between mb-3">
+   596→          <h3 className="font-bebas text-2xl text-[#00e5ff] flex items-center gap-2">
+   597→            <MessageSquare className="w-5 h-5" /> ENTRIES ({entries.length})
+   598→          </h3>
+   599→          <button onClick={() => { play("click"); refetch(); }} className="font-mono-ud text-xs font-black bg-[#00e5ff] text-black px-3 py-1 border-2 border-[#00e5ff] hover:bg-transparent hover:text-[#00e5ff] transition-colors no-color-transition">↻ REFRESH</button>
+   600→        </div>
+   601→        <div className="space-y-2 max-h-[500px] overflow-y-auto">
+   602→          {entries.length === 0 && (
+   603→            <div className="text-center py-8 font-mono-ud text-xs text-white/40">No entries yet. Add one above!</div>
+   604→          )}
+   605→          {entries.map((e) => (
+   606→            <div key={e.id} className="border-2 border-[#00e5ff]/30 p-3 bg-black/50 flex items-start justify-between gap-2 group">
+   607→              <div className="flex-1 min-w-0">
+   608→                <div className="flex items-center gap-2 mb-1">
+   609→                  <span className="w-3 h-3 flex-shrink-0" style={{ backgroundColor: e.color }} />
+   610→                  <span className="font-bebas text-lg text-white">{e.name}</span>
+   611→                  <span className="font-mono-ud text-[9px] text-white/40">
+   612→                    {new Date(e.createdAt).toLocaleString("id-ID", { dateStyle: "short", timeStyle: "short" })}
+   613→                  </span>
+   614→                </div>
+   615→                <div className="font-mono-ud text-xs text-white/70">{e.message}</div>
+   616→              </div>
+   617→              <button onClick={() => handleDelete(e.id, e.name)} disabled={deletingId === e.id}
+   618→                className="p-2.5 border-2 border-white/30 hover:border-[#ff4d4d] hover:bg-[#ff4d4d]/10 transition-colors no-color-transition disabled:opacity-50 min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0"
+   619→                title="Delete entry"
+   620→                aria-label="Delete guestbook entry">
+   621→                {deletingId === e.id ? <Loader2 className="w-5 h-5 animate-spin text-[#ff4d4d]" /> : <Trash2 className="w-5 h-5 text-[#ff4d4d]" />}
+   622→              </button>
+   623→            </div>
+   624→          ))}
+   625→        </div>
+   626→      </div>
+   627→    </div>
+   628→  );
+   629→}
+   630→
+   631→// ── Portfolio Management Tab (CRUD) ─────────────────────────────────────────
+   632→type DbProject = {
+   633→  id: string;
+   634→  title: string;
+   635→  description: string;
+   636→  tech: string[];
+   637→  category: string;
+   638→  status: string;
+   639→  year: string;
+   640→  memberId: string;
+   641→  link: string | null;
+   642→  repo: string | null;
+   643→  color: string;
+   644→};
+   645→
+   646→const PORTFOLIO_CATEGORIES = ["WEB", "GAME", "MOBILE", "TOOL", "BOT", "OTHER"];
+   647→const PORTFOLIO_STATUSES = ["LIVE", "WIP", "ARCHIVED"];
+   648→const MEMBER_SLUGS = ["aldi", "rembo", "eja", "byan", "acong", "tipki", "dudit"];
+   649→
+   650→function PortfolioTab() {
+   651→  const { data, refetch } = useFetch<{ projects: DbProject[]; count: number }>("/api/portfolio");
+   652→  const { chaosFetch } = useChaosFetch();
+   653→  const { play } = useSfx();
+   654→  const [title, setTitle] = useState("");
+   655→  const [description, setDescription] = useState("");
+   656→  const [tech, setTech] = useState("");
+   657→  const [category, setCategory] = useState("WEB");
+   658→  const [status, setStatus] = useState("WIP");
+   659→  const [year, setYear] = useState(String(new Date().getFullYear()));
+   660→  const [memberId, setMemberId] = useState("aldi");
+   661→  const [link, setLink] = useState("");
+   662→  const [repo, setRepo] = useState("");
+   663→  const [color, setColor] = useState("#ff4d4d");
+   664→  const [error, setError] = useState<string | null>(null);
+   665→  const [success, setSuccess] = useState<string | null>(null);
+   666→  const [deletingId, setDeletingId] = useState<string | null>(null);
+   667→
+   668→  const projects = data?.projects ?? [];
+   669→
+   670→  const handleCreate = async () => {
+   671→    if (!title.trim() || !description.trim()) { setError("Title dan description wajib diisi."); return; }
+   672→    setError(null); setSuccess(null);
+   673→    try {
+   674→      const res = await chaosFetch("/api/portfolio", {
+   675→        method: "POST",
+   676→        body: JSON.stringify({
+   677→          title, description,
+   678→          tech: tech.split(",").map((t) => t.trim()).filter(Boolean),
+   679→          category, status, year, memberId,
+   680→          link: link || null, repo: repo || null, color,
+   681→        }),
+   682→      });
+   683→      const d = await res.json();
+   684→      if (!res.ok) throw new Error(d.error || "Gagal");
+   685→      setSuccess(`✓ Project "${d.title}" dibuat!`);
+   686→      setTitle(""); setDescription(""); setTech(""); setLink(""); setRepo("");
+   687→      refetch(); play("submit");
+   688→      setTimeout(() => setSuccess(null), 4000);
+   689→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+   690→  };
+   691→
+   692→  const handleDelete = async (id: string, title: string) => {
+   693→    if (!confirm(`Hapus project "${title}"?`)) return;
+   694→    setDeletingId(id);
+   695→    try {
+   696→      const res = await chaosFetch(`/api/portfolio?id=${id}`, { method: "DELETE" });
+   697→      if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+   698→      setSuccess(`✓ Project dihapus.`);
+   699→      refetch(); play("close");
+   700→      setTimeout(() => setSuccess(null), 3000);
+   701→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+   702→    finally { setDeletingId(null); }
+   703→  };
+   704→
+   705→  const isDbProject = (id: string) => !id.startsWith("p") || id.length > 3;
+   706→
+   707→  const CAT_COLORS: Record<string, string> = {
+   708→    WEB: "#00e5ff", GAME: "#ff4d4d", MOBILE: "#ff00ff",
+   709→    TOOL: "#d4ff00", BOT: "#8a2be2", OTHER: "#ff8c00",
+   710→  };
+   711→
+   712→  return (
+   713→    <div className="space-y-4">
+   714→      {/* Create form */}
+   715→      <div className="border-8 border-[#8a2be2] bg-black p-6 shadow-[12px_12px_0_#8a2be2]">
+   716→        <h2 className="font-bebas text-4xl text-[#8a2be2] mb-4 flex items-center gap-2">
+   717→          <FolderOpen className="w-8 h-8" /> ADD PORTFOLIO PROJECT
+   718→        </h2>
+   719→        <div className="space-y-3">
+   720→          <input value={title} onChange={(e) => setTitle(e.target.value.slice(0, 80))}
+   721→            placeholder="PROJECT TITLE *"
+   722→            className="block w-full px-3 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   723→          <textarea value={description} onChange={(e) => setDescription(e.target.value.slice(0, 500))}
+   724→            placeholder="DESCRIPTION * (max 500 chars)" rows={3}
+   725→            className="block w-full px-3 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-sm resize-none focus:outline-none focus:border-[#ff00ff]" />
+   726→          <input value={tech} onChange={(e) => setTech(e.target.value)}
+   727→            placeholder="TECH (comma separated: Next.js, TypeScript, ...)"
+   728→            className="block w-full px-3 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   729→          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+   730→            <select value={category} onChange={(e) => setCategory(e.target.value)}
+   731→              className="px-2 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-xs focus:outline-none focus:border-[#ff00ff]">
+   732→              {PORTFOLIO_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+   733→            </select>
+   734→            <select value={status} onChange={(e) => setStatus(e.target.value)}
+   735→              className="px-2 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-xs focus:outline-none focus:border-[#ff00ff]">
+   736→              {PORTFOLIO_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+   737→            </select>
+   738→            <input value={year} onChange={(e) => setYear(e.target.value)} placeholder="YEAR"
+   739→              className="px-2 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-xs focus:outline-none focus:border-[#ff00ff]" />
+   740→            <select value={memberId} onChange={(e) => setMemberId(e.target.value)}
+   741→              className="px-2 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-xs focus:outline-none focus:border-[#ff00ff]">
+   742→              {MEMBER_SLUGS.map((m) => <option key={m} value={m}>{m.toUpperCase()}</option>)}
+   743→            </select>
+   744→          </div>
+   745→          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+   746→            <input value={link} onChange={(e) => setLink(e.target.value)} placeholder="Live demo URL (optional)"
+   747→              className="px-3 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-xs focus:outline-none focus:border-[#ff00ff]" />
+   748→            <input value={repo} onChange={(e) => setRepo(e.target.value)} placeholder="GitHub repo URL (optional)"
+   749→              className="px-3 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-xs focus:outline-none focus:border-[#ff00ff]" />
+   750→          </div>
+   751→          <div className="flex items-center gap-2">
+   752→            <span className="font-mono-ud text-xs text-[#d4ff00]">COLOR:</span>
+   753→            <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="w-10 h-8 border-2 border-[#8a2be2] bg-transparent cursor-pointer" />
+   754→          </div>
+   755→          {error && <div className="bg-[#ff4d4d] text-white px-3 py-2 border-2 border-white font-mono-ud text-xs font-bold">! {error}</div>}
+   756→          {success && <div className="bg-[#00ff00] text-black px-3 py-2 border-2 border-black font-mono-ud text-xs font-bold">{success}</div>}
+   757→          <button onClick={handleCreate}
+   758→            className="w-full bg-[#8a2be2] text-white font-bebas text-2xl py-3 border-2 border-[#8a2be2] hover:bg-transparent hover:text-[#8a2be2] transition-colors no-color-transition">
+   759→            <FolderOpen className="w-5 h-5 inline mr-2" /> + ADD PROJECT
+   760→          </button>
+   761→        </div>
+   762→      </div>
+   763→
+   764→      {/* Projects list */}
+   765→      <div className="border-4 border-[#00e5ff] bg-[#1a1a1a] p-4 shadow-[8px_8px_0_#00e5ff]">
+   766→        <div className="flex items-center justify-between mb-3">
+   767→          <h3 className="font-bebas text-2xl text-[#00e5ff] flex items-center gap-2">
+   768→            <FolderOpen className="w-5 h-5" /> PROJECTS ({projects.length})
+   769→          </h3>
+   770→          <button onClick={() => { play("click"); refetch(); }} className="font-mono-ud text-xs font-black bg-[#00e5ff] text-black px-3 py-1 border-2 border-[#00e5ff] hover:bg-transparent hover:text-[#00e5ff] transition-colors no-color-transition">↻ REFRESH</button>
+   771→        </div>
+   772→        <div className="space-y-2 max-h-[500px] overflow-y-auto">
+   773→          {projects.length === 0 && (
+   774→            <div className="text-center py-8 font-mono-ud text-xs text-white/40">No projects yet. Create one above!</div>
+   775→          )}
+   776→          {projects.map((p) => (
+   777→            <div key={p.id} className="border-2 border-[#00e5ff]/30 p-3 bg-black/50 flex items-start justify-between gap-2 group">
+   778→              <div className="flex-1 min-w-0">
+   779→                <div className="flex items-center gap-2 mb-1 flex-wrap">
+   780→                  <span className="font-mono-ud text-[9px] font-black px-1.5 py-0.5 border"
+   781→                    style={{ color: CAT_COLORS[p.category] || "#fff", borderColor: CAT_COLORS[p.category] || "#fff" }}>
+   782→                    {p.category}
+   783→                  </span>
+   784→                  <span className="font-mono-ud text-[9px] font-black px-1.5 py-0.5 border border-white/30"
+   785→                    style={{ color: p.status === "LIVE" ? "#00ff00" : p.status === "WIP" ? "#ff8c00" : "#666" }}>
+   786→                    {p.status}
+   787→                  </span>
+   788→                  <span className="font-mono-ud text-[9px] text-white/40">{p.year} · {p.memberId?.toUpperCase() || p.author}</span>
+   789→                  {isDbProject(p.id) && <span className="font-mono-ud text-[8px] text-[#d4ff00]">DB</span>}
+   790→                </div>
+   791→                <div className="font-bebas text-lg text-white truncate">{p.title}</div>
+   792→                <div className="font-mono-ud text-[10px] text-white/50 line-clamp-2">{p.description}</div>
+   793→                {p.tech && p.tech.length > 0 && (
+   794→                  <div className="font-mono-ud text-[9px] text-[#00e5ff]/60 mt-1 truncate">{p.tech.join(" · ")}</div>
+   795→                )}
+   796→              </div>
+   797→              {isDbProject(p.id) ? (
+   798→                <button onClick={() => handleDelete(p.id, p.title)} disabled={deletingId === p.id}
+   799→                  className="p-2.5 border-2 border-white/30 hover:border-[#ff4d4d] hover:bg-[#ff4d4d]/10 transition-colors no-color-transition disabled:opacity-50 min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0"
+   800→                  title="Delete project" aria-label="Delete project">
+   801→                  {deletingId === p.id ? <Loader2 className="w-5 h-5 animate-spin text-[#ff4d4d]" /> : <Trash2 className="w-5 h-5 text-[#ff4d4d]" />}
+   802→                </button>
+   803→              ) : (
+   804→                <div className="bg-black/70 text-white/60 px-2 py-1 font-mono-ud text-[9px] font-bold border border-white/30 flex-shrink-0">SEED</div>
+   805→              )}
+   806→            </div>
+   807→          ))}
+   808→        </div>
+   809→      </div>
+   810→    </div>
+   811→  );
+   812→}
+   813→
+   814→// ── Achievements Management Tab (CRUD) ──────────────────────────────────────
+   815→type DbAchievement = {
+   816→  id: string;
+   817→  memberId: string;
+   818→  title: string;
+   819→  year: string;
+   820→  description: string;
+   821→  images: string[];
+   822→};
+   823→
+   824→function AchievementsTab() {
+   825→  const { data, refetch } = useFetch<{ achievements: DbAchievement[]; count: number }>("/api/achievements");
+   826→  const { chaosFetch } = useChaosFetch();
+   827→  const { play } = useSfx();
+   828→  const [title, setTitle] = useState("");
+   829→  const [year, setYear] = useState(String(new Date().getFullYear()));
+   830→  const [description, setDescription] = useState("");
+   831→  const [memberId, setMemberId] = useState("aldi");
+   832→  const [error, setError] = useState<string | null>(null);
+   833→  const [success, setSuccess] = useState<string | null>(null);
+   834→  const [deletingId, setDeletingId] = useState<string | null>(null);
+   835→
+   836→  const achievements = data?.achievements ?? [];
+   837→
+   838→  const handleCreate = async () => {
+   839→    if (!title.trim() || !description.trim()) { setError("Title dan description wajib diisi."); return; }
+   840→    setError(null); setSuccess(null);
+   841→    try {
+   842→      const res = await chaosFetch("/api/achievements", {
+   843→        method: "POST",
+   844→        body: JSON.stringify({ title, year, description, memberId }),
+   845→      });
+   846→      const d = await res.json();
+   847→      if (!res.ok) throw new Error(d.error || "Gagal");
+   848→      setSuccess(`✓ Achievement "${d.title}" dibuat!`);
+   849→      setTitle(""); setDescription("");
+   850→      refetch(); play("submit");
+   851→      setTimeout(() => setSuccess(null), 4000);
+   852→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+   853→  };
+   854→
+   855→  const handleDelete = async (id: string, title: string) => {
+   856→    if (!confirm(`Hapus achievement "${title}"?`)) return;
+   857→    setDeletingId(id);
+   858→    try {
+   859→      const res = await chaosFetch(`/api/achievements?id=${id}`, { method: "DELETE" });
+   860→      if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+   861→      setSuccess(`✓ Achievement dihapus.`);
+   862→      refetch(); play("close");
+   863→      setTimeout(() => setSuccess(null), 3000);
+   864→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+   865→    finally { setDeletingId(null); }
+   866→  };
+   867→
+   868→  return (
+   869→    <div className="space-y-4">
+   870→      {/* Create form */}
+   871→      <div className="border-8 border-[#d4ff00] bg-black p-6 shadow-[12px_12px_0_#d4ff00]">
+   872→        <h2 className="font-bebas text-4xl text-[#d4ff00] mb-4 flex items-center gap-2">
+   873→          <Award className="w-8 h-8" /> ADD ACHIEVEMENT
+   874→        </h2>
+   875→        <div className="space-y-3">
+   876→          <input value={title} onChange={(e) => setTitle(e.target.value.slice(0, 100))}
+   877→            placeholder="ACHIEVEMENT TITLE *"
+   878→            className="block w-full px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   879→          <textarea value={description} onChange={(e) => setDescription(e.target.value.slice(0, 500))}
+   880→            placeholder="DESCRIPTION * (max 500 chars)" rows={3}
+   881→            className="block w-full px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm resize-none focus:outline-none focus:border-[#ff00ff]" />
+   882→          <div className="grid grid-cols-2 gap-2">
+   883→            <input value={year} onChange={(e) => setYear(e.target.value)} placeholder="YEAR"
+   884→              className="px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   885→            <select value={memberId} onChange={(e) => setMemberId(e.target.value)}
+   886→              className="px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]">
+   887→              {MEMBER_SLUGS.map((m) => <option key={m} value={m}>{m.toUpperCase()}</option>)}
+   888→            </select>
+   889→          </div>
+   890→          {error && <div className="bg-[#ff4d4d] text-white px-3 py-2 border-2 border-white font-mono-ud text-xs font-bold">! {error}</div>}
+   891→          {success && <div className="bg-[#00ff00] text-black px-3 py-2 border-2 border-black font-mono-ud text-xs font-bold">{success}</div>}
+   892→          <button onClick={handleCreate}
+   893→            className="w-full bg-[#d4ff00] text-black font-bebas text-2xl py-3 border-2 border-[#d4ff00] hover:bg-transparent hover:text-[#d4ff00] transition-colors no-color-transition">
+   894→            <Award className="w-5 h-5 inline mr-2" /> + ADD ACHIEVEMENT
+   895→          </button>
+   896→        </div>
+   897→      </div>
+   898→
+   899→      {/* Achievements list */}
+   900→      <div className="border-4 border-[#00e5ff] bg-[#1a1a1a] p-4 shadow-[8px_8px_0_#00e5ff]">
+   901→        <div className="flex items-center justify-between mb-3">
+   902→          <h3 className="font-bebas text-2xl text-[#00e5ff] flex items-center gap-2">
+   903→            <Award className="w-5 h-5" /> ACHIEVEMENTS ({achievements.length})
+   904→          </h3>
+   905→          <button onClick={() => { play("click"); refetch(); }} className="font-mono-ud text-xs font-black bg-[#00e5ff] text-black px-3 py-1 border-2 border-[#00e5ff] hover:bg-transparent hover:text-[#00e5ff] transition-colors no-color-transition">↻ REFRESH</button>
+   906→        </div>
+   907→        <div className="space-y-2 max-h-[500px] overflow-y-auto">
+   908→          {achievements.length === 0 && (
+   909→            <div className="text-center py-8 font-mono-ud text-xs text-white/40">No achievements yet. Create one above!</div>
+   910→          )}
+   911→          {achievements.map((a) => (
+   912→            <div key={a.id} className="border-2 border-[#00e5ff]/30 p-3 bg-black/50 flex items-start justify-between gap-2 group">
+   913→              <div className="flex-1 min-w-0">
+   914→                <div className="flex items-center gap-2 mb-1">
+   915→                  <span className="font-mono-ud text-[9px] text-[#d4ff00]">{a.year}</span>
+   916→                  <span className="font-mono-ud text-[9px] text-white/40">{a.memberId.toUpperCase()}</span>
+   917→                </div>
+   918→                <div className="font-bebas text-lg text-white truncate">{a.title}</div>
+   919→                <div className="font-mono-ud text-[10px] text-white/50 line-clamp-2">{a.description}</div>
+   920→                {a.images && a.images.length > 0 && (
+   921→                  <div className="font-mono-ud text-[9px] text-[#d4ff00]/60 mt-1">{a.images.length} image(s)</div>
+   922→                )}
+   923→              </div>
+   924→              <button onClick={() => handleDelete(a.id, a.title)} disabled={deletingId === a.id}
+   925→                className="p-2.5 border-2 border-white/30 hover:border-[#ff4d4d] hover:bg-[#ff4d4d]/10 transition-colors no-color-transition disabled:opacity-50 min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0"
+   926→                title="Delete achievement" aria-label="Delete achievement">
+   927→                {deletingId === a.id ? <Loader2 className="w-5 h-5 animate-spin text-[#ff4d4d]" /> : <Trash2 className="w-5 h-5 text-[#ff4d4d]" />}
+   928→              </button>
+   929→            </div>
+   930→          ))}
+   931→        </div>
+   932→      </div>
+   933→    </div>
+   934→  );
+   935→}
+   936→
+   937→// ── Info / ERD Tab ──────────────────────────────────────────────────────────
+   938→function InfoTab() {
+   939→  return (
+   940→    <div className="border-8 border-[#00e5ff] bg-black p-6 shadow-[12px_12px_0_#00e5ff]">
+   941→      <h2 className="font-bebas text-4xl text-[#00e5ff] mb-4 flex items-center gap-2">
+   942→        <Settings className="w-8 h-8" /> SYSTEM INFO & CRUD ENDPOINTS
+   943→      </h2>
+   944→      <div className="space-y-4 font-mono-ud text-xs text-white/80">
+   945→        {/* CRUD endpoints */}
+   946→        <div>
+   947→          <h3 className="font-bebas text-2xl text-[#00e5ff] mb-2 border-b-2 border-[#00e5ff]/30 pb-1">▸ CRUD ENDPOINTS</h3>
+   948→          <div className="space-y-1 text-[11px]">
+   949→            <div className="text-[#d4ff00]">GALLERY:</div>
+   950→            <div>  GET    /api/gallery        — list all photos (public)</div>
+   951→            <div>  POST   /api/gallery/upload — upload new photo (chaos)</div>
+   952→            <div>  PUT    /api/gallery        — edit photo metadata (chaos)</div>
+   953→            <div>  DELETE /api/gallery?id=X   — delete photo (chaos)</div>
+   954→            <div className="text-[#d4ff00] mt-2">NEWS:</div>
+   955→            <div>  GET    /api/news           — list articles (public)</div>
+   956→            <div>  POST   /api/news           — create article (public)</div>
+   957→            <div>  PUT    /api/news           — edit/pin article (chaos)</div>
+   958→            <div>  DELETE /api/news?id=X      — delete article (chaos)</div>
+   959→            <div className="text-[#d4ff00] mt-2">GUESTBOOK:</div>
+   960→            <div>  GET    /api/guestbook      — list entries (public)</div>
+   961→            <div>  POST   /api/guestbook      — post entry (public)</div>
+   962→            <div>  PUT    /api/guestbook      — edit/approve entry (chaos)</div>
+   963→            <div>  DELETE /api/guestbook?id=X — delete entry (chaos)</div>
+   964→            <div className="text-[#d4ff00] mt-2">AUTH:</div>
+   965→            <div>  GET    /api/chaos-token    — get chaos token (called on konami)</div>
+   966→          </div>
+   967→        </div>
+   968→
+   969→        {/* Chaos mode access */}
+   970→        <div>
+   971→          <h3 className="font-bebas text-2xl text-[#00e5ff] mb-2 border-b-2 border-[#00e5ff]/30 pb-1">▸ CHAOS MODE ACCESS</h3>
+   972→          <div className="space-y-1 text-[11px]">
+   973→            <div>1. Activate <span className="text-[#ff00ff]">Chaos Mode</span> (Shuffle button in navbar)</div>
+   974→            <div>2. Enter key sequence: <span className="text-[#d4ff00]">↑ ↓ ← → ← ← ↑</span> (arrow keys only)</div>
+   975→            <div>3. God Mode unlocks → token fetched from /api/chaos-token</div>
+   976→            <div>4. Token stored in localStorage as <code className="text-[#d4ff00]">ud-chaos-token</code></div>
+   977→            <div>5. Click CHAOS MODE button → access CRUD UI</div>
+   978→            <div>6. All DELETE/PUT requests auto-include <code className="text-[#d4ff00]">x-chaos-token</code> header</div>
+   979→          </div>
+   980→        </div>
+   981→
+   982→        {/* Architecture */}
+   983→        <div>
+   984→          <h3 className="font-bebas text-2xl text-[#00e5ff] mb-2 border-b-2 border-[#00e5ff]/30 pb-1">▸ ARCHITECTURE</h3>
+   985→          <div className="space-y-1 text-[11px]">
+   986→            <div>▸ <span className="text-[#d4ff00]">Hosting:</span> Vercel (Next.js 16 — frontend + API)</div>
+   987→            <div>▸ <span className="text-[#d4ff00]">Database:</span> Supabase PostgreSQL (shared local + prod)</div>
+   988→            <div>▸ <span className="text-[#d4ff00]">Storage:</span> Supabase Bucket (gallery uploads)</div>
+   989→            <div>▸ <span className="text-[#d4ff00]">Auth:</span> Chaos-mode token (simple shared secret)</div>
+   990→          </div>
+   991→        </div>
+   992→      </div>
+   993→    </div>
+   994→  );
+   995→}
+   996→
+   997→export { ChaosModePage };
+   998→

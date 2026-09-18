@@ -1,0 +1,599 @@
+   400→      });
+   401→      const d = await res.json();
+   402→      if (!res.ok) throw new Error(d.error || "Gagal membuat artikel");
+   403→      setSuccess(`✓ Artikel "${d.title}" dipublikasikan!`);
+   404→      setTitle(""); setBody(""); setAuthor(""); refetch(); play("submit");
+   405→      setTimeout(() => setSuccess(null), 4000);
+   406→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+   407→  };
+   408→
+   409→  const handleDelete = async (id: string, title: string) => {
+   410→    if (!confirm(`Hapus artikel "${title}"?`)) return;
+   411→    setDeletingId(id);
+   412→    try {
+   413→      const res = await chaosFetch(`/api/news?id=${id}`, { method: "DELETE" });
+   414→      if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+   415→      setSuccess(`✓ Artikel dihapus.`);
+   416→      refetch(); play("close");
+   417→      setTimeout(() => setSuccess(null), 3000);
+   418→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+   419→    finally { setDeletingId(null); }
+   420→  };
+   421→
+   422→  const togglePin = async (article: NewsArticle) => {
+   423→    try {
+   424→      const res = await chaosFetch("/api/news", {
+   425→        method: "PUT",
+   426→        body: JSON.stringify({ id: article.id, pinned: !article.pinned }),
+   427→      });
+   428→      if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+   429→      refetch(); play("click");
+   430→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+   431→  };
+   432→
+   433→  const CATEGORIES = ["UPDATE", "EVENT", "CHAOS", "MILESTONE", "NOTICE"];
+   434→  const CAT_COLORS: Record<string, string> = {
+   435→    UPDATE: "#00e5ff", EVENT: "#ff4d4d", CHAOS: "#ff00ff",
+   436→    MILESTONE: "#d4ff00", NOTICE: "#ff8c00",
+   437→  };
+   438→
+   439→  return (
+   440→    <div className="space-y-4">
+   441→      {/* Create form */}
+   442→      <div className="border-8 border-[#00e5ff] bg-black p-6 shadow-[12px_12px_0_#00e5ff]">
+   443→        <h2 className="font-bebas text-4xl text-[#00e5ff] mb-4 flex items-center gap-2">
+   444→          <Newspaper className="w-8 h-8" /> PUBLISH NEWS ARTICLE
+   445→        </h2>
+   446→        <div className="space-y-3">
+   447→          <input value={title} onChange={(e) => setTitle(e.target.value.slice(0, 80))}
+   448→            placeholder="ARTICLE TITLE *"
+   449→            className="block w-full px-3 py-2 border-2 border-[#00e5ff] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   450→          <textarea value={body} onChange={(e) => setBody(e.target.value.slice(0, 500))}
+   451→            placeholder="ARTICLE BODY * (max 500 chars)" rows={3}
+   452→            className="block w-full px-3 py-2 border-2 border-[#00e5ff] bg-[#1a1a1a] text-white font-mono-ud text-sm resize-none focus:outline-none focus:border-[#ff00ff]" />
+   453→          <div className="grid grid-cols-2 gap-3">
+   454→            <select value={category} onChange={(e) => setCategory(e.target.value)}
+   455→              className="px-3 py-2 border-2 border-[#00e5ff] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]">
+   456→              {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+   457→            </select>
+   458→            <input value={author} onChange={(e) => setAuthor(e.target.value.slice(0, 30))}
+   459→              placeholder="AUTHOR (default: THE COLLECTIVE)"
+   460→              className="px-3 py-2 border-2 border-[#00e5ff] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   461→          </div>
+   462→          {error && <div className="bg-[#ff4d4d] text-white px-3 py-2 border-2 border-white font-mono-ud text-xs font-bold">! {error}</div>}
+   463→          {success && <div className="bg-[#00ff00] text-black px-3 py-2 border-2 border-black font-mono-ud text-xs font-bold">{success}</div>}
+   464→          <button onClick={handleCreate}
+   465→            className="w-full bg-[#00e5ff] text-black font-bebas text-2xl py-3 border-2 border-[#00e5ff] hover:bg-transparent hover:text-[#00e5ff] transition-colors no-color-transition">
+   466→            <Newspaper className="w-5 h-5 inline mr-2" /> PUBLISH ARTICLE
+   467→          </button>
+   468→        </div>
+   469→      </div>
+   470→
+   471→      {/* Articles list with delete/pin */}
+   472→      <div className="border-4 border-[#ff00ff] bg-[#1a1a1a] p-4 shadow-[8px_8px_0_#ff00ff]">
+   473→        <div className="flex items-center justify-between mb-3">
+   474→          <h3 className="font-bebas text-2xl text-[#ff00ff] flex items-center gap-2">
+   475→            <Newspaper className="w-5 h-5" /> ARTICLES ({articles.length})
+   476→          </h3>
+   477→          <button onClick={() => { play("click"); refetch(); }} className="font-mono-ud text-xs font-black bg-[#ff00ff] text-black px-3 py-1 border-2 border-[#ff00ff] hover:bg-transparent hover:text-[#ff00ff] transition-colors no-color-transition">↻ REFRESH</button>
+   478→        </div>
+   479→        <div className="space-y-2 max-h-[500px] overflow-y-auto">
+   480→          {articles.length === 0 && (
+   481→            <div className="text-center py-8 font-mono-ud text-xs text-white/40">No articles yet. Create one above!</div>
+   482→          )}
+   483→          {articles.map((a) => (
+   484→            <div key={a.id} className="border-2 border-[#ff00ff]/30 p-3 bg-black/50 group">
+   485→              <div className="flex items-start justify-between gap-2">
+   486→                <div className="flex-1 min-w-0">
+   487→                  <div className="flex items-center gap-2 mb-1">
+   488→                    <span className="font-mono-ud text-[9px] font-black px-1.5 py-0.5 border"
+   489→                      style={{ color: CAT_COLORS[a.category] || "#fff", borderColor: CAT_COLORS[a.category] || "#fff" }}>
+   490→                      {a.category}
+   491→                    </span>
+   492→                    {a.pinned && <span className="font-mono-ud text-[9px] text-[#d4ff00]">📌 PINNED</span>}
+   493→                    <span className="font-mono-ud text-[9px] text-white/40">{a.author}</span>
+   494→                  </div>
+   495→                  <div className="font-bebas text-lg text-white truncate">{a.title}</div>
+   496→                  <div className="font-mono-ud text-[10px] text-white/50 line-clamp-2">{a.body}</div>
+   497→                </div>
+   498→                <div className="flex flex-col gap-2">
+   499→                  <button onClick={() => togglePin(a)}
+   500→                    className="p-2.5 border-2 border-white/30 hover:border-[#d4ff00] hover:bg-[#d4ff00]/10 transition-colors no-color-transition min-w-[44px] min-h-[44px] flex items-center justify-center"
+   501→                    title={a.pinned ? "Unpin article" : "Pin to top"}
+   502→                    aria-label={a.pinned ? "Unpin article" : "Pin article"}>
+   503→                    {a.pinned ? <PinOff className="w-5 h-5 text-[#d4ff00]" /> : <Pin className="w-5 h-5 text-white/60" />}
+   504→                  </button>
+   505→                  <button onClick={() => handleDelete(a.id, a.title)} disabled={deletingId === a.id}
+   506→                    className="p-2.5 border-2 border-white/30 hover:border-[#ff4d4d] hover:bg-[#ff4d4d]/10 transition-colors no-color-transition disabled:opacity-50 min-w-[44px] min-h-[44px] flex items-center justify-center"
+   507→                    title="Delete article"
+   508→                    aria-label="Delete article">
+   509→                    {deletingId === a.id ? <Loader2 className="w-5 h-5 animate-spin text-[#ff4d4d]" /> : <Trash2 className="w-5 h-5 text-[#ff4d4d]" />}
+   510→                  </button>
+   511→                </div>
+   512→              </div>
+   513→            </div>
+   514→          ))}
+   515→        </div>
+   516→      </div>
+   517→    </div>
+   518→  );
+   519→}
+   520→
+   521→// ── Guestbook Management Tab (CRUD) ─────────────────────────────────────────
+   522→type GuestbookEntry = {
+   523→  id: string;
+   524→  name: string;
+   525→  message: string;
+   526→  color: string;
+   527→  createdAt: string;
+   528→};
+   529→
+   530→function GuestbookTab() {
+   531→  const { data, refetch } = useFetch<{ entries: GuestbookEntry[]; count: number }>("/api/guestbook");
+   532→  const { chaosFetch } = useChaosFetch();
+   533→  const [name, setName] = useState("");
+   534→  const [message, setMessage] = useState("");
+   535→  const [error, setError] = useState<string | null>(null);
+   536→  const [success, setSuccess] = useState<string | null>(null);
+   537→  const [deletingId, setDeletingId] = useState<string | null>(null);
+   538→  const { play } = useSfx();
+   539→  const entries = data?.entries ?? [];
+   540→
+   541→  const handleCreate = async () => {
+   542→    if (!name.trim() || !message.trim()) { setError("Nama dan pesan wajib diisi."); return; }
+   543→    setError(null); setSuccess(null);
+   544→    try {
+   545→      const res = await chaosFetch("/api/guestbook", {
+   546→        method: "POST",
+   547→        body: JSON.stringify({ name, message }),
+   548→      });
+   549→      const d = await res.json();
+   550→      if (!res.ok) throw new Error(d.error || "Gagal");
+   551→      setSuccess(`✓ Pesan dari ${d.name} ditambahkan!`);
+   552→      setName(""); setMessage(""); refetch(); play("submit");
+   553→      setTimeout(() => setSuccess(null), 4000);
+   554→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+   555→  };
+   556→
+   557→  const handleDelete = async (id: string, name: string) => {
+   558→    if (!confirm(`Hapus pesan dari "${name}"?`)) return;
+   559→    setDeletingId(id);
+   560→    try {
+   561→      const res = await chaosFetch(`/api/guestbook?id=${id}`, { method: "DELETE" });
+   562→      if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+   563→      setSuccess(`✓ Pesan dihapus.`);
+   564→      refetch(); play("close");
+   565→      setTimeout(() => setSuccess(null), 3000);
+   566→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+   567→    finally { setDeletingId(null); }
+   568→  };
+   569→
+   570→  return (
+   571→    <div className="space-y-4">
+   572→      {/* Create form */}
+   573→      <div className="border-8 border-[#d4ff00] bg-black p-6 shadow-[12px_12px_0_#d4ff00]">
+   574→        <h2 className="font-bebas text-4xl text-[#d4ff00] mb-4 flex items-center gap-2">
+   575→          <MessageSquare className="w-8 h-8" /> ADD GUESTBOOK ENTRY
+   576→        </h2>
+   577→        <div className="space-y-3">
+   578→          <input value={name} onChange={(e) => setName(e.target.value.slice(0, 40))}
+   579→            placeholder="NAME *"
+   580→            className="block w-full px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   581→          <textarea value={message} onChange={(e) => setMessage(e.target.value.slice(0, 280))}
+   582→            placeholder="MESSAGE * (max 280 chars)" rows={3}
+   583→            className="block w-full px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm resize-none focus:outline-none focus:border-[#ff00ff]" />
+   584→          {error && <div className="bg-[#ff4d4d] text-white px-3 py-2 border-2 border-white font-mono-ud text-xs font-bold">! {error}</div>}
+   585→          {success && <div className="bg-[#00ff00] text-black px-3 py-2 border-2 border-black font-mono-ud text-xs font-bold">{success}</div>}
+   586→          <button onClick={handleCreate}
+   587→            className="w-full bg-[#d4ff00] text-black font-bebas text-2xl py-3 border-2 border-[#d4ff00] hover:bg-transparent hover:text-[#d4ff00] transition-colors no-color-transition">
+   588→            <MessageSquare className="w-5 h-5 inline mr-2" /> POST MESSAGE
+   589→          </button>
+   590→        </div>
+   591→      </div>
+   592→
+   593→      {/* Entries with delete */}
+   594→      <div className="border-4 border-[#00e5ff] bg-[#1a1a1a] p-4 shadow-[8px_8px_0_#00e5ff]">
+   595→        <div className="flex items-center justify-between mb-3">
+   596→          <h3 className="font-bebas text-2xl text-[#00e5ff] flex items-center gap-2">
+   597→            <MessageSquare className="w-5 h-5" /> ENTRIES ({entries.length})
+   598→          </h3>
+   599→          <button onClick={() => { play("click"); refetch(); }} className="font-mono-ud text-xs font-black bg-[#00e5ff] text-black px-3 py-1 border-2 border-[#00e5ff] hover:bg-transparent hover:text-[#00e5ff] transition-colors no-color-transition">↻ REFRESH</button>
+   600→        </div>
+   601→        <div className="space-y-2 max-h-[500px] overflow-y-auto">
+   602→          {entries.length === 0 && (
+   603→            <div className="text-center py-8 font-mono-ud text-xs text-white/40">No entries yet. Add one above!</div>
+   604→          )}
+   605→          {entries.map((e) => (
+   606→            <div key={e.id} className="border-2 border-[#00e5ff]/30 p-3 bg-black/50 flex items-start justify-between gap-2 group">
+   607→              <div className="flex-1 min-w-0">
+   608→                <div className="flex items-center gap-2 mb-1">
+   609→                  <span className="w-3 h-3 flex-shrink-0" style={{ backgroundColor: e.color }} />
+   610→                  <span className="font-bebas text-lg text-white">{e.name}</span>
+   611→                  <span className="font-mono-ud text-[9px] text-white/40">
+   612→                    {new Date(e.createdAt).toLocaleString("id-ID", { dateStyle: "short", timeStyle: "short" })}
+   613→                  </span>
+   614→                </div>
+   615→                <div className="font-mono-ud text-xs text-white/70">{e.message}</div>
+   616→              </div>
+   617→              <button onClick={() => handleDelete(e.id, e.name)} disabled={deletingId === e.id}
+   618→                className="p-2.5 border-2 border-white/30 hover:border-[#ff4d4d] hover:bg-[#ff4d4d]/10 transition-colors no-color-transition disabled:opacity-50 min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0"
+   619→                title="Delete entry"
+   620→                aria-label="Delete guestbook entry">
+   621→                {deletingId === e.id ? <Loader2 className="w-5 h-5 animate-spin text-[#ff4d4d]" /> : <Trash2 className="w-5 h-5 text-[#ff4d4d]" />}
+   622→              </button>
+   623→            </div>
+   624→          ))}
+   625→        </div>
+   626→      </div>
+   627→    </div>
+   628→  );
+   629→}
+   630→
+   631→// ── Portfolio Management Tab (CRUD) ─────────────────────────────────────────
+   632→type DbProject = {
+   633→  id: string;
+   634→  title: string;
+   635→  description: string;
+   636→  tech: string[];
+   637→  category: string;
+   638→  status: string;
+   639→  year: string;
+   640→  memberId: string;
+   641→  link: string | null;
+   642→  repo: string | null;
+   643→  color: string;
+   644→};
+   645→
+   646→const PORTFOLIO_CATEGORIES = ["WEB", "GAME", "MOBILE", "TOOL", "BOT", "OTHER"];
+   647→const PORTFOLIO_STATUSES = ["LIVE", "WIP", "ARCHIVED"];
+   648→const MEMBER_SLUGS = ["aldi", "rembo", "eja", "byan", "acong", "tipki", "dudit"];
+   649→
+   650→function PortfolioTab() {
+   651→  const { data, refetch } = useFetch<{ projects: DbProject[]; count: number }>("/api/portfolio");
+   652→  const { chaosFetch } = useChaosFetch();
+   653→  const { play } = useSfx();
+   654→  const [title, setTitle] = useState("");
+   655→  const [description, setDescription] = useState("");
+   656→  const [tech, setTech] = useState("");
+   657→  const [category, setCategory] = useState("WEB");
+   658→  const [status, setStatus] = useState("WIP");
+   659→  const [year, setYear] = useState(String(new Date().getFullYear()));
+   660→  const [memberId, setMemberId] = useState("aldi");
+   661→  const [link, setLink] = useState("");
+   662→  const [repo, setRepo] = useState("");
+   663→  const [color, setColor] = useState("#ff4d4d");
+   664→  const [error, setError] = useState<string | null>(null);
+   665→  const [success, setSuccess] = useState<string | null>(null);
+   666→  const [deletingId, setDeletingId] = useState<string | null>(null);
+   667→
+   668→  const projects = data?.projects ?? [];
+   669→
+   670→  const handleCreate = async () => {
+   671→    if (!title.trim() || !description.trim()) { setError("Title dan description wajib diisi."); return; }
+   672→    setError(null); setSuccess(null);
+   673→    try {
+   674→      const res = await chaosFetch("/api/portfolio", {
+   675→        method: "POST",
+   676→        body: JSON.stringify({
+   677→          title, description,
+   678→          tech: tech.split(",").map((t) => t.trim()).filter(Boolean),
+   679→          category, status, year, memberId,
+   680→          link: link || null, repo: repo || null, color,
+   681→        }),
+   682→      });
+   683→      const d = await res.json();
+   684→      if (!res.ok) throw new Error(d.error || "Gagal");
+   685→      setSuccess(`✓ Project "${d.title}" dibuat!`);
+   686→      setTitle(""); setDescription(""); setTech(""); setLink(""); setRepo("");
+   687→      refetch(); play("submit");
+   688→      setTimeout(() => setSuccess(null), 4000);
+   689→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+   690→  };
+   691→
+   692→  const handleDelete = async (id: string, title: string) => {
+   693→    if (!confirm(`Hapus project "${title}"?`)) return;
+   694→    setDeletingId(id);
+   695→    try {
+   696→      const res = await chaosFetch(`/api/portfolio?id=${id}`, { method: "DELETE" });
+   697→      if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+   698→      setSuccess(`✓ Project dihapus.`);
+   699→      refetch(); play("close");
+   700→      setTimeout(() => setSuccess(null), 3000);
+   701→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+   702→    finally { setDeletingId(null); }
+   703→  };
+   704→
+   705→  const isDbProject = (id: string) => !id.startsWith("p") || id.length > 3;
+   706→
+   707→  const CAT_COLORS: Record<string, string> = {
+   708→    WEB: "#00e5ff", GAME: "#ff4d4d", MOBILE: "#ff00ff",
+   709→    TOOL: "#d4ff00", BOT: "#8a2be2", OTHER: "#ff8c00",
+   710→  };
+   711→
+   712→  return (
+   713→    <div className="space-y-4">
+   714→      {/* Create form */}
+   715→      <div className="border-8 border-[#8a2be2] bg-black p-6 shadow-[12px_12px_0_#8a2be2]">
+   716→        <h2 className="font-bebas text-4xl text-[#8a2be2] mb-4 flex items-center gap-2">
+   717→          <FolderOpen className="w-8 h-8" /> ADD PORTFOLIO PROJECT
+   718→        </h2>
+   719→        <div className="space-y-3">
+   720→          <input value={title} onChange={(e) => setTitle(e.target.value.slice(0, 80))}
+   721→            placeholder="PROJECT TITLE *"
+   722→            className="block w-full px-3 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   723→          <textarea value={description} onChange={(e) => setDescription(e.target.value.slice(0, 500))}
+   724→            placeholder="DESCRIPTION * (max 500 chars)" rows={3}
+   725→            className="block w-full px-3 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-sm resize-none focus:outline-none focus:border-[#ff00ff]" />
+   726→          <input value={tech} onChange={(e) => setTech(e.target.value)}
+   727→            placeholder="TECH (comma separated: Next.js, TypeScript, ...)"
+   728→            className="block w-full px-3 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   729→          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+   730→            <select value={category} onChange={(e) => setCategory(e.target.value)}
+   731→              className="px-2 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-xs focus:outline-none focus:border-[#ff00ff]">
+   732→              {PORTFOLIO_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+   733→            </select>
+   734→            <select value={status} onChange={(e) => setStatus(e.target.value)}
+   735→              className="px-2 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-xs focus:outline-none focus:border-[#ff00ff]">
+   736→              {PORTFOLIO_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+   737→            </select>
+   738→            <input value={year} onChange={(e) => setYear(e.target.value)} placeholder="YEAR"
+   739→              className="px-2 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-xs focus:outline-none focus:border-[#ff00ff]" />
+   740→            <select value={memberId} onChange={(e) => setMemberId(e.target.value)}
+   741→              className="px-2 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-xs focus:outline-none focus:border-[#ff00ff]">
+   742→              {MEMBER_SLUGS.map((m) => <option key={m} value={m}>{m.toUpperCase()}</option>)}
+   743→            </select>
+   744→          </div>
+   745→          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+   746→            <input value={link} onChange={(e) => setLink(e.target.value)} placeholder="Live demo URL (optional)"
+   747→              className="px-3 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-xs focus:outline-none focus:border-[#ff00ff]" />
+   748→            <input value={repo} onChange={(e) => setRepo(e.target.value)} placeholder="GitHub repo URL (optional)"
+   749→              className="px-3 py-2 border-2 border-[#8a2be2] bg-[#1a1a1a] text-white font-mono-ud text-xs focus:outline-none focus:border-[#ff00ff]" />
+   750→          </div>
+   751→          <div className="flex items-center gap-2">
+   752→            <span className="font-mono-ud text-xs text-[#d4ff00]">COLOR:</span>
+   753→            <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="w-10 h-8 border-2 border-[#8a2be2] bg-transparent cursor-pointer" />
+   754→          </div>
+   755→          {error && <div className="bg-[#ff4d4d] text-white px-3 py-2 border-2 border-white font-mono-ud text-xs font-bold">! {error}</div>}
+   756→          {success && <div className="bg-[#00ff00] text-black px-3 py-2 border-2 border-black font-mono-ud text-xs font-bold">{success}</div>}
+   757→          <button onClick={handleCreate}
+   758→            className="w-full bg-[#8a2be2] text-white font-bebas text-2xl py-3 border-2 border-[#8a2be2] hover:bg-transparent hover:text-[#8a2be2] transition-colors no-color-transition">
+   759→            <FolderOpen className="w-5 h-5 inline mr-2" /> + ADD PROJECT
+   760→          </button>
+   761→        </div>
+   762→      </div>
+   763→
+   764→      {/* Projects list */}
+   765→      <div className="border-4 border-[#00e5ff] bg-[#1a1a1a] p-4 shadow-[8px_8px_0_#00e5ff]">
+   766→        <div className="flex items-center justify-between mb-3">
+   767→          <h3 className="font-bebas text-2xl text-[#00e5ff] flex items-center gap-2">
+   768→            <FolderOpen className="w-5 h-5" /> PROJECTS ({projects.length})
+   769→          </h3>
+   770→          <button onClick={() => { play("click"); refetch(); }} className="font-mono-ud text-xs font-black bg-[#00e5ff] text-black px-3 py-1 border-2 border-[#00e5ff] hover:bg-transparent hover:text-[#00e5ff] transition-colors no-color-transition">↻ REFRESH</button>
+   771→        </div>
+   772→        <div className="space-y-2 max-h-[500px] overflow-y-auto">
+   773→          {projects.length === 0 && (
+   774→            <div className="text-center py-8 font-mono-ud text-xs text-white/40">No projects yet. Create one above!</div>
+   775→          )}
+   776→          {projects.map((p) => (
+   777→            <div key={p.id} className="border-2 border-[#00e5ff]/30 p-3 bg-black/50 flex items-start justify-between gap-2 group">
+   778→              <div className="flex-1 min-w-0">
+   779→                <div className="flex items-center gap-2 mb-1 flex-wrap">
+   780→                  <span className="font-mono-ud text-[9px] font-black px-1.5 py-0.5 border"
+   781→                    style={{ color: CAT_COLORS[p.category] || "#fff", borderColor: CAT_COLORS[p.category] || "#fff" }}>
+   782→                    {p.category}
+   783→                  </span>
+   784→                  <span className="font-mono-ud text-[9px] font-black px-1.5 py-0.5 border border-white/30"
+   785→                    style={{ color: p.status === "LIVE" ? "#00ff00" : p.status === "WIP" ? "#ff8c00" : "#666" }}>
+   786→                    {p.status}
+   787→                  </span>
+   788→                  <span className="font-mono-ud text-[9px] text-white/40">{p.year} · {p.memberId?.toUpperCase() || p.author}</span>
+   789→                  {isDbProject(p.id) && <span className="font-mono-ud text-[8px] text-[#d4ff00]">DB</span>}
+   790→                </div>
+   791→                <div className="font-bebas text-lg text-white truncate">{p.title}</div>
+   792→                <div className="font-mono-ud text-[10px] text-white/50 line-clamp-2">{p.description}</div>
+   793→                {p.tech && p.tech.length > 0 && (
+   794→                  <div className="font-mono-ud text-[9px] text-[#00e5ff]/60 mt-1 truncate">{p.tech.join(" · ")}</div>
+   795→                )}
+   796→              </div>
+   797→              {isDbProject(p.id) ? (
+   798→                <button onClick={() => handleDelete(p.id, p.title)} disabled={deletingId === p.id}
+   799→                  className="p-2.5 border-2 border-white/30 hover:border-[#ff4d4d] hover:bg-[#ff4d4d]/10 transition-colors no-color-transition disabled:opacity-50 min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0"
+   800→                  title="Delete project" aria-label="Delete project">
+   801→                  {deletingId === p.id ? <Loader2 className="w-5 h-5 animate-spin text-[#ff4d4d]" /> : <Trash2 className="w-5 h-5 text-[#ff4d4d]" />}
+   802→                </button>
+   803→              ) : (
+   804→                <div className="bg-black/70 text-white/60 px-2 py-1 font-mono-ud text-[9px] font-bold border border-white/30 flex-shrink-0">SEED</div>
+   805→              )}
+   806→            </div>
+   807→          ))}
+   808→        </div>
+   809→      </div>
+   810→    </div>
+   811→  );
+   812→}
+   813→
+   814→// ── Achievements Management Tab (CRUD) ──────────────────────────────────────
+   815→type DbAchievement = {
+   816→  id: string;
+   817→  memberId: string;
+   818→  title: string;
+   819→  year: string;
+   820→  description: string;
+   821→  images: string[];
+   822→};
+   823→
+   824→function AchievementsTab() {
+   825→  const { data, refetch } = useFetch<{ achievements: DbAchievement[]; count: number }>("/api/achievements");
+   826→  const { chaosFetch } = useChaosFetch();
+   827→  const { play } = useSfx();
+   828→  const [title, setTitle] = useState("");
+   829→  const [year, setYear] = useState(String(new Date().getFullYear()));
+   830→  const [description, setDescription] = useState("");
+   831→  const [memberId, setMemberId] = useState("aldi");
+   832→  const [error, setError] = useState<string | null>(null);
+   833→  const [success, setSuccess] = useState<string | null>(null);
+   834→  const [deletingId, setDeletingId] = useState<string | null>(null);
+   835→
+   836→  const achievements = data?.achievements ?? [];
+   837→
+   838→  const handleCreate = async () => {
+   839→    if (!title.trim() || !description.trim()) { setError("Title dan description wajib diisi."); return; }
+   840→    setError(null); setSuccess(null);
+   841→    try {
+   842→      const res = await chaosFetch("/api/achievements", {
+   843→        method: "POST",
+   844→        body: JSON.stringify({ title, year, description, memberId }),
+   845→      });
+   846→      const d = await res.json();
+   847→      if (!res.ok) throw new Error(d.error || "Gagal");
+   848→      setSuccess(`✓ Achievement "${d.title}" dibuat!`);
+   849→      setTitle(""); setDescription("");
+   850→      refetch(); play("submit");
+   851→      setTimeout(() => setSuccess(null), 4000);
+   852→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+   853→  };
+   854→
+   855→  const handleDelete = async (id: string, title: string) => {
+   856→    if (!confirm(`Hapus achievement "${title}"?`)) return;
+   857→    setDeletingId(id);
+   858→    try {
+   859→      const res = await chaosFetch(`/api/achievements?id=${id}`, { method: "DELETE" });
+   860→      if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+   861→      setSuccess(`✓ Achievement dihapus.`);
+   862→      refetch(); play("close");
+   863→      setTimeout(() => setSuccess(null), 3000);
+   864→    } catch (e) { setError(e instanceof Error ? e.message : "Gagal"); }
+   865→    finally { setDeletingId(null); }
+   866→  };
+   867→
+   868→  return (
+   869→    <div className="space-y-4">
+   870→      {/* Create form */}
+   871→      <div className="border-8 border-[#d4ff00] bg-black p-6 shadow-[12px_12px_0_#d4ff00]">
+   872→        <h2 className="font-bebas text-4xl text-[#d4ff00] mb-4 flex items-center gap-2">
+   873→          <Award className="w-8 h-8" /> ADD ACHIEVEMENT
+   874→        </h2>
+   875→        <div className="space-y-3">
+   876→          <input value={title} onChange={(e) => setTitle(e.target.value.slice(0, 100))}
+   877→            placeholder="ACHIEVEMENT TITLE *"
+   878→            className="block w-full px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   879→          <textarea value={description} onChange={(e) => setDescription(e.target.value.slice(0, 500))}
+   880→            placeholder="DESCRIPTION * (max 500 chars)" rows={3}
+   881→            className="block w-full px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm resize-none focus:outline-none focus:border-[#ff00ff]" />
+   882→          <div className="grid grid-cols-2 gap-2">
+   883→            <input value={year} onChange={(e) => setYear(e.target.value)} placeholder="YEAR"
+   884→              className="px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]" />
+   885→            <select value={memberId} onChange={(e) => setMemberId(e.target.value)}
+   886→              className="px-3 py-2 border-2 border-[#d4ff00] bg-[#1a1a1a] text-white font-mono-ud text-sm focus:outline-none focus:border-[#ff00ff]">
+   887→              {MEMBER_SLUGS.map((m) => <option key={m} value={m}>{m.toUpperCase()}</option>)}
+   888→            </select>
+   889→          </div>
+   890→          {error && <div className="bg-[#ff4d4d] text-white px-3 py-2 border-2 border-white font-mono-ud text-xs font-bold">! {error}</div>}
+   891→          {success && <div className="bg-[#00ff00] text-black px-3 py-2 border-2 border-black font-mono-ud text-xs font-bold">{success}</div>}
+   892→          <button onClick={handleCreate}
+   893→            className="w-full bg-[#d4ff00] text-black font-bebas text-2xl py-3 border-2 border-[#d4ff00] hover:bg-transparent hover:text-[#d4ff00] transition-colors no-color-transition">
+   894→            <Award className="w-5 h-5 inline mr-2" /> + ADD ACHIEVEMENT
+   895→          </button>
+   896→        </div>
+   897→      </div>
+   898→
+   899→      {/* Achievements list */}
+   900→      <div className="border-4 border-[#00e5ff] bg-[#1a1a1a] p-4 shadow-[8px_8px_0_#00e5ff]">
+   901→        <div className="flex items-center justify-between mb-3">
+   902→          <h3 className="font-bebas text-2xl text-[#00e5ff] flex items-center gap-2">
+   903→            <Award className="w-5 h-5" /> ACHIEVEMENTS ({achievements.length})
+   904→          </h3>
+   905→          <button onClick={() => { play("click"); refetch(); }} className="font-mono-ud text-xs font-black bg-[#00e5ff] text-black px-3 py-1 border-2 border-[#00e5ff] hover:bg-transparent hover:text-[#00e5ff] transition-colors no-color-transition">↻ REFRESH</button>
+   906→        </div>
+   907→        <div className="space-y-2 max-h-[500px] overflow-y-auto">
+   908→          {achievements.length === 0 && (
+   909→            <div className="text-center py-8 font-mono-ud text-xs text-white/40">No achievements yet. Create one above!</div>
+   910→          )}
+   911→          {achievements.map((a) => (
+   912→            <div key={a.id} className="border-2 border-[#00e5ff]/30 p-3 bg-black/50 flex items-start justify-between gap-2 group">
+   913→              <div className="flex-1 min-w-0">
+   914→                <div className="flex items-center gap-2 mb-1">
+   915→                  <span className="font-mono-ud text-[9px] text-[#d4ff00]">{a.year}</span>
+   916→                  <span className="font-mono-ud text-[9px] text-white/40">{a.memberId.toUpperCase()}</span>
+   917→                </div>
+   918→                <div className="font-bebas text-lg text-white truncate">{a.title}</div>
+   919→                <div className="font-mono-ud text-[10px] text-white/50 line-clamp-2">{a.description}</div>
+   920→                {a.images && a.images.length > 0 && (
+   921→                  <div className="font-mono-ud text-[9px] text-[#d4ff00]/60 mt-1">{a.images.length} image(s)</div>
+   922→                )}
+   923→              </div>
+   924→              <button onClick={() => handleDelete(a.id, a.title)} disabled={deletingId === a.id}
+   925→                className="p-2.5 border-2 border-white/30 hover:border-[#ff4d4d] hover:bg-[#ff4d4d]/10 transition-colors no-color-transition disabled:opacity-50 min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0"
+   926→                title="Delete achievement" aria-label="Delete achievement">
+   927→                {deletingId === a.id ? <Loader2 className="w-5 h-5 animate-spin text-[#ff4d4d]" /> : <Trash2 className="w-5 h-5 text-[#ff4d4d]" />}
+   928→              </button>
+   929→            </div>
+   930→          ))}
+   931→        </div>
+   932→      </div>
+   933→    </div>
+   934→  );
+   935→}
+   936→
+   937→// ── Info / ERD Tab ──────────────────────────────────────────────────────────
+   938→function InfoTab() {
+   939→  return (
+   940→    <div className="border-8 border-[#00e5ff] bg-black p-6 shadow-[12px_12px_0_#00e5ff]">
+   941→      <h2 className="font-bebas text-4xl text-[#00e5ff] mb-4 flex items-center gap-2">
+   942→        <Settings className="w-8 h-8" /> SYSTEM INFO & CRUD ENDPOINTS
+   943→      </h2>
+   944→      <div className="space-y-4 font-mono-ud text-xs text-white/80">
+   945→        {/* CRUD endpoints */}
+   946→        <div>
+   947→          <h3 className="font-bebas text-2xl text-[#00e5ff] mb-2 border-b-2 border-[#00e5ff]/30 pb-1">▸ CRUD ENDPOINTS</h3>
+   948→          <div className="space-y-1 text-[11px]">
+   949→            <div className="text-[#d4ff00]">GALLERY:</div>
+   950→            <div>  GET    /api/gallery        — list all photos (public)</div>
+   951→            <div>  POST   /api/gallery/upload — upload new photo (chaos)</div>
+   952→            <div>  PUT    /api/gallery        — edit photo metadata (chaos)</div>
+   953→            <div>  DELETE /api/gallery?id=X   — delete photo (chaos)</div>
+   954→            <div className="text-[#d4ff00] mt-2">NEWS:</div>
+   955→            <div>  GET    /api/news           — list articles (public)</div>
+   956→            <div>  POST   /api/news           — create article (public)</div>
+   957→            <div>  PUT    /api/news           — edit/pin article (chaos)</div>
+   958→            <div>  DELETE /api/news?id=X      — delete article (chaos)</div>
+   959→            <div className="text-[#d4ff00] mt-2">GUESTBOOK:</div>
+   960→            <div>  GET    /api/guestbook      — list entries (public)</div>
+   961→            <div>  POST   /api/guestbook      — post entry (public)</div>
+   962→            <div>  PUT    /api/guestbook      — edit/approve entry (chaos)</div>
+   963→            <div>  DELETE /api/guestbook?id=X — delete entry (chaos)</div>
+   964→            <div className="text-[#d4ff00] mt-2">AUTH:</div>
+   965→            <div>  GET    /api/chaos-token    — get chaos token (called on konami)</div>
+   966→          </div>
+   967→        </div>
+   968→
+   969→        {/* Chaos mode access */}
+   970→        <div>
+   971→          <h3 className="font-bebas text-2xl text-[#00e5ff] mb-2 border-b-2 border-[#00e5ff]/30 pb-1">▸ CHAOS MODE ACCESS</h3>
+   972→          <div className="space-y-1 text-[11px]">
+   973→            <div>1. Activate <span className="text-[#ff00ff]">Chaos Mode</span> (Shuffle button in navbar)</div>
+   974→            <div>2. Enter key sequence: <span className="text-[#d4ff00]">↑ ↓ ← → ← ← ↑</span> (arrow keys only)</div>
+   975→            <div>3. God Mode unlocks → token fetched from /api/chaos-token</div>
+   976→            <div>4. Token stored in localStorage as <code className="text-[#d4ff00]">ud-chaos-token</code></div>
+   977→            <div>5. Click CHAOS MODE button → access CRUD UI</div>
+   978→            <div>6. All DELETE/PUT requests auto-include <code className="text-[#d4ff00]">x-chaos-token</code> header</div>
+   979→          </div>
+   980→        </div>
+   981→
+   982→        {/* Architecture */}
+   983→        <div>
+   984→          <h3 className="font-bebas text-2xl text-[#00e5ff] mb-2 border-b-2 border-[#00e5ff]/30 pb-1">▸ ARCHITECTURE</h3>
+   985→          <div className="space-y-1 text-[11px]">
+   986→            <div>▸ <span className="text-[#d4ff00]">Hosting:</span> Vercel (Next.js 16 — frontend + API)</div>
+   987→            <div>▸ <span className="text-[#d4ff00]">Database:</span> Supabase PostgreSQL (shared local + prod)</div>
+   988→            <div>▸ <span className="text-[#d4ff00]">Storage:</span> Supabase Bucket (gallery uploads)</div>
+   989→            <div>▸ <span className="text-[#d4ff00]">Auth:</span> Chaos-mode token (simple shared secret)</div>
+   990→          </div>
+   991→        </div>
+   992→      </div>
+   993→    </div>
+   994→  );
+   995→}
+   996→
+   997→export { ChaosModePage };
+   998→

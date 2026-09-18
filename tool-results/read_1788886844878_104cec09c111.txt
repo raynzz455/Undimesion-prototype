@@ -1,0 +1,467 @@
+     1→-- ═══════════════════════════════════════════════════════════════════════════
+     2→-- UNDIMENSION — Complete Database Migration (PostgreSQL)
+     3→-- 15 TABLES for all features
+     4→-- ═══════════════════════════════════════════════════════════════════════════
+     5→--
+     6→-- TABLES:
+     7→--   About:     Member, GuestbookEntry, NewsArticle
+     8→--   Gallery:   GalleryPhoto
+     9→--   Games:     Game, GameMoment, GamePlayerStat, GameCompatibility,
+    10→--              DnDCharacter, DnDCampaign, DnDCampaignImage
+    11→--   Portfolio: PortfolioProject, PortfolioProjectImage, Achievement, AchievementImage
+    12→--
+    13→-- Usage: Paste in Supabase SQL Editor → Run
+    14→-- ═══════════════════════════════════════════════════════════════════════════
+    15→
+    16→CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+    17→
+    18→-- ═══════════════════════════════════════════════════════════════════════════
+    19→-- ABOUT PAGE TABLES
+    20→-- ═══════════════════════════════════════════════════════════════════════════
+    21→
+    22→CREATE TABLE IF NOT EXISTS "Member" (
+    23→    "id"              TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+    24→    "slug"            TEXT UNIQUE NOT NULL,
+    25→    "name"            TEXT NOT NULL,
+    26→    "nick"            TEXT NOT NULL,
+    27→    "role"            TEXT NOT NULL,
+    28→    "img"             TEXT NOT NULL,
+    29→    "color"           TEXT NOT NULL,
+    30→    "highlight"       TEXT NOT NULL,
+    31→    "bio"             TEXT NOT NULL,
+    32→    "statsJson"       TEXT NOT NULL DEFAULT '[]',
+    33→    "socialsJson"     TEXT NOT NULL DEFAULT '[]',
+    34→    "taglineCareer"   TEXT NOT NULL DEFAULT '',
+    35→    "location"        TEXT NOT NULL DEFAULT '',
+    36→    "availability"    TEXT NOT NULL DEFAULT 'EMPLOYED',
+    37→    "educationJson"   TEXT NOT NULL DEFAULT '[]',
+    38→    "workHistoryJson" TEXT NOT NULL DEFAULT '[]',
+    39→    "skillsJson"      TEXT NOT NULL DEFAULT '[]',
+    40→    "order"           INTEGER NOT NULL DEFAULT 0,
+    41→    "createdAt"       TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    42→    "updatedAt"       TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+    43→);
+    44→CREATE INDEX IF NOT EXISTS "Member_order_idx" ON "Member"("order");
+    45→
+    46→CREATE TABLE IF NOT EXISTS "GuestbookEntry" (
+    47→    "id"        TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+    48→    "name"      TEXT NOT NULL,
+    49→    "message"   TEXT NOT NULL,
+    50→    "color"     TEXT NOT NULL DEFAULT '#ff4d4d',
+    51→    "approved"  BOOLEAN NOT NULL DEFAULT true,
+    52→    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+    53→);
+    54→CREATE INDEX IF NOT EXISTS "GuestbookEntry_createdAt_idx" ON "GuestbookEntry"("createdAt");
+    55→
+    56→CREATE TABLE IF NOT EXISTS "NewsArticle" (
+    57→    "id"        TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+    58→    "title"     TEXT NOT NULL,
+    59→    "body"      TEXT NOT NULL,
+    60→    "category"  TEXT NOT NULL DEFAULT 'UPDATE',
+    61→    "author"    TEXT NOT NULL DEFAULT 'THE COLLECTIVE',
+    62→    "img"       TEXT,
+    63→    "pinned"    BOOLEAN NOT NULL DEFAULT false,
+    64→    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+    65→);
+    66→CREATE INDEX IF NOT EXISTS "NewsArticle_createdAt_idx" ON "NewsArticle"("createdAt");
+    67→
+    68→-- ═══════════════════════════════════════════════════════════════════════════
+    69→-- GALLERY TABLE
+    70→-- ═══════════════════════════════════════════════════════════════════════════
+    71→
+    72→CREATE TABLE IF NOT EXISTS "GalleryPhoto" (
+    73→    "id"        TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+    74→    "title"     TEXT NOT NULL,
+    75→    "img"       TEXT NOT NULL,
+    76→    "author"    TEXT NOT NULL,
+    77→    "date"      TEXT NOT NULL,
+    78→    "rotate"    TEXT NOT NULL DEFAULT '-rotate-2',
+    79→    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    80→    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+    81→);
+    82→CREATE INDEX IF NOT EXISTS "GalleryPhoto_createdAt_idx" ON "GalleryPhoto"("createdAt");
+    83→CREATE INDEX IF NOT EXISTS "GalleryPhoto_author_idx" ON "GalleryPhoto"("author");
+    84→
+    85→-- ═══════════════════════════════════════════════════════════════════════════
+    86→-- GAMES TABLES
+    87→-- ═══════════════════════════════════════════════════════════════════════════
+    88→
+    89→-- ─── Game (metadata: title, sector, description, bg image) ──────────────────
+    90→CREATE TABLE IF NOT EXISTS "Game" (
+    91→    "id"            TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+    92→    "gameId"        TEXT UNIQUE NOT NULL,    -- 'minecraft', 'roblox', 'ml', 'dnd'
+    93→    "sector"        TEXT NOT NULL,           -- 'SEKTOR 01'
+    94→    "title"         TEXT NOT NULL,           -- 'MINECRAFT'
+    95→    "subtitle"      TEXT NOT NULL,           -- 'SURVIVAL OF THE FITTEST'
+    96→    "description"   TEXT NOT NULL,
+    97→    "bgImg"         TEXT NOT NULL,           -- URL → games/backgrounds/*.webp
+    98→    "accent"        TEXT NOT NULL,           -- '#5d9e35'
+    99→    "carouselTitle" TEXT NOT NULL,           -- 'OUR WORLD'
+   100→    "reverse"       BOOLEAN NOT NULL DEFAULT false,
+   101→    "fontClass"     TEXT,                    -- 'font-cinzel' for D&D
+   102→    "order"         INTEGER NOT NULL DEFAULT 0,
+   103→    "createdAt"     TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+   104→);
+   105→CREATE INDEX IF NOT EXISTS "Game_order_idx" ON "Game"("order");
+   106→
+   107→-- ─── GameMoment (foto moment per game) ──────────────────────────────────────
+   108→CREATE TABLE IF NOT EXISTS "GameMoment" (
+   109→    "id"          TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+   110→    "gameId"      TEXT NOT NULL,
+   111→    "title"       TEXT NOT NULL,
+   112→    "description" TEXT,
+   113→    "img"         TEXT NOT NULL,             -- URL → games/moments/*.webp
+   114→    "order"       INTEGER NOT NULL DEFAULT 0,
+   115→    "createdAt"   TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+   116→);
+   117→CREATE INDEX IF NOT EXISTS "GameMoment_gameId_idx" ON "GameMoment"("gameId");
+   118→CREATE INDEX IF NOT EXISTS "GameMoment_createdAt_idx" ON "GameMoment"("createdAt");
+   119→
+   120→-- ─── GamePlayerStat (ML pro player: role, hero, KDA, WR) ────────────────────
+   121→CREATE TABLE IF NOT EXISTS "GamePlayerStat" (
+   122→    "id"        TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+   123→    "memberId"  TEXT NOT NULL,               -- FK → Member.slug
+   124→    "gameId"    TEXT NOT NULL,               -- FK → Game.gameId
+   125→    "role"      TEXT,                        -- 'MIDLANER', 'JUNGLER'
+   126→    "favHero"   TEXT,                        -- 'Lancelot'
+   127→    "rank"      TEXT,                        -- 'Mythic Glory'
+   128→    "kda"       TEXT,                        -- '4.2/2.1/5.8'
+   129→    "winRate"   TEXT,                        -- '68%'
+   130→    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   131→    UNIQUE("memberId", "gameId")
+   132→);
+   133→CREATE INDEX IF NOT EXISTS "GamePlayerStat_memberId_idx" ON "GamePlayerStat"("memberId");
+   134→CREATE INDEX IF NOT EXISTS "GamePlayerStat_gameId_idx" ON "GamePlayerStat"("gameId");
+   135→
+   136→-- ─── GameCompatibility (Play Matrix: member × game intensity 0-3) ───────────
+   137→CREATE TABLE IF NOT EXISTS "GameCompatibility" (
+   138→    "id"        TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+   139→    "memberId"  TEXT NOT NULL,               -- FK → Member.slug
+   140→    "gameId"    TEXT NOT NULL,               -- FK → Game.gameId
+   141→    "level"     INTEGER NOT NULL DEFAULT 0,  -- 0=none, 1=rare, 2=casual, 3=main
+   142→    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   143→    UNIQUE("memberId", "gameId")
+   144→);
+   145→CREATE INDEX IF NOT EXISTS "GameCompatibility_memberId_idx" ON "GameCompatibility"("memberId");
+   146→CREATE INDEX IF NOT EXISTS "GameCompatibility_gameId_idx" ON "GameCompatibility"("gameId");
+   147→
+   148→-- ─── DnDCharacter (karakter D&D per member) ─────────────────────────────────
+   149→CREATE TABLE IF NOT EXISTS "DnDCharacter" (
+   150→    "id"            TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+   151→    "memberId"      TEXT NOT NULL,           -- FK → Member.slug
+   152→    "characterName" TEXT NOT NULL,
+   153→    "race"          TEXT NOT NULL,
+   154→    "charClass"     TEXT NOT NULL,
+   155→    "level"         INTEGER NOT NULL DEFAULT 1,
+   156→    "img"           TEXT,                    -- URL → games/dnd/characters/*.webp
+   157→    "str"           INTEGER NOT NULL DEFAULT 10,
+   158→    "dex"           INTEGER NOT NULL DEFAULT 10,
+   159→    "con"           INTEGER NOT NULL DEFAULT 10,
+   160→    "int"           INTEGER NOT NULL DEFAULT 10,
+   161→    "wis"           INTEGER NOT NULL DEFAULT 10,
+   162→    "cha"           INTEGER NOT NULL DEFAULT 10,
+   163→    "createdAt"     TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+   164→);
+   165→CREATE INDEX IF NOT EXISTS "DnDCharacter_memberId_idx" ON "DnDCharacter"("memberId");
+   166→
+   167→-- ─── DnDCampaign (kampanye D&D) ─────────────────────────────────────────────
+   168→CREATE TABLE IF NOT EXISTS "DnDCampaign" (
+   169→    "id"           TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+   170→    "name"         TEXT NOT NULL,
+   171→    "dm"           TEXT NOT NULL,
+   172→    "status"       TEXT NOT NULL DEFAULT 'ONGOING',
+   173→    "description"  TEXT NOT NULL,
+   174→    "storyOutline" TEXT,                     -- Alur cerita kampanye
+   175→    "sessions"     INTEGER NOT NULL DEFAULT 0,
+   176→    "createdAt"    TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+   177→);
+   178→CREATE INDEX IF NOT EXISTS "DnDCampaign_createdAt_idx" ON "DnDCampaign"("createdAt");
+   179→
+   180→-- ─── DnDCampaignImage (foto lokasi/scene) ───────────────────────────────────
+   181→CREATE TABLE IF NOT EXISTS "DnDCampaignImage" (
+   182→    "id"         TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+   183→    "campaignId" TEXT NOT NULL,
+   184→    "img"        TEXT NOT NULL,              -- URL → games/dnd/locations/*.webp
+   185→    "caption"    TEXT,
+   186→    "order"      INTEGER NOT NULL DEFAULT 0,
+   187→    "createdAt"  TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+   188→);
+   189→CREATE INDEX IF NOT EXISTS "DnDCampaignImage_campaignId_idx" ON "DnDCampaignImage"("campaignId");
+   190→
+   191→-- ═══════════════════════════════════════════════════════════════════════════
+   192→-- PORTFOLIO TABLES
+   193→-- ═══════════════════════════════════════════════════════════════════════════
+   194→
+   195→CREATE TABLE IF NOT EXISTS "PortfolioProject" (
+   196→    "id"          TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+   197→    "memberId"    TEXT NOT NULL,
+   198→    "title"       TEXT NOT NULL,
+   199→    "description" TEXT NOT NULL,
+   200→    "techJson"    TEXT NOT NULL DEFAULT '[]',
+   201→    "category"    TEXT NOT NULL DEFAULT 'WEB',
+   202→    "status"      TEXT NOT NULL DEFAULT 'LIVE',
+   203→    "year"        TEXT NOT NULL,
+   204→    "link"        TEXT,
+   205→    "repo"        TEXT,
+   206→    "color"       TEXT NOT NULL DEFAULT '#ff4d4d',
+   207→    "createdAt"   TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+   208→);
+   209→CREATE INDEX IF NOT EXISTS "PortfolioProject_memberId_idx" ON "PortfolioProject"("memberId");
+   210→CREATE INDEX IF NOT EXISTS "PortfolioProject_category_idx" ON "PortfolioProject"("category");
+   211→
+   212→CREATE TABLE IF NOT EXISTS "PortfolioProjectImage" (
+   213→    "id"         TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+   214→    "projectId"  TEXT NOT NULL,
+   215→    "img"        TEXT NOT NULL,
+   216→    "caption"    TEXT,
+   217→    "order"      INTEGER NOT NULL DEFAULT 0,
+   218→    "createdAt"  TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+   219→);
+   220→CREATE INDEX IF NOT EXISTS "PortfolioProjectImage_projectId_idx" ON "PortfolioProjectImage"("projectId");
+   221→
+   222→CREATE TABLE IF NOT EXISTS "Achievement" (
+   223→    "id"          TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+   224→    "memberId"    TEXT NOT NULL,
+   225→    "title"       TEXT NOT NULL,
+   226→    "year"        TEXT NOT NULL,
+   227→    "description" TEXT NOT NULL,
+   228→    "createdAt"   TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+   229→);
+   230→CREATE INDEX IF NOT EXISTS "Achievement_memberId_idx" ON "Achievement"("memberId");
+   231→
+   232→CREATE TABLE IF NOT EXISTS "AchievementImage" (
+   233→    "id"            TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+   234→    "achievementId" TEXT NOT NULL,
+   235→    "img"           TEXT NOT NULL,
+   236→    "caption"       TEXT,
+   237→    "order"         INTEGER NOT NULL DEFAULT 0,
+   238→    "createdAt"     TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+   239→);
+   240→CREATE INDEX IF NOT EXISTS "AchievementImage_achievementId_idx" ON "AchievementImage"("achievementId");
+   241→
+   242→-- ═══════════════════════════════════════════════════════════════════════════
+   243→-- FOREIGN KEYS (PostgreSQL doesn't support IF NOT EXISTS on ADD CONSTRAINT,
+   244→-- so we use DO $$ blocks with exception handling)
+   245→-- ═══════════════════════════════════════════════════════════════════════════
+   246→
+   247→DO $$ BEGIN
+   248→    ALTER TABLE "GameMoment" ADD CONSTRAINT "GameMoment_gameId_fkey"
+   249→        FOREIGN KEY ("gameId") REFERENCES "Game"("gameId") ON DELETE CASCADE;
+   250→EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+   251→
+   252→DO $$ BEGIN
+   253→    ALTER TABLE "GamePlayerStat" ADD CONSTRAINT "GamePlayerStat_memberId_fkey"
+   254→        FOREIGN KEY ("memberId") REFERENCES "Member"("slug") ON DELETE CASCADE;
+   255→EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+   256→
+   257→DO $$ BEGIN
+   258→    ALTER TABLE "GamePlayerStat" ADD CONSTRAINT "GamePlayerStat_gameId_fkey"
+   259→        FOREIGN KEY ("gameId") REFERENCES "Game"("gameId") ON DELETE CASCADE;
+   260→EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+   261→
+   262→DO $$ BEGIN
+   263→    ALTER TABLE "GameCompatibility" ADD CONSTRAINT "GameCompatibility_memberId_fkey"
+   264→        FOREIGN KEY ("memberId") REFERENCES "Member"("slug") ON DELETE CASCADE;
+   265→EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+   266→
+   267→DO $$ BEGIN
+   268→    ALTER TABLE "GameCompatibility" ADD CONSTRAINT "GameCompatibility_gameId_fkey"
+   269→        FOREIGN KEY ("gameId") REFERENCES "Game"("gameId") ON DELETE CASCADE;
+   270→EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+   271→
+   272→DO $$ BEGIN
+   273→    ALTER TABLE "DnDCharacter" ADD CONSTRAINT "DnDCharacter_memberId_fkey"
+   274→        FOREIGN KEY ("memberId") REFERENCES "Member"("slug") ON DELETE CASCADE;
+   275→EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+   276→
+   277→DO $$ BEGIN
+   278→    ALTER TABLE "DnDCampaignImage" ADD CONSTRAINT "DnDCampaignImage_campaignId_fkey"
+   279→        FOREIGN KEY ("campaignId") REFERENCES "DnDCampaign"("id") ON DELETE CASCADE;
+   280→EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+   281→
+   282→DO $$ BEGIN
+   283→    ALTER TABLE "PortfolioProject" ADD CONSTRAINT "PortfolioProject_memberId_fkey"
+   284→        FOREIGN KEY ("memberId") REFERENCES "Member"("slug") ON DELETE CASCADE;
+   285→EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+   286→
+   287→DO $$ BEGIN
+   288→    ALTER TABLE "PortfolioProjectImage" ADD CONSTRAINT "PortfolioProjectImage_projectId_fkey"
+   289→        FOREIGN KEY ("projectId") REFERENCES "PortfolioProject"("id") ON DELETE CASCADE;
+   290→EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+   291→
+   292→DO $$ BEGIN
+   293→    ALTER TABLE "Achievement" ADD CONSTRAINT "Achievement_memberId_fkey"
+   294→        FOREIGN KEY ("memberId") REFERENCES "Member"("slug") ON DELETE CASCADE;
+   295→EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+   296→
+   297→DO $$ BEGIN
+   298→    ALTER TABLE "AchievementImage" ADD CONSTRAINT "AchievementImage_achievementId_fkey"
+   299→        FOREIGN KEY ("achievementId") REFERENCES "Achievement"("id") ON DELETE CASCADE;
+   300→EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+   301→
+   302→-- ═══════════════════════════════════════════════════════════════════════════
+   303→-- TRIGGERS (use DO $$ for idempotency)
+   304→-- ═══════════════════════════════════════════════════════════════════════════
+   305→
+   306→CREATE OR REPLACE FUNCTION update_updatedAt_column()
+   307→RETURNS TRIGGER AS $$
+   308→BEGIN
+   309→    NEW."updatedAt" = CURRENT_TIMESTAMP;
+   310→    RETURN NEW;
+   311→END;
+   312→$$ language 'plpgsql';
+   313→
+   314→DO $$ BEGIN
+   315→    CREATE TRIGGER update_member_updatedAt
+   316→        BEFORE UPDATE ON "Member" FOR EACH ROW EXECUTE FUNCTION update_updatedAt_column();
+   317→EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+   318→
+   319→DO $$ BEGIN
+   320→    CREATE TRIGGER update_galleryphoto_updatedAt
+   321→        BEFORE UPDATE ON "GalleryPhoto" FOR EACH ROW EXECUTE FUNCTION update_updatedAt_column();
+   322→EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+   323→
+   324→-- ═══════════════════════════════════════════════════════════════════════════
+   325→-- SEED DATA
+   326→-- ═══════════════════════════════════════════════════════════════════════════
+   327→
+   328→-- Members (7) with D&D 6-stat + CV fields
+   329→INSERT INTO "Member" ("slug", "name", "nick", "role", "img", "color", "highlight", "bio", "statsJson", "socialsJson", "taglineCareer", "location", "availability", "educationJson", "workHistoryJson", "skillsJson", "order") VALUES
+   330→('aldi',  'Raynaldi',                   'Aldi',  'THE FOUNDER',    '/members/opening.webp',      'bg-[#ff4d4d]', 'text-[#ff4d4d]', 'Titik nol dari mana semua orbit dimulai.', '[{"label":"STR","value":"16"},{"label":"DEX","value":"12"},{"label":"CON","value":"15"},{"label":"INT","value":"13"},{"label":"WIS","value":"10"},{"label":"CHA","value":"14"}]', '[{"label":"INSTAGRAM","href":"#"},{"label":"X_TWITTER","href":"#"},{"label":"DISCORD","href":"#"}]', 'Full-Stack Developer & Community Builder', 'Jakarta, ID', 'EMPLOYED', '[{"school":"SMK Negeri 4 Jakarta","degree":"Rekayasa Perangkat Lunak","period":"2019-2022"},{"school":"Universitas Bina Sarana Informatika","degree":"S1 Teknik Informatika","period":"2022-2026"}]', '[{"company":"PT Tech Nusantara","role":"Junior Full-Stack Developer","period":"2022-2023","description":"Maintain web app internal"},{"company":"Startup XYZ","role":"Full-Stack Developer","period":"2023-Sekarang","description":"Bangun platform dari nol","current":true}]', '[{"name":"JavaScript","level":85,"category":"LANGUAGE"},{"name":"Next.js","level":88,"category":"FRAMEWORK"},{"name":"Prisma","level":82,"category":"TOOL"},{"name":"Leadership","level":75,"category":"SOFT"}]', 0),
+   331→('razka', 'Muhammad Razka Faudzan',     'Rembo', 'THE ARCHITECT',  '/members/member-razka.webp', 'bg-[#00e5ff]', 'text-[#00e5ff]', 'Perancang struktur di balik kekacauan.',    '[{"label":"STR","value":"8"},{"label":"DEX","value":"14"},{"label":"CON","value":"12"},{"label":"INT","value":"18"},{"label":"WIS","value":"15"},{"label":"CHA","value":"16"}]',  '[{"label":"INSTAGRAM","href":"#"},{"label":"X_TWITTER","href":"#"},{"label":"DISCORD","href":"#"}]', 'Backend Engineer & DevOps Enthusiast', 'Bandung, ID', 'OPEN TO WORK', '[{"school":"SMK Negeri 4 Jakarta","degree":"RPL","period":"2019-2022"},{"school":"Universitas Telkom","degree":"S1 Software Engineering","period":"2022-2026"}]', '[{"company":"PT Cloud Indonesia","role":"Backend Developer Intern","period":"2023-2024"},{"company":"Freelance","role":"DevOps Consultant","period":"2024-Sekarang","current":true}]', '[{"name":"Go","level":82,"category":"LANGUAGE"},{"name":"Docker","level":90,"category":"TOOL"},{"name":"AWS","level":82,"category":"TOOL"}]', 1),
+   332→('reza',  'Reza',                       'Eja',   'THE STRATEGIST', '/members/member-reza.webp',  'bg-[#d4ff00]', 'text-[#d4ff00]', 'Pikirannya selalu lima langkah di depan.',  '[{"label":"STR","value":"6"},{"label":"DEX","value":"12"},{"label":"CON","value":"10"},{"label":"INT","value":"20"},{"label":"WIS","value":"16"},{"label":"CHA","value":"13"}]',  '[{"label":"INSTAGRAM","href":"#"},{"label":"X_TWITTER","href":"#"},{"label":"DISCORD","href":"#"}]', 'Data Analyst & ML Practitioner', 'Jakarta, ID', 'EMPLOYED', '[]', '[]', '[{"name":"Python","level":90,"category":"LANGUAGE"},{"name":"Pandas","level":92,"category":"FRAMEWORK"}]', 2),
+   333→('abyan', 'Muhammad Abyan Riyadh Amal', 'Byan',  'THE VANGUARD',   '/members/member-abyan.webp', 'bg-[#ff00ff]', 'text-[#ff00ff]', 'Barisan depan yang tak pernah mundur.',     '[{"label":"STR","value":"18"},{"label":"DEX","value":"14"},{"label":"CON","value":"17"},{"label":"INT","value":"8"},{"label":"WIS","value":"7"},{"label":"CHA","value":"10"}]', '[{"label":"INSTAGRAM","href":"#"},{"label":"X_TWITTER","href":"#"},{"label":"DISCORD","href":"#"}]', 'Mobile Developer (React Native)', 'Surabaya, ID', 'FREELANCE', '[]', '[]', '[{"name":"React Native","level":88,"category":"FRAMEWORK"}]', 3),
+   334→('rasya', 'Rasya Musyafa Ridwan',       'Acong', 'THE MAVERICK',   '/members/member-rasya.webp', 'bg-[#ff8c00]', 'text-[#ff8c00]', 'Yang tak pernah bisa ditebak.',            '[{"label":"STR","value":"10"},{"label":"DEX","value":"18"},{"label":"CON","value":"12"},{"label":"INT","value":"14"},{"label":"WIS","value":"12"},{"label":"CHA","value":"13"}]',  '[{"label":"INSTAGRAM","href":"#"},{"label":"X_TWITTER","href":"#"},{"label":"DISCORD","href":"#"}]', 'Game Developer & Content Creator', 'Bekasi, ID', 'FREELANCE', '[]', '[]', '[{"name":"Unity","level":88,"category":"FRAMEWORK"},{"name":"Godot","level":82,"category":"FRAMEWORK"}]', 4),
+   335→('rifqi', 'Muhammad Rifqi',             'Tipki', 'THE ENIGMA',     '/members/member-razka.webp', 'bg-[#00ff00]', 'text-[#00ff00]', 'Misteri berjalan.',                         '[{"label":"STR","value":"12"},{"label":"DEX","value":"16"},{"label":"CON","value":"14"},{"label":"INT","value":"13"},{"label":"WIS","value":"18"},{"label":"CHA","value":"8"}]',  '[{"label":"INSTAGRAM","href":"#"},{"label":"X_TWITTER","href":"#"},{"label":"DISCORD","href":"#"}]', 'Backend Developer & Automation Specialist', 'Depok, ID', 'EMPLOYED', '[]', '[]', '[{"name":"Python","level":92,"category":"LANGUAGE"},{"name":"Node.js","level":85,"category":"LANGUAGE"}]', 5),
+   336→('dudit', 'Raditya Jundika Putra',      'Dudit', 'THE CATALYST',   '/members/member-reza.webp',  'bg-[#8a2be2]', 'text-[#8a2be2]', 'Elemen yang mempercepat reaksi.',           '[{"label":"STR","value":"10"},{"label":"DEX","value":"8"},{"label":"CON","value":"14"},{"label":"INT","value":"14"},{"label":"WIS","value":"18"},{"label":"CHA","value":"16"}]',  '[{"label":"INSTAGRAM","href":"#"},{"label":"X_TWITTER","href":"#"},{"label":"DISCORD","href":"#"}]', 'DevOps Engineer & Community Manager', 'Tangerang, ID', 'EMPLOYED', '[]', '[]', '[{"name":"Kubernetes","level":85,"category":"FRAMEWORK"},{"name":"Terraform","level":82,"category":"TOOL"}]', 6)
+   337→ON CONFLICT ("slug") DO NOTHING;
+   338→
+   339→-- Games (4)
+   340→INSERT INTO "Game" ("gameId", "sector", "title", "subtitle", "description", "bgImg", "accent", "carouselTitle", "reverse", "fontClass", "order") VALUES
+   341→('minecraft', 'SEKTOR 01', 'MINECRAFT',          'SURVIVAL OF THE FITTEST',      'Dunia tanpa batas, tempat kami membangun dari nol.', '/games/minecraft-bg.webp', '#5d9e35', 'OUR WORLD', false, NULL, 0),
+   342→('roblox',    'SEKTOR 02', 'ROBLOX',             'PURE UNADULTERATED CHAOS',     'Dari roleplay absurd sampai obby yang bikin emosi.', '/games/roblox-bg.webp',    '#cc0000', 'CHAOS INC', true,  NULL, 1),
+   343→('ml',        'SEKTOR 03', 'MOBILE LEGENDS',     'PUSH MID OR AFK',              'Arena tempur harian. Kami menang bersama, atau kalah dengan gaya.', '/games/ml-bg.webp', '#00e5ff', 'ARENA LOG', false, NULL, 2),
+   344→('dnd',       'SEKTOR 04', 'DUNGEONS & DRAGONS', 'NATURAL 20 OR CRITICAL FAIL',  'Meja imajinasi tempat kami menjadi pahlawan.', '/games/dnd-bg.webp',      '#ffebd2', 'TAVERN TALES', true, 'font-cinzel', 3)
+   345→ON CONFLICT ("gameId") DO NOTHING;
+   346→
+   347→-- Game Moments (9)
+   348→INSERT INTO "GameMoment" ("gameId", "title", "description", "img") VALUES
+   349→('minecraft', 'FIRST DIAMOND',     'Diamond pertama ditambang bareng jam 3 pagi.',     '/gallery/gallery-1.webp'),
+   350→('minecraft', 'CREEPER MASSACRE',  'Base digrebeg creeper 47 kali dalam satu malam.', '/gallery/gallery-2.webp'),
+   351→('minecraft', 'NETHER RAID',       'Raid fortress pertama — total party wipe.',        '/gallery/gallery-3.webp'),
+   352→('roblox',    'OBBY HELL',         'Obby level 100 yang bikin emosi kolektif.',        '/gallery/gallery-1.webp'),
+   353→('roblox',    'ROLEPLAY CHAOS',    'Roleplay yang nggak masuk akal tapi bikin ketawa.','/gallery/gallery-2.webp'),
+   354→('roblox',    'OOF MONTAGE',       'Ratusan oof dalam satu sesi. Klasik.',             '/gallery/gallery-3.webp'),
+   355→('ml',        'EPIC COMEBACK',     '1-12 di menit 8, menang di menit 22.',             '/gallery/gallery-1.webp'),
+   356→('ml',        'PUSH MID OR AFK',   'Strategi klasik yang tidak pernah sesederhana itu.','/gallery/gallery-2.webp'),
+   357→('ml',        'LAG SPIRAL',        '3 player lag merah, masih somehow menang.',        '/gallery/gallery-3.webp')
+   358→ON CONFLICT DO NOTHING;
+   359→
+   360→-- Game Player Stats (ML: 5 players)
+   361→INSERT INTO "GamePlayerStat" ("memberId", "gameId", "role", "favHero", "rank", "kda", "winRate") VALUES
+   362→('reza',  'ml', 'MIDLANER',  'Lancelot', 'Mythic Glory', '4.2/2.1/5.8', '68%'),
+   363→('abyan', 'ml', 'GOLD LANER','Lesley',   'Mythic V',     '5.1/1.8/3.2', '61%'),
+   364→('dudit', 'ml', 'JUNGLER',   'Ling',     'Mythic III',   '6.3/2.5/4.1', '64%'),
+   365→('aldi',  'ml', 'ROAMER',    'Tigreal',  'Mythic V',     '2.1/1.5/8.2', '58%'),
+   366→('razka', 'ml', 'EXP LANER', 'Paquito',  'Mythic II',    '3.8/2.0/4.5', '60%')
+   367→ON CONFLICT DO NOTHING;
+   368→
+   369→-- Game Compatibility (7 members × 4 games = 28 entries)
+   370→INSERT INTO "GameCompatibility" ("memberId", "gameId", "level") VALUES
+   371→('aldi',  'minecraft', 3), ('aldi',  'roblox', 2), ('aldi',  'ml', 2), ('aldi',  'dnd', 1),
+   372→('razka', 'minecraft', 3), ('razka', 'roblox', 1), ('razka', 'ml', 2), ('razka', 'dnd', 3),
+   373→('reza',  'minecraft', 2), ('reza',  'roblox', 1), ('reza',  'ml', 3), ('reza',  'dnd', 3),
+   374→('abyan', 'minecraft', 2), ('abyan', 'roblox', 2), ('abyan', 'ml', 3), ('abyan', 'dnd', 1),
+   375→('rasya', 'minecraft', 3), ('rasya', 'roblox', 3), ('rasya', 'ml', 2), ('rasya', 'dnd', 2),
+   376→('rifqi', 'minecraft', 1), ('rifqi', 'roblox', 2), ('rifqi', 'ml', 1), ('rifqi', 'dnd', 2),
+   377→('dudit', 'minecraft', 2), ('dudit', 'roblox', 3), ('dudit', 'ml', 3), ('dudit', 'dnd', 2)
+   378→ON CONFLICT DO NOTHING;
+   379→
+   380→-- DnD Characters (7)
+   381→INSERT INTO "DnDCharacter" ("memberId", "characterName", "race", "charClass", "level", "img", "str", "dex", "con", "int", "wis", "cha") VALUES
+   382→('aldi',  'Theron Blackwood',      'Human',    'Fighter (Battle Master)',  8, '/gallery/harapan-mimpi.webp',  16, 12, 15, 13, 10, 14),
+   383→('razka', 'Zephyr Voidwalker',     'Tiefling', 'Warlock (Great Old One)',  8, '/gallery/harapan-negeri.webp', 8, 14, 12, 18, 15, 16),
+   384→('reza',  'Lyra Moonwhisper',      'Elf',      'Wizard (Divination)',      8, '/gallery/harapan-kota.webp',   6, 12, 10, 20, 16, 13),
+   385→('abyan', 'Grommash Ironjaw',      'Half-Orc', 'Barbarian (Berserker)',    8, '/gallery/harapan-depan.webp',  18, 14, 17, 8,  7,  10),
+   386→('rasya', 'Finnick Quickfingers',  'Halfling', 'Rogue (Thief)',            8, '/gallery/gallery-1.webp',      10, 18, 12, 14, 12, 13),
+   387→('rifqi', 'The Stranger',          'Unknown',  'Ranger (Gloom Stalker)',   8, '/gallery/gallery-2.webp',      12, 16, 14, 13, 18, 8),
+   388→('dudit', 'Father Corvin',         'Human',    'Cleric (Life Domain)',     8, '/gallery/gallery-3.webp',      10, 8,  14, 14, 18, 16)
+   389→ON CONFLICT DO NOTHING;
+   390→
+   391→-- DnD Campaigns (2)
+   392→INSERT INTO "DnDCampaign" ("name", "dm", "status", "description", "storyOutline", "sessions") VALUES
+   393→('SHADOWS OF EMBERFALL',     'Raynaldi (Aldi)', 'COMPLETED', 'Kampanye pertama collective. Investigasi hilangnya penduduk desa Emberfall.', 'Arc 1: Emberfall mystery → Arc 2: Cult reveal → Arc 3: Final confrontation. Ended with TPK.', 12),
+   394→('THE VOIDWALKER''S GAMBIT', 'Raynaldi (Aldi)', 'ONGOING',   'Kampanye kedua. Party diburu oleh entitas dari dimensi void.', 'Arc 1: Void introduction → Arc 2: Voidwalker reveal → Arc 3: Illusion shatter → Arc 4: Final confrontation. Currently at Arc 3.', 8)
+   395→ON CONFLICT DO NOTHING;
+   396→
+   397→-- Portfolio Projects (9)
+   398→INSERT INTO "PortfolioProject" ("memberId", "title", "description", "techJson", "category", "status", "year", "link", "repo", "color") VALUES
+   399→('razka', 'UNDIMENSION WEB',          'Web profile collective ini.', '["Next.js","TypeScript","Prisma"]', 'WEB', 'LIVE', '2026', '#', 'https://github.com/raynzz455/Undimesion-prototype', '#00e5ff'),
+   400→('aldi',  'SMK REUNION SITE',         'Landing page undangan reuni.', '["HTML","JavaScript"]', 'WEB', 'ARCHIVED', '2025', NULL, NULL, '#ff4d4d'),
+   401→('razka', 'SCREENSHOT ARCHIVER',      'CLI tool Python.', '["Python","Pillow"]', 'TOOL', 'LIVE', '2023', NULL, NULL, '#00e5ff'),
+   402→('reza',  'ML DRAFT ANALYZER',        'Tool analisis draft ML.', '["React","Node.js"]', 'TOOL', 'ARCHIVED', '2023', NULL, NULL, '#d4ff00'),
+   403→('dudit', 'DISCORD CHAOS BOT',        'Bot Discord collective.', '["Node.js","discord.js"]', 'BOT', 'LIVE', '2024', NULL, NULL, '#8a2be2'),
+   404→('abyan', 'D&D DICE ROLLER PWA',      'PWA roll dadu D&D.', '["React","PWA"]', 'WEB', 'LIVE', '2024', NULL, NULL, '#ff00ff'),
+   405→('rasya', 'OBBY SPEEDRUN TRACKER',    'Track speedrun Roblox.', '["Next.js","Prisma"]', 'WEB', 'WIP', '2025', NULL, NULL, '#ff8c00'),
+   406→('rifqi', 'GHOST PRESENCE BOT',       'Bot Discord online 24/7.', '["Python","discord.py"]', 'BOT', 'ARCHIVED', '2024', NULL, NULL, '#00ff00'),
+   407→('dudit', 'K8S AUTOSCALER',           'Custom autoscaler K8s.', '["Go","Kubernetes"]', 'TOOL', 'LIVE', '2024', NULL, NULL, '#8a2be2')
+   408→ON CONFLICT DO NOTHING;
+   409→
+   410→-- Achievements (21)
+   411→INSERT INTO "Achievement" ("memberId", "title", "year", "description") VALUES
+   412→('aldi',  'Best Student Project',   '2022', 'Juara 1 lomba project SMK se-Jakarta'),
+   413→('aldi',  'Undimension Founder',    '2020', 'Mendirikan circle collective'),
+   414→('aldi',  'Hackathon Finalist',     '2023', 'Top 10 Hackathon ID'),
+   415→('razka', 'AWS Certified',          '2024', 'AWS Solutions Architect Associate'),
+   416→('razka', 'Screenshot Archiver',    '2023', 'CLI tool organize 4000+ screenshot'),
+   417→('razka', 'Open Source Contributor','2024', '10+ merged PR di repo Go'),
+   418→('reza',  'Kaggle Competition',     '2024', 'Top 5% tabular playground'),
+   419→('reza',  'ML Draft Analyzer',      '2023', 'Tool analisis draft ML'),
+   420→('reza',  'Research Assistant',     '2024', 'Asisten dosen NLP'),
+   421→('abyan', 'Play Store Launch',      '2024', '3 app, 50K+ downloads'),
+   422→('abyan', 'D&D Dice PWA',           '2024', 'PWA D&D player'),
+   423→('abyan', 'Mobile Design Award',    '2023', 'Juara 2 UI/UX mobile'),
+   424→('rasya', 'Game Jam Winner',        '2023', 'Juara 1 Ludum Dare local'),
+   425→('rasya', 'Twitch Affiliate',       '2024', '500+ followers'),
+   426→('rasya', 'Itch.io Releases',       '2024', '5 game, 2K+ downloads'),
+   427→('rifqi', 'Automation Champion',    '2023', 'Hemat 200+ jam/bulan'),
+   428→('rifqi', 'Ghost Presence Bot',     '2024', 'Bot Discord 24/7'),
+   429→('rifqi', 'API Scale',              '2024', '1M+ requests/hari'),
+   430→('dudit', '99.9% Uptime',           '2024', 'SLA production K8s'),
+   431→('dudit', 'Discord Chaos Bot',      '2024', '100+ command bot'),
+   432→('dudit', 'CKA Certified',          '2024', 'Certified Kubernetes Administrator')
+   433→ON CONFLICT DO NOTHING;
+   434→
+   435→-- Guestbook (4)
+   436→INSERT INTO "GuestbookEntry" ("name", "message", "color") VALUES
+   437→('Wanderer_07',    'Across dimensions, the orbit holds.', '#ff4d4d'),
+   438→('Pixel Phantom',  'Neo-brutalism for the win.',          '#00e5ff'),
+   439→('Orbit Guest',    'Seven souls, one gravity.',            '#d4ff00'),
+   440→('Void Walker',    'Gallery of Chaos lives up to its name.', '#ff00ff')
+   441→ON CONFLICT DO NOTHING;
+   442→
+   443→-- News (5)
+   444→INSERT INTO "NewsArticle" ("title", "body", "category", "author") VALUES
+   445→('UNDIMENSION V3 LAUNCHED',      'Web profile live dengan 11 section.', 'UPDATE', 'ALDI'),
+   446→('EVENT NOSTALGIA SMK 2026',     'Reuni akhir tahun.', 'EVENT', 'REZA'),
+   447→('CHAOS MODE UNLOCKED',          'Tekan shuffle di navbar.', 'CHAOS', 'RASYA'),
+   448→('MILESTONE: 7 TAHUN ORBIT',     'Sejak 2020.', 'MILESTONE', 'THE COLLECTIVE'),
+   449→('GALLERY UPLOAD LIVE',          'Upload via Chaos Mode.', 'UPDATE', 'RAZKA')
+   450→ON CONFLICT DO NOTHING;
+   451→
+   452→-- ═══════════════════════════════════════════════════════════════════════════
+   453→-- VERIFY:
+   454→--   SELECT COUNT(*) FROM "Member";              -- 7
+   455→--   SELECT COUNT(*) FROM "Game";                -- 4
+   456→--   SELECT COUNT(*) FROM "GameMoment";          -- 9
+   457→--   SELECT COUNT(*) FROM "GamePlayerStat";      -- 5
+   458→--   SELECT COUNT(*) FROM "GameCompatibility";   -- 28
+   459→--   SELECT COUNT(*) FROM "DnDCharacter";        -- 7
+   460→--   SELECT COUNT(*) FROM "DnDCampaign";         -- 2
+   461→--   SELECT COUNT(*) FROM "PortfolioProject";    -- 9
+   462→--   SELECT COUNT(*) FROM "Achievement";         -- 21
+   463→--   SELECT COUNT(*) FROM "GuestbookEntry";      -- 4
+   464→--   SELECT COUNT(*) FROM "NewsArticle";         -- 5
+   465→-- ═══════════════════════════════════════════════════════════════════════════
+
+[showing lines 1-465 of 466; use offset=466 with limit to continue reading]

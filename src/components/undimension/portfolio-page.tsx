@@ -373,7 +373,7 @@ function MemberPortfolio({ member }: { member: Member }) {
                 <img
                   src={member.img}
                   alt={member.nick}
-                  className="w-full aspect-[4/5] object-cover grayscale contrast-[1.4]"
+                  className="w-full aspect-[4/5] object-cover"
                 />
                 <div className="absolute inset-2 ud-scanlines opacity-30 pointer-events-none" />
                 {/* Nick sticker */}

@@ -1,0 +1,24 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# Cloudflare Pages config — DISABLED (Next.js 16 incompatible)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# ⚠️ NOT USABLE with Next.js 16:
+#   @cloudflare/next-on-pages adapter only supports Next.js ≤15.5.2
+#   Next.js 16 requires Node.js runtime (not Edge runtime)
+#
+# For production deployment, use VERCEL:
+#   - Natively supports Next.js 16
+#   - API routes work as serverless functions
+#   - Auto-deploys from GitHub
+#
+# This file is kept for reference only.
+# To re-enable Cloudflare Pages (when adapter supports Next 16):
+#   1. npm install -D @cloudflare/next-on-pages
+#   2. Update deploy-cloudflare.yml to use 'npx @cloudflare/next-on-pages' build
+#   3. Set pages_build_output_dir to '.vercel/output/static'
+# ═══════════════════════════════════════════════════════════════════════════
+
+name = "undimension"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "out"
