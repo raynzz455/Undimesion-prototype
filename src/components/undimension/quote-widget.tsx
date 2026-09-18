@@ -45,7 +45,7 @@ export function QuoteWidget() {
     // Previously this inverted to white in dark mode, which created a confusing
     // mix of light/dark sections when the rest of the page was dark. Now it's
     // a consistent dark band in both themes — text is always white-on-black.
-    <div className="relative bg-black py-16 px-6 md:px-12 border-y-8 border-white overflow-hidden">
+    <div className="relative bg-black h-full flex flex-col items-center justify-center py-12 md:py-16 px-6 md:px-12 overflow-hidden">
       {/* Background scanlines */}
       <div className="absolute inset-0 ud-scanlines opacity-20 pointer-events-none" />
 
