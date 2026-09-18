@@ -46,8 +46,42 @@ model Member {
   achievements        Achievement[]
   gamePlayerStats     GamePlayerStat[]
   gameCompatibilities GameCompatibility[]
+  profileHistory      MemberProfileHistory[]
 
   @@index([order])
+}
+
+/// Profile history snapshots — saved before each member update.
+/// Max 4 per member. When adding a 5th, the oldest is deleted.
+/// Members can restore a previous profile from chaos mode.
+model MemberProfileHistory {
+  id              String   @id @default(cuid())
+  memberSlug      String   // FK → Member.slug
+  // Snapshot of all editable fields
+  name            String
+  nick            String
+  role            String
+  img             String
+  color           String
+  highlight       String
+  bio             String
+  tagline         String   @default("")
+  quote           String   @default("")
+  funFactsJson    String   @default("[]")
+  element         String   @default("")
+  joinYear        String   @default("2020")
+  statsJson       String   @default("[]")
+  socialsJson     String   @default("[]")
+  taglineCareer   String   @default("")
+  location        String   @default("")
+  availability    String   @default("EMPLOYED")
+  educationJson   String   @default("[]")
+  workHistoryJson String   @default("[]")
+  skillsJson      String   @default("[]")
+  createdAt       DateTime @default(now())
+
+  @@index([memberSlug])
+  @@index([createdAt])
 }
 
 model Quote {
