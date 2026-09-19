@@ -6,7 +6,7 @@ import {
   Upload, Loader2, Image as ImageIcon, LogOut, Shield, Zap,
   FolderOpen, Award, Settings, Newspaper, MessageSquare,
   Trash2, Edit3, Pin, PinOff, CheckCircle, XCircle, X,
-  Users, Plus, Quote as QuoteIcon, RefreshCw,
+  Users, Plus, Quote as QuoteIcon, RefreshCw, History,
 } from "lucide-react";
 import { StarField } from "./star-field";
 import { useFetch } from "@/hooks/use-fetch";
@@ -130,6 +130,13 @@ function MembersTab() {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [restoring, setRestoring] = useState<string | null>(null);
+
+  // Fetch profile history for selected member
+  const { data: historyData, refetch: refetchHistory } = useFetch<{ history: { id: string; createdAt: string; name: string; nick: string; img: string; role: string }[]; count: number }>(
+    selectedSlug ? `/api/members/${selectedSlug}/history` : ""
+  );
+  const history = historyData?.history ?? [];
 
   useEffect(() => {
     if (!selectedSlug && members[0]?.id) setSelectedSlug(members[0].id);
@@ -179,6 +186,24 @@ function MembersTab() {
       setTimeout(() => setSuccess(null), 5000);
     } catch (e) { setError(e instanceof Error ? e.message : "Gagal update member"); }
     finally { setSaving(false); }
+  };
+
+  const handleRestore = async (historyId: string, dateStr: string) => {
+    if (!confirm(`Restore profile dari ${dateStr}? Profile saat ini akan disimpan sebagai history.`)) return;
+    setRestoring(historyId);
+    setError(null); setSuccess(null);
+    try {
+      const res = await chaosFetch(`/api/members/${encodeURIComponent(selectedSlug)}/history`, {
+        method: "POST",
+        body: JSON.stringify({ historyId }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || "Gagal restore");
+      setSuccess(`✓ Profile restored dari ${dateStr}`);
+      refetch(); refetchHistory(); play("submit");
+      setTimeout(() => setSuccess(null), 5000);
+    } catch (e) { setError(e instanceof Error ? e.message : "Gagal restore"); }
+    finally { setRestoring(null); }
   };
 
   const STAT_LABELS = ["STR", "DEX", "CON", "INT", "WIS", "CHA"];
@@ -331,6 +356,43 @@ function MembersTab() {
           {saving || uploadingPhoto ? <><Loader2 className="w-6 h-6 animate-spin" /> SAVING...</> : <><Users className="w-6 h-6" /> SAVE MEMBER PROFILE</>}
         </button>
       </div>
+
+      {/* Profile History — restore previous profiles (max 4) */}
+      {selectedSlug && history.length > 0 && (
+        <div className="border-8 border-[#00e5ff] bg-black p-6 shadow-[12px_12px_0_#00e5ff]">
+          <h2 className="font-bebas text-3xl text-[#00e5ff] mb-4 flex items-center gap-2">
+            <History className="w-6 h-6" /> PROFILE HISTORY ({history.length}/4)
+          </h2>
+          <p className="font-mono-ud text-[10px] text-white/40 mb-3 tracking-wider">
+            ▸ Snapshot profile sebelumnya. Klik RESTORE untuk kembalikan profile lama. Profile saat ini otomatis disimpan.
+          </p>
+          <div className="space-y-2">
+            {history.map((h, i) => {
+              const date = new Date(h.createdAt);
+              const dateStr = date.toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
+              return (
+                <div key={h.id} className="border-2 border-[#00e5ff]/30 p-3 bg-black/50 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <img src={h.img} alt={h.nick} className="w-10 h-10 object-cover border-2 border-[#00e5ff]/50 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="font-bebas text-lg text-white truncate">{h.name} · {h.role}</div>
+                      <div className="font-mono-ud text-[10px] text-white/40">{dateStr}</div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleRestore(h.id, dateStr)}
+                    disabled={restoring === h.id}
+                    className="bg-[#00e5ff] text-black font-bebas text-sm px-4 py-2 border-2 border-[#00e5ff] hover:bg-transparent hover:text-[#00e5ff] transition-colors no-color-transition disabled:opacity-50 min-w-[100px] min-h-[44px] flex items-center justify-center gap-1 flex-shrink-0"
+                    title={`Restore profile dari ${dateStr}`}
+                  >
+                    {restoring === h.id ? <><Loader2 className="w-4 h-4 animate-spin" /> RESTORING...</> : <><History className="w-4 h-4" /> RESTORE</>}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
