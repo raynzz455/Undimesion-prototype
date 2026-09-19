@@ -11,7 +11,7 @@ datasource db {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// ABOUT PAGE TABLES (4)
+// ABOUT PAGE TABLES (5)
 // ═══════════════════════════════════════════════════════════════════════════
 
 model Member {
@@ -53,11 +53,10 @@ model Member {
 
 /// Profile history snapshots — saved before each member update.
 /// Max 4 per member. When adding a 5th, the oldest is deleted.
-/// Members can restore a previous profile from chaos mode.
 model MemberProfileHistory {
   id              String   @id @default(cuid())
-  memberSlug      String   // FK → Member.slug
-  // Snapshot of all editable fields
+  member          Member   @relation(fields: [memberSlug], references: [slug], onDelete: Cascade)
+  memberSlug      String
   name            String
   nick            String
   role            String
